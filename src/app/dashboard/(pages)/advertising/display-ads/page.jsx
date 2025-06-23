@@ -54,17 +54,26 @@ function DisplayAds() {
                   }
                   return response.json();
                 }).then((res)=>{
-                  if(!res.status){
+                    if(!res.status){
                       Swal.fire({
-                      title:"Error",
-                      icon:"error",
-                      title:"Validation Error",
-                      text:res.data?.message,
-                      confirmButtonText:"Okay"
-                    }).then((confirmData)=>{
-                      // router.push("/dashboard/advertising/my-ads/All")
-                    })
-                  } 
+                            title:"Error",
+                            icon:"error",
+                            title:"Validation Error",
+                            text:res.data?.message,
+                            confirmButtonText:"Apply Brand",
+                            cancelButtonText:"Cancel",
+                            showCancelButton:true
+                          }).then((res)=>{
+                             if (res.isConfirmed) {
+                                router.push("/dashboard/brand-aproval-page");
+                              } else if (res.dismiss === Swal.DismissReason.cancel) {
+                                router.push("/dashboard/advertising/start-advertising");
+                              }
+                          })
+
+                        }
+
+                  
                 }).catch((err)=>{
                   Swal.fire({
                     title:"Error",
@@ -379,9 +388,13 @@ function DisplayAds() {
     const produDoc = selectedProduct.map(prod => ({
                   ...prod,
                   product_id: prod._id,
-                  variant_id: prod.variant?._id
+                  variant_id: prod.variant?._id,
+                  category_id       : prod.category_id || undefined,
+                subcategory_id    : prod.subcategory_id || undefined,
+                childcategory_id  : prod.childcategory_id || undefined,
               }));
   
+              console.log({selectedProduct, produDoc});
     const formDataField = {
       ...campaign,
       fileUrlPath:"",

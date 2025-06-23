@@ -33,7 +33,7 @@ function afterLoginHeader() {
     
     useEffect(() => {
       if (globalData.sellor) {
-        $(".loaderouter").css("display", "none");
+        // $(".loaderouter").css("display", "none");
         fetch(
           `${baseUrl}api/seller/get-profile?user_id=${globalData.sellor._id}&with_data=businessDetails`,
           {
@@ -42,13 +42,13 @@ function afterLoginHeader() {
         )
           .then((response) => {
             if (!response.ok) {
-              $(".loaderouter").css("display", "none");
+              // $(".loaderouter").css("display", "none");
               throw new Error("Network Error");
             }
             return response.json();
           })
           .then((res) => {
-            $(".loaderouter").css("display", "none");
+            // $(".loaderouter").css("display", "none");
             if (res.status) { 
               setSellor(res.data.data);
               if (res.data.referData) {

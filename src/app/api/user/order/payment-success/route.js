@@ -11,10 +11,11 @@ import { productVariantModel } from "@/Http/Models/productModel";
 export async function POST(request) {
 
     const {temp_order_id} = await request.json(); 
-    const session = await mongoose.startSession();
-   session.startTransaction()
+    // const session = await mongoose.startSession();
+//    session.startTransaction()
     try{    
-        const tempOrder = await tempOrderModel.findOne({temp_order_id:temp_order_id}).session(session);
+        const tempOrder = await tempOrderModel.findOne({temp_order_id:temp_order_id})
+        // .session(session);
         if (!tempOrder) {
             throw new Error("Temporary order not found.");
         }
@@ -23,7 +24,7 @@ export async function POST(request) {
         const totalOrder = await orderCountModel.findOneAndUpdate( 
              {id:1},
             {$inc: {count:1}},
-            {new:true, upsert:true, session } 
+            {new:true, upsert:true } 
         );
         const newOrderId =  `ORD${totalOrder.count.toString().padStart(5, "0")}`;
 
@@ -62,8 +63,7 @@ export async function POST(request) {
                 currency:tempOrder.products.currency,
                 order_note:tempOrder.addresss?.order_note
             }
-        ],
-        {session}
+        ] 
     )
 
         // insert order product
@@ -74,7 +74,7 @@ export async function POST(request) {
            if (inventory) {
                 // if nagetive then 0
                 inventory.stock = Math.max(0, availableStock - product.quantity); 
-                await inventory.save({ session });
+                await inventory.save();
                 } else {
                     console.warn(`Inventory not found for variant ID: ${product.variant?._id}`);
                 }
@@ -101,8 +101,7 @@ export async function POST(request) {
                     currency:product.currency ,
                     order_status:availableStock >= product.quantity ?1:0,
                 }
-            ],
-            {session}
+            ]
         )
         }
          
@@ -146,18 +145,17 @@ export async function POST(request) {
                     : {})
                 
             }
-        ],
-    {session}
+        ]
 )
     
-    await tempOrderModel.deleteOne({temp_order_id}).session(session)
-    await session.commitTransaction();
-    session.endSession();
+    await tempOrderModel.deleteOne({temp_order_id}) 
+    // await session.commitTransaction();
+    // session.endSession();
     return responseFun(true, { message: "Your Order has been Placed Sccessfully" }, 200)
     }catch(error){
         console.log(error);
-        await session.abortTransaction();
-        session.endSession();
+        // await session.abortTransaction();
+        // session.endSession();
        return responseFun(false, {error}, 200)
     }
 }

@@ -240,7 +240,7 @@ const page = ({ params }) => {
         }
       }
       setErrors({});
-      $(".loaderouter").css("display", "flex");
+      // $(".loaderouter").css("display", "flex");
       fetch(`${baseUrl}api/seller/product/add-variant`, {
         method: "POST",
         body: bodyData,
@@ -309,7 +309,7 @@ const page = ({ params }) => {
       }
 
       if (globalData.sellor) {
-        $(".loaderouter").css("display", "flex");
+        // $(".loaderouter").css("display", "flex");
         fetch(`${baseUrl}api/seller/get-category-and-brand`, {
           method: "POST",
           body: JSON.stringify({
@@ -394,7 +394,7 @@ const page = ({ params }) => {
     }, [globalData.sellor, pathname]);
 
     const deleteVariant = (id) => {
-      $(".loaderouter").css("display", "flex");
+      // $(".loaderouter").css("display", "flex");
       fetch(`${baseUrl}api/seller/product/add-variant`, {
         method: "DELETE",
         body: JSON.stringify({ _id: id }),

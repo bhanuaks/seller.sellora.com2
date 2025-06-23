@@ -34,7 +34,7 @@ function Page() {
 
   useEffect(() => {
     if (globalData.sellor) {
-      $(".loaderouter").css("display", "flex");
+      // $(".loaderouter").css("display", "flex");
       fetch(
         `${baseUrl}api/seller/get-profile?user_id=${globalData.sellor._id}&with_data=returnAddress`,
         {
@@ -129,7 +129,7 @@ function Page() {
     e.preventDefault();
     setErrors({});
 
-    $(".loaderouter").css("display", "flex");
+    // $(".loaderouter").css("display", "flex");
     fetch(`${baseUrl}api/seller/update-profile?update=returnAddress`, {
       method: "POST",
       body: JSON.stringify({

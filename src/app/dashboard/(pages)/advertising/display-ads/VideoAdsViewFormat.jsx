@@ -1,6 +1,7 @@
 "use client"
 import { baseUrl, currencyCode, main_thumb_img_path } from '@/Http/helper'
 import { fileBasePath } from '@/Http/urlHelper'
+import Script from 'next/script'
 import React, { useEffect, useState } from 'react'
 
 function VideoAdsViewFormat({product, campaign, adProduct, setAdProduct}) {
@@ -145,6 +146,10 @@ function VideoAdsViewFormat({product, campaign, adProduct, setAdProduct}) {
                   </li>
                 </ul>
               </div> */}
+
+
+            
+
             </div>
   )
 }

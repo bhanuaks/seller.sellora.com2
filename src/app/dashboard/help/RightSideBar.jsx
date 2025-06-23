@@ -47,7 +47,7 @@ function RightSideBar() {
             </li>
             <li>
               <Link href={`${baseUrl}dashboard/help/raise-a-ticket`}   className={pathname == "/dashboard/help/raise-a-ticket"?"orange":""}>
-                Raise a ticket
+                Still need help?Raise a ticket
               </Link>
             </li>
           </ul>

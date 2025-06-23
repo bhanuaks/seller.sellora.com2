@@ -26,7 +26,7 @@ export async function POST(request) {
      const formData = await request.formData();
     
      const data = {
-        _id                 : formData.get("_id"),
+        _id                 : formData.get("_id") || undefined,
         adsType             : formData.get("adsType"),
         adFormat            : formData.get("adFormat"),
         campaignName        : formData.get("campaignName"),
@@ -51,10 +51,12 @@ export async function POST(request) {
                const start_date = new Date(data.startDate)
                const end_date = new Date(data.endDate)
                const timeDiffer = end_date.getTime() - start_date.getTime();
-               // Convert milliseconds to days 
-                   let diifInDay = Math.floor(timeDiffer/ (1000 * 60 * 60 * 24));
-                   // include start and end date
-                   diifInDay = diifInDay + 1;
+               // Convert milliseconds to days
+
+                let diifInDay = Math.floor(timeDiffer/ (1000 * 60 * 60 * 24));
+                // include start and end date
+
+                diifInDay = diifInDay + 1;
                const totalDayAdsAmount = Number(data.dailyBudget) * diifInDay;
                if(data._id){
                 const exitsAd  =  await SponsoredAdsModal.findById(data._id);
@@ -77,6 +79,9 @@ export async function POST(request) {
                            newSpendAmount          = (exitsAd.spendAmount || 0) - newSubAmount
                            wallet.adsBalance       =  wallet.adsBalance + newSubAmount;
                            wallet.accruingCharge   =  wallet.accruingCharge - newSubAmount;
+                   }else if(totalDayAdsAmount == remainingAmount){
+                    newRemainingAmount = exitsAd.remainingAmount;
+                    newSpendAmount = exitsAd.spendAmount;
                    }
                 }
                }else{ 
@@ -142,7 +147,7 @@ export async function POST(request) {
                 spendAmount     : newSpendAmount,
                 remainingAmount : newRemainingAmount
             }); 
-
+            
          await AdsStatusModal.create([{seller_id, ads_id:ad._id}]); 
          }
         
@@ -254,10 +259,13 @@ export async function POST(request) {
 
                 if (!existing)   {
                     await AdsProductsModals.create({
-                        product_id: product._id,
-                        variant_id: product.variant_id || null, 
-                        ads_id: ad._id,
-                        seller_id: seller_id,
+                        product_id          : product._id,
+                        variant_id          : product.variant_id || null, 
+                        ads_id              : ad._id,
+                        seller_id           : seller_id,
+                         category_id        : product.category_id,
+                        subcategory_id      : product.subcategory_id,
+                        childcategory_id    : product.childcategory_id,
                     });
                 }
                 })
@@ -265,10 +273,13 @@ export async function POST(request) {
             }else if (selectedProduct?.length > 0) {
                 // when create new Ad 
             const produDoc = selectedProduct.map((prod) => ({
-                     product_id: prod._id,
-                    variant_id: prod.variant_id || null, 
-                    ads_id: ad._id,
-                    seller_id: seller_id,
+                    product_id          : prod._id,
+                    variant_id          : prod.variant_id || null, 
+                    ads_id              : ad._id,
+                    seller_id           : seller_id,
+                    category_id         : prod.category_id,
+                    subcategory_id      : prod.subcategory_id,
+                    childcategory_id    : prod.childcategory_id,
             }));
 
             await AdsProductsModals.insertMany(produDoc);

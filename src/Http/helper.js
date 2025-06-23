@@ -120,6 +120,11 @@ export function formatString(input) {
 //     return isValid;
 //   }
 
+export function isValidEmail(email) {
+  const regex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,})+$/;
+  return regex.test(email);
+}
+
 export function getPricingLabel(price) {
   return price.toLocaleString("en-US", { style: "currency", currency: "USD" });
 }

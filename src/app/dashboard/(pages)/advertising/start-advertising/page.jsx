@@ -26,7 +26,15 @@ function Page() {
           icon:"error",
           title:"Validation Error",
           text:res.data?.message,
-          confirmButtonText:"Okay"
+          confirmButtonText:"Apply Brand",
+          cancelButtonText:"Cancel",
+          showCancelButton:true
+        }).then((res)=>{
+           if (res.isConfirmed) {
+              router.push("/dashboard/brand-aproval-page");
+            } else if (res.dismiss === Swal.DismissReason.cancel) {
+              // router.push("/back");
+            }
         })
       }else{
           router.push("/dashboard/advertising/display-ads");

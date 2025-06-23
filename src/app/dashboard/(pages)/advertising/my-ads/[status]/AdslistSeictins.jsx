@@ -15,12 +15,10 @@ function AdslistSeictins() {
     const status = params.status;
 const [searchText, setSearchText] = useState("")
 
-
-// const {data, isLoading, error} = useSWR(`/api/seller/ads/sponsored-ads-list/?status=${status || "All"}&searchText=${searchText}`, fetcher);
-// const adsList = data?.data?.adsList;
+ 
 
 const [adsList, setAdsList] = useState([])
-const [isLoading, setIsLoading] = useState(false)
+const [isLoading, setIsLoading] = useState(false) 
 
 function LoadData(loader=1){
   setIsLoading(loader?true:false)
@@ -28,7 +26,10 @@ function LoadData(loader=1){
   .then((respone)=>{return respone.json()})
   .then((res)=>{
     setIsLoading(false)
-    if(res.status){
+    if(res.status){ 
+      if(res.data.adsList.length == 0){
+        router.push('/dashboard/advertising')
+      }
       setAdsList(res.data.adsList)
     }
   }).catch((error)=>{
@@ -148,7 +149,8 @@ if(!["Active", "Inactive"].includes(value)){
                     <th>Campaign Name</th>
                     <th>Campaign Type </th>
                     <th>Budget</th>
-                    <th>Budget Utilized</th>
+                    {/* <th>Daily Budget</th> */}
+                    <th>Budget Spend</th>
                     <th>Views</th>
                     <th>Clicks</th>
                     <th>Orders</th>
@@ -190,10 +192,13 @@ if(!["Active", "Inactive"].includes(value)){
                                 </ul>
                             </div>
                             </td>
+                             {/* <td className="text-center small-size">$ 
+                                { adItem.spendAmount || 0 } 
+                            </td> */}
                             <td className="text-center small-size">$ 
                                 { adItem.dailyBudget || 0 } 
                             </td>
-                            <td className="text-center small-size">$0</td>
+                            <td className="text-center small-size">${adItem.totalDeductedAmount || 0}</td>
 
                             <td className="text-center small-size">{adItem.repoonse?.views}</td>
                             <td className="text-center small-size">{adItem.repoonse?.clicks}</td>

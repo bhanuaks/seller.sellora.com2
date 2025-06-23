@@ -10,7 +10,7 @@ import { AppProvider } from "./contaxtData/contextData";
 import SellorDashboardCss from "./dashboard/SellorDashboardCss";
 import '../../public/front/assets/css/plugins.css'
 import '../../public/front/assets/css/style.css'
-
+import { Toaster } from 'sonner';
  
 
 export default function SellorRootLayout({ children }) {
@@ -73,6 +73,7 @@ export default function SellorRootLayout({ children }) {
           </div>
         </div>
         {children}
+         <Toaster position="top-right" richColors />
         {!pathname.startsWith("/seller/product/add-product")  && !pathname.startsWith("/seller/product/add-variant")  &&
         !pathname.startsWith("/seller/p-details") & !pathname.startsWith("/seller/product/compliance-and-key-attributes") ? (
           <SellorFooter />

@@ -74,7 +74,10 @@ export async function POST(request) {
                     newSpendAmount          = (exitsAd.spendAmount || 0) - newSubAmount
                     wallet.adsBalance       =  wallet.adsBalance + newSubAmount;
                     wallet.accruingCharge   =  wallet.accruingCharge - newSubAmount;
-            }
+            }else if(totalDayAdsAmount == remainingAmount){
+                    newRemainingAmount = exitsAd.remainingAmount;
+                    newSpendAmount = exitsAd.spendAmount;
+                   }
          }
         }else{
 
@@ -127,6 +130,7 @@ export async function POST(request) {
                 spendAmount     : newSpendAmount,
                 remainingAmount : newRemainingAmount
             }); 
+               
          await AdsStatusModal.create([{seller_id, ads_id:ad._id}]);
          }
       
@@ -234,9 +238,15 @@ export async function POST(request) {
                 });
               
                 if(!check){
+                     
                       await AdsProductsModals.create({
                          product_id: prod.product_id,
                         variant_id:prod.variant_id,
+
+                        category_id:prod.category_id,
+                        subcategory_id:prod.subcategory_id,
+                        childcategory_id:prod.childcategory_id,
+
                         ads_id: ad._id,
                         seller_id:seller_id
                     });

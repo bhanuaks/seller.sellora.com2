@@ -166,7 +166,7 @@ const page = () => {
           <div className="boxs_1">
             <div className="heding_fl">
               <div><img src={`${baseUrl}front/assets/images/new.jpg`} /></div>
-              <div><Link href="#">Whats s New</Link></div>
+              <div><Link href="#">What's New</Link></div>
             </div>
             <p>Check out our latest offers and
               exciting new deals</p>

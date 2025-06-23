@@ -137,9 +137,9 @@ function page() {
           </div>
         </div>
       </div>
-      <div className="col-lg-3">
+      
         <RightNav />
-      </div>
+      
     </div>
   </div>
 </>

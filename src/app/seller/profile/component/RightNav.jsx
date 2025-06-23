@@ -1,9 +1,14 @@
 'use client'
+import { AppContext } from '@/app/contaxtData/contextData'
 import { baseUrl } from '@/Http/helper'
 import Link from 'next/link'
-import React from 'react'
+import { usePathname } from 'next/navigation'
+import React, { useContext } from 'react'
 
 function RightNav() {
+
+  const pathname = usePathname();
+ const {globalData} =  useContext(AppContext)
 
 const sellorLogout=(e)=>{ 
       e.preventDefault();
@@ -24,73 +29,76 @@ const sellorLogout=(e)=>{
 
 
   return (
-    <>
-    <div className="help_single-filter-box">
+  
+    <div className="col-lg-3 rts-sticky-column-item2">
+        <div className='sticky-box2'> 
+    <div className="help_single-filter-box ">
           <div className="goody-s">
-            <h3>Goody2’s</h3>
-            <p>Merchant ID: US001</p>
+            <h3>{globalData?.sellor && globalData?.sellor?.display_name ? globalData?.sellor?.display_name :globalData?.sellor?.name }</h3>
+             
+            <p>Merchant ID: {globalData?.sellor?.merchant_id}</p>
           </div>
           <div className="filterbox-body">
             <div className="order-card2">
-              <div className="order-header2">
-                <Link href={`${baseUrl}/seller/profile/notification-setting`} className="title">
+              <div className={`order-header2 ${pathname =="/seller/profile/notification-setting"?"active_1":""}`} >
+                <Link href={`/seller/profile/notification-setting`} className="title">
                   Notification Setting
                 </Link>
               </div>
             </div>
             <div className="order-card2">
-              <div className="order-header2">
-                <Link href={`${baseUrl}seller/profile/contact-details`} className="title">
+              <div className={`order-header2 ${pathname =="/seller/profile/contact-details"?"active_1":""}`} >
+                <Link href={`/seller/profile/contact-details`} className="title">
                   Contact Details{" "}
                 </Link>
               </div>
             </div>
             <div className="order-card2">
-              <div className="order-header2">
-                <Link href={`${baseUrl}seller/profile/display-information`} className="title">
+              <div className={`order-header2 ${pathname =="/seller/profile/display-information"?"active_1":""}`} >
+                <Link href={`/seller/profile/display-information`} className="title">
                   Display Information
                 </Link>
               </div>
             </div>
             <div className="order-card2">
-              <div className="order-header2">
-                <Link href={`${baseUrl}seller/profile/pickup-address`} className="title">
+              <div className={`order-header2 ${pathname =="/seller/profile/pickup-address"?"active_1":""}`} >
+                <Link href={`/seller/profile/pickup-address`} className="title">
                   Pick up Address
                 </Link>
               </div>
             </div>
             <div className="order-card2">
-              <div className="order-header2">
-                <Link href={`${baseUrl}/seller/profile/return-setting`} className="title">
+              <div className={`order-header2 ${pathname =="/seller/profile/return-setting"?"active_1":""}`} >
+                <Link href={`/seller/profile/return-setting`} className="title">
                   Return Setting
                 </Link>
               </div>
             </div>
             <div className="order-card2">
-              <div className="order-header2">
-                <Link href={`${baseUrl}seller/profile/business-details`} className="title">
+              <div className={`order-header2 ${pathname =="/seller/profile/business-details"?"active_1":""}`} >
+                <Link href={`/seller/profile/business-details`} className="title">
                   Business Details
                 </Link>
               </div>
             </div>
             <div className="order-card2">
-              <div className="order-header2">
-                <Link href={`${baseUrl}seller/profile/tax-information`} className="title">
+              <div className={`order-header2 ${pathname =="/seller/profile/tax-information"?"active_1":""}`} >
+                <Link href={`/seller/profile/tax-information`} className="title">
                   Tax Information
                 </Link>
               </div>
             </div>
             <div className="order-card2">
-              <div className="order-header2">
-                <Link href={`${baseUrl}seller/profile/shipping-setting`} className="title">
+              <div className={`order-header2 ${pathname =="/seller/profile/shipping-setting"?"active_1":""}`}>
+                <Link href={`/seller/profile/shipping-setting`} className="title">
                   Shipping Setting
                 </Link>
               </div>
             </div>
             <div className="order-card2">
-              <div className="order-header2">
+              <div className={`order-header2 ${pathname =="/seller/profile/bank-account-information"?"active_1":""}`}>
                 <Link
-                  href={`${baseUrl}seller/profile/bank-account-information`}
+                  href={`/seller/profile/bank-account-information`}
                   className="title"
                 >
                   Bank Account Information
@@ -98,22 +106,22 @@ const sellorLogout=(e)=>{
               </div>
             </div>
             <div className="order-card2">
-              <div className="order-header2">
-                <Link href={`${baseUrl}seller/profile/payment-information`} className="title">
+              <div className={`order-header2 ${pathname =="/seller/profile/payment-information"?"active_1":""}`}>
+                <Link href={`/seller/profile/payment-information`} className="title">
                   Payment Information
                 </Link>
               </div>
             </div>
             <div className="order-card2">
-              <div className="order-header2 active_1">
-                <Link href={`${baseUrl}/seller/profile/user-management`} className="title">
+              <div className={`order-header2 ${pathname =="/seller/profile/user-management"?"active_1":""}`}>
+                <Link href={`/seller/profile/user-management`} className="title">
                   User Management
                 </Link>
               </div>
             </div>
             <div className="order-card2">
-              <div className="order-header2">
-                <Link href={`${baseUrl}/seller/profile/login-setting`} className="title">
+              <div className={`order-header2 ${pathname =="/seller/profile/login-setting"?"active_1":""}`}>
+                <Link href={`/seller/profile/login-setting`} className="title">
                   Login Setting
                 </Link>
               </div>
@@ -127,7 +135,9 @@ const sellorLogout=(e)=>{
             </div>
           </div>
         </div>
-    </>
+        </div>
+      </div>
+   
   )
 }
 

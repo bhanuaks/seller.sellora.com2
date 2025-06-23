@@ -11,6 +11,7 @@ import { baseUrl } from "@/Http/helper";
 import { useRouter } from "next/navigation";
 import { ToastContainer, toast } from "react-toastify";
 import HelpAndVideoTopSection from "@/app/seller/HelpAndVideoTop";
+import RightNav from "../../component/RightNav";
 
 function Page() {
   const { globalData, setGlobalData } = useContext(AppContext);
@@ -35,7 +36,7 @@ function Page() {
 
   useEffect(() => {
     if (globalData.sellor) {
-      $(".loaderouter").css("display", "flex");
+      // $(".loaderouter").css("display", "flex");
       fetch(
         `${baseUrl}api/seller/get-profile?user_id=${globalData.sellor._id}&with_data=standerdShippingTemplete`,
         {
@@ -98,7 +99,7 @@ function Page() {
     e.preventDefault();
     setErrors({});
 
-    $(".loaderouter").css("display", "flex");
+    // $(".loaderouter").css("display", "flex");
     fetch(`${baseUrl}api/seller/create-shipping-templete`, {
       method: "POST",
       body: JSON.stringify(shippingTemplete),
@@ -142,19 +143,31 @@ function Page() {
       </div>
       {/* loader end */}
 
-      <div className="rts-navigation-area-breadcrumb pb--10">
-        <div className="container">
-          <div className="row">
-            <div className="col-lg-6 col-md-6"></div>
-            <div className="col-lg-6 col-md-6">
-               <HelpAndVideoTopSection />
-            </div>
+<div className="notification_breadcomb_rts-navigation-area-breadcrumb">
+    <div className="container">
+      <div className="row">
+        <div className="col-lg-12">
+          <div className="notification_breadcomb">
+            <ul>
+              <li>
+                <a href="#">Dashboard</a>{" "}
+              </li>
+              <li>
+                <a href="#" className="active_002">
+                 Shipping Setting
+                </a>{" "}
+              </li>
+            </ul>
           </div>
         </div>
       </div>
+    </div>
+  </div>
+
+       
       <div className="container">
         <div className="row">
-          <div className="col-lg-8 offset-lg-2">
+          <div className="col-lg-9">
             <div>
               <div className="form_outer">
                 <div className="seller_edit_information">
@@ -363,6 +376,7 @@ function Page() {
               </div>
             </div>
           </div>
+          <RightNav />
         </div>
       </div>
     </div>

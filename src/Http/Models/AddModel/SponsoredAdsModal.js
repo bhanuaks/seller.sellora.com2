@@ -138,6 +138,7 @@ const adsSearchKeywordSchema =  new Schema({
         default:0 
     }
     
+    
 }, {timestamps:true})
 
 

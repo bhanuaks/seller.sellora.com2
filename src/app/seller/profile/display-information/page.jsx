@@ -10,6 +10,7 @@ import intlTelInput from 'intl-tel-input';
 import { useRouter } from 'next/navigation'
 import { AppContext } from '@/app/contaxtData/contextData'
 import HelpAndVideoTopSection from '../../HelpAndVideoTop'
+import RightNav from '../component/RightNav'
 
 
 
@@ -22,17 +23,17 @@ function Page() {
     const router = useRouter()
     useEffect(()=>{ 
       if(globalData.sellor){
-        $('.loaderouter').css('display','flex') 
+        // $('.loaderouter').css('display','flex') 
         fetch(`${baseUrl}api/seller/get-profile?user_id=${globalData.sellor._id}`,{
           method:"GET", 
         }).then((response)=>{
             if(!response.ok){
-              $('.loaderouter').css('display','none') 
+              // $('.loaderouter').css('display','none') 
               throw new Error('Network Error') 
             }
             return response.json();
         }).then((res)=>{
-            $('.loaderouter').css('display','none') 
+            // $('.loaderouter').css('display','none') 
             if(res.status){
                // check complete step
             if(!res.data.data.complete_step || res.data.data.complete_step < 1){
@@ -90,7 +91,7 @@ function Page() {
   } 
 
   return (
-    <div className="bg33">
+    <div className="">
        <ToastContainer 
                                   position="top-center"
                                   autoClose={3000} 
@@ -108,8 +109,30 @@ function Page() {
                           {/* loader end */}
       
 
-  <div className="rts-navigation-area-breadcrumb pb--10">
+<div className="notification_breadcomb_rts-navigation-area-breadcrumb">
     <div className="container">
+      <div className="row">
+        <div className="col-lg-12">
+          <div className="notification_breadcomb">
+            <ul>
+              <li>
+                <a href="#">Dashboard</a>{" "}
+              </li>
+              <li>
+                <a href="#" className="active_002">
+                 Display Information
+                </a>{" "}
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div className="rts-navigation-area-breadcrumb pb--10">
+    
+    {/* <div className="container">
       <div className="row">
         <div className="col-lg-6 col-md-6"> 
         </div>
@@ -117,11 +140,11 @@ function Page() {
           <HelpAndVideoTopSection />
         </div>
       </div>
-    </div>
+    </div> */}
   </div>
   <div className="container">
     <div className="row">
-      <div className="col-lg-8 offset-lg-2">
+      <div className="col-lg-9">
         <div>
          
           <div className="form_outer">
@@ -173,6 +196,7 @@ function Page() {
           </div>
         </div>
       </div>
+       <RightNav />
     </div>
   </div>
 </div>

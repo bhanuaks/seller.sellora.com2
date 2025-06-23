@@ -62,9 +62,12 @@ export async function GET(request) {
             },
             {
                 $project:{
-                    product_name:1,
-                    variant:1,
-                    main_image:1
+                    product_name     : 1,
+                    category_id      : 1, 
+                    subcategory_id   : 1, 
+                    childcategory_id : 1, 
+                    variant          : 1,
+                    main_image       : 1
                 }
             }
             

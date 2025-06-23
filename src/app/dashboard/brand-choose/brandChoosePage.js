@@ -321,7 +321,7 @@ const BrandChoosePage = () => {
 
   useEffect(() => {
     if (globalData.sellor) {
-      $(".loaderouter").css("display", "flex");
+      // $(".loaderouter").css("display", "flex");
       fetch(
         `${baseUrl}api/seller/get-profile?user_id=${globalData.sellor._id}&with_data=brands`,
         {
@@ -336,7 +336,7 @@ const BrandChoosePage = () => {
           return response.json();
         })
         .then((res) => {
-          $(".loaderouter").css("display", "none");
+          // $(".loaderouter").css("display", "none");
           if (res.status) {
             setSellor(res.data.data);
             setBrand((predata) => ({
@@ -354,20 +354,20 @@ const BrandChoosePage = () => {
     e.preventDefault();
     setErrors({});
     setBrandStatus(null);
-    $(".loaderouter").css("display", "flex");
+    // $(".loaderouter").css("display", "flex");
     fetch(`${baseUrl}api/seller/verify-brand`, {
       method: "POST",
       body: JSON.stringify({ ...brand, name: searchTerm }),
     })
       .then((response) => {
         if (!response.ok) {
-          $(".loaderouter").css("display", "none");
+          // $(".loaderouter").css("display", "none");
           throw new Error("Network Error");
         }
         return response.json();
       })
       .then((res) => {
-        $(".loaderouter").css("display", "none");
+        // $(".loaderouter").css("display", "none");
         if (res.status) {
           setBrandStatus("verify");
           const selectedBrand = brandListData.filter(

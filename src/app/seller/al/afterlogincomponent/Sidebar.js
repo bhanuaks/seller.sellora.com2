@@ -16,17 +16,17 @@ function activeSeller(e){
   e.preventDefault();
  
 
-  $('.loaderouter').css('display','flex');
+  // $('.loaderouter').css('display','flex');
   fetch(`${baseUrl}api/seller/active-my-profile`,{
     method:"PUT", 
   }).then((response)=>{
       if(!response.ok){
-        $('.loaderouter').css('display','none')
+        // $('.loaderouter').css('display','none')
         throw new Error('Network Error') 
       }
       return response.json();
   }).then((res)=>{
-    $('.loaderouter').css('display','none') 
+    // $('.loaderouter').css('display','none') 
     console.log(res.data);
       if(res.status){
          window.location.reload()

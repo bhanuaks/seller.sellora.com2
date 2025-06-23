@@ -10,13 +10,16 @@ import $ from "jquery";
 import "intl-tel-input/build/css/intlTelInput.css";
 import intlTelInput from "intl-tel-input";
 import HelpAndVideoTopSection from "../../HelpAndVideoTop";
+import RightNav from "../component/RightNav";
+
 
 function Page() {
+
   const { globalData, setGlobalData } = useContext(AppContext);
   const [sellor, setSellor] = useState(null);
   const router = useRouter();
   const phoneInputRef = useRef(null);
-    const [errors, setErrors] = useState({});
+  const [errors, setErrors] = useState({});
 
 
   useEffect(() => {
@@ -47,7 +50,7 @@ function Page() {
   }, [setSellor, sellor?.country_s_name]);
   useEffect(() => {
     if (globalData.sellor) {
-      $(".loaderouter").css("display", "flex");
+      // $(".loaderouter").css("display", "flex");
       fetch(
         `${baseUrl}api/seller/get-profile?user_id=${globalData.sellor._id}`,
         {
@@ -89,7 +92,7 @@ function Page() {
 
   function submitUpdateForm(e) {
     e.preventDefault();
-    $(".loaderouter").css("display", "flex");
+    // $(".loaderouter").css("display", "flex");
     fetch(`${baseUrl}api/seller/update-profile?update=contact_details`, {
       method: "POST",
       body: JSON.stringify(sellor),
@@ -113,7 +116,7 @@ function Page() {
   }
 
   return (
-    <div className="bg33">
+    <div className="">
       <ToastContainer
         position="top-center"
         autoClose={3000} // Toast disappears after 3 seconds
@@ -132,7 +135,27 @@ function Page() {
       </div>
       {/* loader end */}
 
-      <div className="rts-navigation-area-breadcrumb pb--10">
+  <div className="notification_breadcomb_rts-navigation-area-breadcrumb">
+    <div className="container">
+      <div className="row">
+        <div className="col-lg-12">
+          <div className="notification_breadcomb">
+            <ul>
+              <li>
+                <a href="#">Dashboard</a>{" "}
+              </li>
+              <li>
+                <a href="#" className="active_002">
+                  Contact Details
+                </a>{" "}
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+      {/* <div className="rts-navigation-area-breadcrumb pb--10">
         <div className="container">
           <div className="row">
             <div className="col-lg-6 col-md-6"></div>
@@ -141,10 +164,10 @@ function Page() {
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
       <div className="container">
         <div className="row">
-          <div className="col-lg-8 offset-lg-2">
+          <div className="col-lg-9">
             <div>
               <div className="form_outer">
                 <div className="seller_edit_information">
@@ -208,12 +231,16 @@ function Page() {
                           </div>
                         </div>
                       </div>
+                      
                     </div>
                   </form>
                 </div>
               </div>
             </div>
           </div>
+          <RightNav />
+               
+           
         </div>
       </div>
     </div>

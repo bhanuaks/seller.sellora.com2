@@ -169,6 +169,7 @@ const productSchema = new Schema({
     productHeightUnit:String,
     numberOfItem:String, 
     groupId:String, 
+    clicks:Number,
      
 
 },{timestamps:true})

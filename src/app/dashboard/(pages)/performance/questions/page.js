@@ -27,9 +27,9 @@ const Page = () => {
     async function submmitAnswer(e){
       setErrors({})
       e.preventDefault();
-       $('.loaderouter').css('display',"flex") 
+      //  $('.loaderouter').css('display',"flex") 
       const response = await apiRequest(`${baseUrl}api/seller/question-answer`, "POST", {...singleQuestion, answer})
-      $('.loaderouter').css('display',"none") 
+      // $('.loaderouter').css('display',"none") 
      if(response.status){
        mutate(`${baseUrl}api/seller/question-answer?page=${currentPage}`)
       setOpenModal(false);

@@ -77,6 +77,9 @@ const sellerSchema = new Schema({
     lastloginTimeDate:{
         type:Date, 
     },
+    merchant_id:{
+        type:String, 
+    }
 
 
 
@@ -343,3 +346,13 @@ const sellerBusinessDetails = new Schema({
 
 export const sellerBusinessProfileModel = mongoose.models.SellerBusinessProfile ||  mongoose.model("SellerBusinessProfile", sellerBusinessDetails)
  
+
+const sellerCountSchema = new Schema({
+    count:{
+        type:Number,
+        required:true,
+        default:1,
+    }
+}, { timestamps:true })
+
+export const sellerCountModel = mongoose.models.SellerCount ||  mongoose.model("SellerCount", sellerCountSchema)

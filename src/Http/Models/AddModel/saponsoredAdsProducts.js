@@ -20,13 +20,36 @@ const sponsoredAdsProductsSchema = new Schema({
         require:true
     },
 
+      category_id:{
+        type:mongoose.Types.ObjectId,
+        ref:"Category",
+        required:[true, "Category is required"]
+    },
+
+     subcategory_id:{
+        type:mongoose.Types.ObjectId,
+            ref:"subCategory",
+            required: false,
+            default: null,
+    },
+    childcategory_id:{
+        type:mongoose.Types.ObjectId,
+        ref:"ChildCategory",
+        required: false,
+        default: null,
+    },
+
      variant_id:{
         type:mongoose.Types.ObjectId,
         ref:"ProductVariant",
         require:true
     },
 
-    click:{
+    views:{
+        type:Number,
+        default:0
+    },
+    clicks:{
         type:Number,
         default:0
     }

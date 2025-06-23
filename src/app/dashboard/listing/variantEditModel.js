@@ -206,7 +206,7 @@ useEffect(()=>{
 
         setErrors({})
 
-        $('.loaderouter').css('display', 'flex')
+        // $('.loaderouter').css('display', 'flex')
         fetch(`${baseUrl}api/seller/product/update-and-copy-variant`, {
             method: "POST",
             body: JSON.stringify({
@@ -217,12 +217,12 @@ useEffect(()=>{
             })
         }).then((response) => {
             if (!response.ok) {
-                $('.loaderouter').css('display', 'none')
+                // $('.loaderouter').css('display', 'none')
                 throw new Error("Network Error")
             }
             return response.json();
         }).then((res) => {
-            $('.loaderouter').css('display', 'none')
+            // $('.loaderouter').css('display', 'none')
             if (res.status) {
                 closeVariantModal()
                 Swal.fire({

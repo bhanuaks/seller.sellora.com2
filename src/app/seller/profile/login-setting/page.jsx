@@ -1,7 +1,12 @@
-import React from 'react'
+"use client"
+import React, { useContext } from 'react'
 import RightNav from '../component/RightNav'
+import { AppContext } from '@/app/contaxtData/contextData'
 
 function page() {
+
+  const {globalData} = useContext(AppContext)
+
   return (
     <>
   <div className="notification_breadcomb_rts-navigation-area-breadcrumb">
@@ -34,7 +39,7 @@ function page() {
                 <div className="form_field_outer">
                   <div>
                     <div className="name_heading">Name</div>
-                    <div className="name">Paula</div>
+                    <div className="name">{globalData?.sellor?.name}</div>
                   </div>
                   <div>
                     {" "}
@@ -44,7 +49,7 @@ function page() {
                 <div className="form_field_outer">
                   <div>
                     <div className="name_heading">E-Mail</div>
-                    <div className="name">paula@yahoo.com</div>
+                    <div className="name">{globalData?.sellor?.email}</div>
                   </div>
                   <div>
                     {" "}
@@ -56,7 +61,7 @@ function page() {
                     <div className="name_heading">Primary mobile number:</div>
                     <div className="name">
                       <span>
-                        <strong>+1</strong> 9211886687{" "}
+                        <strong>+{globalData?.sellor?.mobile_code}</strong> {globalData?.sellor?.mobile}
                       </span>
                       <p>
                         Quickly sign in, easily recover passwords, and receive
@@ -83,8 +88,8 @@ function page() {
                   <div>
                     <div className="name_heading">2-step verification</div>
                     <div className="name">
-                      <span>paulaa123@yahoo.com</span>
-                      <span>+1 8700894154</span>
+                      <span>{globalData?.sellor?.email}</span>
+                      <span>+{globalData?.sellor?.mobile_code} {globalData?.sellor?.mobile}</span>
                       <p>
                         Enter a code sent to your verification method, in
                         addition to your password, to sign in securely.
@@ -102,9 +107,9 @@ function page() {
           </div>
         </div>
       </div>
-      <div className="col-lg-3">
+    
         <RightNav />
-      </div>
+       
     </div>
   </div>
   {/* popup-1-add-new-user-Modal */}

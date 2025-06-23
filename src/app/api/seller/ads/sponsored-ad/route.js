@@ -70,6 +70,9 @@ export async function GET(request) {
                     "ads_id":1,
                     "seller_id":1,
                     "product_id":1,
+                    "category_id":"$product.category_id",
+                    "subcategory_id":"$product.subcategory_id",
+                    "childcategory_id":"$product.childcategory_id", 
                     "variant_id":1,
                     "product_name":"$product.product_name",
                     "main_image":"$product.main_image", 
@@ -80,7 +83,7 @@ export async function GET(request) {
             
         ]);
 
-        return responseFun(true, {adProduct, campaign:ads,adProduct, adsKeyword, excludKeyword}, 200);
+        return responseFun(true, {adProduct, campaign:ads, adsKeyword, excludKeyword}, 200);
     }catch(error){
         console.log(error.message);
         return responseFun(false, {message:error.message}, 500)

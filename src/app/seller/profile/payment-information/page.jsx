@@ -12,6 +12,7 @@ import { baseUrl, decryptText } from '@/Http/helper'
 import { useRouter } from 'next/navigation' 
 import { ToastContainer, toast } from 'react-toastify'; 
 import HelpAndVideoTopSection from '../../HelpAndVideoTop';
+import RightNav from '../component/RightNav';
 
 
 function Page() {
@@ -193,21 +194,31 @@ function Page() {
                 {/* loader end */}
 
 
-      <div className="rts-navigation-area-breadcrumb pb--10">
-        <div className="container">
-          <div className="row">
-            <div className="col-lg-6 col-md-6"> 
-            </div>
-            <div className="col-lg-6 col-md-6">
-              <HelpAndVideoTopSection />
-            </div>
+      <div className="notification_breadcomb_rts-navigation-area-breadcrumb">
+    <div className="container">
+      <div className="row">
+        <div className="col-lg-12">
+          <div className="notification_breadcomb">
+            <ul>
+              <li>
+                <a href="#">Dashboard</a>{" "}
+              </li>
+              <li>
+                <a href="#" className="active_002">
+                 Payment Information
+                </a>{" "}
+              </li>
+            </ul>
           </div>
         </div>
       </div>
+    </div>
+  </div>
+
       <div className="container">
       <form action="#" onSubmit={(e) => submitUpdateForm(e)}>
         <div className="row">
-          <div className="col-lg-8 offset-lg-2">
+          <div className="col-lg-9">
             <div>
               <div className="form_outer">
                 <div className="seller_edit_information">
@@ -427,6 +438,7 @@ function Page() {
               </div>
             </div>
           </div>
+          <RightNav />
         </div>
         </form>
       </div>

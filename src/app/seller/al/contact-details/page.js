@@ -47,7 +47,7 @@ function page() {
   }, [setSellor, sellor?.country_s_name]);
   useEffect(() => {
     if (globalData.sellor) {
-      $(".loaderouter").css("display", "flex");
+      // $(".loaderouter").css("display", "flex");
       fetch(
         `${baseUrl}api/seller/get-profile?user_id=${globalData.sellor._id}`,
         {
@@ -89,7 +89,7 @@ function page() {
 
   function submitUpdateForm(e) {
     e.preventDefault();
-    $(".loaderouter").css("display", "flex");
+    // $(".loaderouter").css("display", "flex");
     fetch(`${baseUrl}api/seller/update-profile?update=contact_details`, {
       method: "POST",
       body: JSON.stringify(sellor),

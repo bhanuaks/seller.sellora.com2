@@ -49,17 +49,17 @@ const page = () => {
   
   useEffect(()=>{ 
     if(globalData.sellor){
-      $('.loaderouter').css('display','flex') 
+      // $('.loaderouter').css('display','flex') 
       fetch(`${baseUrl}api/seller/get-profile?user_id=${globalData.sellor._id}`,{
         method:"GET", 
       }).then((response)=>{
           if(!response.ok){
-            $('.loaderouter').css('display','none')
+            // $('.loaderouter').css('display','none')
             throw new Error('Network Error')
           }
           return response.json();
       }).then((res)=>{
-          $('.loaderouter').css('display','none') 
+          // $('.loaderouter').css('display','none') 
           if(res.status){ 
             setSellor(res.data.data) 
             setBrandDetails((preData) => ({
@@ -194,7 +194,7 @@ const page = () => {
     function submitBrandForm(e){
       e.preventDefault();
       setErrors({})
-      $('.loaderouter').css('display', 'flex')
+      // $('.loaderouter').css('display', 'flex')
       const formData = createFormData(brandDetails);
       console.log(formData);
       fetch(`${baseUrl}api/seller/add-new-brand`,{
@@ -202,12 +202,12 @@ const page = () => {
         body:formData
       }).then((response)=>{
         if(!response.ok){
-          $('.loaderouter').css('display', 'none')
+          // $('.loaderouter').css('display', 'none')
           throw new Error("Network Error")
         }
         return response.json();
       }).then((res)=>{
-        $('.loaderouter').css('display', 'none')
+        // $('.loaderouter').css('display', 'none')
         if(res.status){
           toast.success('Success! Your brand saved successfully. and sent to admin for approval.')
          router.push(`${baseUrl}dashboard/track-approval-requests`)

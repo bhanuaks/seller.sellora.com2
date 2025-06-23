@@ -29,7 +29,7 @@ function Page() {
                   <i className="fa-solid fa-wallet" /> Wallet
                 </Link>
               </li>
-              <li>
+              {/* <li>
                 <a href="#">
                   <Image src={`${baseUrl}front/assets/images/hand_shaking.png`}
                     width={0}
@@ -39,7 +39,7 @@ function Page() {
                     alt='hand_shaking'
                   /> Help
                 </a>
-              </li>
+              </li> */}
             </ul>
           </div>
         </div>

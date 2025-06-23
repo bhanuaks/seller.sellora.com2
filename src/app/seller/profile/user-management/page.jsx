@@ -51,9 +51,9 @@ function page() {
           </div>
         </div>
       </div>
-      <div className="col-lg-3">
+       
         <RightNav />
-      </div>
+      
     </div>
   </div>
   {/* popup-1-add-new-user-Modal */}

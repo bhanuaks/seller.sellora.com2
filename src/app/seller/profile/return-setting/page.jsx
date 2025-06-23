@@ -222,9 +222,9 @@ function page() {
           </div>
         </div>
       </div>
-      <div className="col-lg-3">
+      
         <RightNav />
-      </div>
+      
     </div>
   </div>
 
@@ -450,9 +450,9 @@ function page() {
                   No
                 </label>
               </div>
-              {/*  <div class="radio">
+              {/*  <div className="radio">
     <input id="radio-3" name="radio" type="radio" disabled>
-    <label for="radio-3" class="radio-label">Disabled</label>
+    <label for="radio-3" className="radio-label">Disabled</label>
   </div> */}
             </div>
           </div>

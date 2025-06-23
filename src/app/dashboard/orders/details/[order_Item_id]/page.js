@@ -80,7 +80,7 @@ function Page() {
 
   async function saveShipingData(e) {
     e.preventDefault();
-    $(".loaderouter").css("display", "flex");
+    // $(".loaderouter").css("display", "flex");
     setApiLoader(true)
     const response = await apiRequest(
       `${baseUrl}api/seller/product/orders/shipped`,
@@ -88,7 +88,7 @@ function Page() {
       { trakingInfo: trakingInfo, order_Item_id: order_Item_id }
     );
     setApiLoader(false)
-    $(".loaderouter").css("display", "none");
+    // $(".loaderouter").css("display", "none");
     console.log(response);
     if (response.status) {
         mutate(`${baseUrl}api/seller/product/orders/single-product-details?order_Item_id=${order_Item_id}`);

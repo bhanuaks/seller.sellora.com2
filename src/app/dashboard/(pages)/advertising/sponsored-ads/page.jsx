@@ -313,10 +313,14 @@ async function submitCampaign(e){
 
   const produDoc = selectedProduct.map(prod => ({
                 ...prod,
-                product_id: prod._id,
-                variant_id: prod.variant?._id
+                product_id        : prod._id,
+                category_id       : prod.category_id || undefined,
+                subcategory_id    : prod.subcategory_id || undefined,
+                childcategory_id  : prod.childcategory_id || undefined,
+                variant_id        : prod.variant?._id
             }));
 
+            console.log({produDoc});
   const formData = {
     ...campaign,
     selectedProduct:produDoc,

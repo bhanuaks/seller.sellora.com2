@@ -36,7 +36,7 @@ const page = () => {
 
   useEffect(() => {
     if (globalData.sellor) {
-      $(".loaderouter").css("display", "flex");
+      // $(".loaderouter").css("display", "flex");
       fetch(
         `${baseUrl}api/seller/get-profile?user_id=${globalData.sellor._id}&with_data=bankDetails`,
         {
@@ -45,13 +45,13 @@ const page = () => {
       )
         .then((response) => {
           if (!response.ok) {
-            $(".loaderouter").css("display", "none");
+            // $(".loaderouter").css("display", "none");
             throw new Error("Network Error");
           }
           return response.json();
         })
         .then((res) => {
-          $(".loaderouter").css("display", "none");
+          // $(".loaderouter").css("display", "none");
           if (res.status) {
             // check complete step
             if (
@@ -131,20 +131,20 @@ const page = () => {
     e.preventDefault();
     setErrors({});
 
-    $(".loaderouter").css("display", "flex");
+    // $(".loaderouter").css("display", "flex");
     fetch(`${baseUrl}api/seller/update-profile?update=bankDetails`, {
       method: "POST",
       body: JSON.stringify(bankDetails),
     })
       .then((response) => {
         if (!response.ok) {
-          $(".loaderouter").css("display", "none");
+          // $(".loaderouter").css("display", "none");
           throw new Error("Network Error");
         }
         return response.json();
       })
       .then((res) => {
-        $(".loaderouter").css("display", "none");
+        // $(".loaderouter").css("display", "none");
         if (res.status) {
           toast.success("Success! Account information saved successfully.");
           router.push("/seller/al/payment-information");

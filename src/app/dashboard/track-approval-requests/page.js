@@ -36,17 +36,17 @@ const page = ({params}) => {
   useEffect(()=>{ 
    
     if(globalData.sellor){
-      $('.loaderouter').css('display','flex') 
+      // $('.loaderouter').css('display','flex') 
       fetch(`${baseUrl}api/seller/get-brand-list?user_id=${globalData.sellor._id}&status=${status?status:''}&search=${search?search:""}`,{
         method:"GET", 
       }).then((response)=>{
           if(!response.ok){
-            $('.loaderouter').css('display','none')
+            // $('.loaderouter').css('display','none')
             throw new Error('Network Error')
           }
           return response.json();
       }).then((res)=>{
-          $('.loaderouter').css('display','none') 
+          // $('.loaderouter').css('display','none') 
           if(res.status){ 
             setSellor(res.data.seller) 
             setBrandList(res.data.brandList);
@@ -70,18 +70,18 @@ const page = ({params}) => {
   function deletdBrand(e,_id){
     e.preventDefault();
     if(globalData.sellor){
-      $('.loaderouter').css('display','flex') 
+      // $('.loaderouter').css('display','flex') 
       fetch(`${baseUrl}api/seller/get-brand-list`,{
         method:"DELETE", 
         body:JSON.stringify({_id:_id})
       }).then((response)=>{
           if(!response.ok){
-            $('.loaderouter').css('display','none')
+            // $('.loaderouter').css('display','none')
             throw new Error('Network Error')
           }
           return response.json();
       }).then((res)=>{
-          $('.loaderouter').css('display','none') 
+          // $('.loaderouter').css('display','none') 
           if(res.status){
             toast.success("Success! Brand has been deleted successfully.")
             setBrandList(brandList.filter((item)=>item._id != _id));

@@ -82,7 +82,7 @@ const page = ({ params }) => {
       }
 
       if (globalData.sellor) {
-        $(".loaderouter").css("display", "flex");
+        // $(".loaderouter").css("display", "flex");
         fetch(`${baseUrl}api/seller/get-category-and-brand`, {
           method: "POST",
           body: JSON.stringify({
@@ -160,7 +160,7 @@ const page = ({ params }) => {
           })
           .catch((err) => {
             console.log(err);
-            $(".loaderouter").css("display", "flex");
+            // $(".loaderouter").css("display", "flex");
           });
       }
     }, [globalData.sellor]);
@@ -178,7 +178,7 @@ const page = ({ params }) => {
 
     function saveProductInforemationData(e, save_as_draft) {
       e.preventDefault();
-      $(".loaderouter").css("display", "flex"); 
+      // $(".loaderouter").css("display", "flex"); 
       setErrors({});
       fetch(`${baseUrl}api/seller/product/add-compliance-and-other`, {
         method: "POST",

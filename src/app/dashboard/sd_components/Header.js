@@ -6,14 +6,14 @@ import React, { useContext, useEffect, useState } from 'react'
 
 const Header = () => {
 
-  const {globalData} =  useContext(AppContext)
+  const {globalData, setGlobalData} =  useContext(AppContext)
   const [businessData, setBusinessData] = useState(null)
   const [sellor, setSellor] = useState(null);
   
 
   useEffect(() => {
     if (globalData.sellor) {
-      $(".loaderouter").css("display", "none");
+      // $(".loaderouter").css("display", "none");
       fetch(
         `${baseUrl}api/seller/get-profile?user_id=${globalData.sellor._id}&with_data=businessDetails`,
         {
@@ -22,15 +22,16 @@ const Header = () => {
       )
         .then((response) => {
           if (!response.ok) {
-            $(".loaderouter").css("display", "none");
+            // $(".loaderouter").css("display", "none");
             throw new Error("Network Error");
           }
           return response.json();
         })
         .then((res) => {
-          $(".loaderouter").css("display", "none");
+          // $(".loaderouter").css("display", "none");
           if (res.status) { 
             setSellor(res.data.data);
+            setGlobalData((preData)=>({sellor:res.data.data}));
             if (res.data.referData) {
               setBusinessData(res.data.referData);
             }
@@ -38,7 +39,7 @@ const Header = () => {
           }
         });
     }
-  }, [globalData.sellor]);
+  }, []);
 
 
   const sellorLogout=(e)=>{ 
@@ -258,17 +259,20 @@ const Header = () => {
                 <a href="#">
                   Buyer Questions <i className="fa-light fa-bell" />
                 </a>
-                {/* <a href="#"><i className="fa-light fa-bell"></i> Aahil Mart </a>  */}
+                <Link href="#" onClick={(e)=>e.preventDefault()}><i className="fa-light fa-cog"></i>  </Link>
               </div>
               <div className="dropdown_login">
-                <li className="seller-login-profile">
-                  <i className="fa fa-user user_bg" /> {sellor && sellor.display_name ? sellor.display_name :sellor?.name }
+             
+                <li className={`seller-login-profile  `}>
+                  {/* <i className="fa fa-user user_bg" />  */}
+                  {globalData?.sellor && globalData?.sellor.display_name ? globalData?.sellor?.display_name :globalData?.sellor?.name }
                   <i className="fa-regular fa-ellipsis-vertical doted_l" />
                   <div className="dropdown mr_10_login">
                     <div className="login_name">
-                      <div className="loginname"> {sellor && sellor.display_name ? sellor.display_name :sellor?.name }</div>
-                      <div></div>
+                      <div className="loginname">  {globalData?.sellor && globalData?.sellor.display_name ? globalData?.sellor?.display_name :globalData?.sellor?.name }</div>
+                      <div>Merchant ID: {globalData?.sellor?.merchant_id}</div>
                     </div>
+
 
                     {sellor?.selfActive == "Pending"  && (
                       <div className="seller_profile_link">
@@ -287,7 +291,7 @@ const Header = () => {
                         </a>
                         </div>
                     )}
-                    {sellor?.selfActive == "Active"  && (
+                    {globalData?.sellor?.selfActive == "Active"  && (
                       <div className="seller_profile_link">
                    
                     <Link
@@ -411,13 +415,19 @@ const Header = () => {
               />
             </a>
             <div className="main-wrapper-action-2 d-flex">
-              <div className="dropdown_login pt--10">
+              <div className="menu_right2 pt--5"> 
+                 <a href="#"><i className="fa-light fa-bell"></i></a> 
+                <a href="#listing-notification.html"><i className="fa-light fa-cog"></i> </a> 
+              </div>
+ 
+              <div className="dropdown_login pt--7">
                 <li className="seller-login-profile">
-                  <i className="fa fa-user user_bg" />  {sellor && sellor.display_name ? sellor.display_name :sellor?.name }
-                  <i className="fa-regular fa-ellipsis-vertical doted_l" />
+                  {/* <i className="fa fa-user user_bg" />   */}
+                  {globalData?.sellor && sellor?.display_name ? globalData?.sellor?.display_name :globalData?.sellor?.name }
+                  {/* <i className="fa-regular fa-ellipsis-vertical doted_l" /> */}
                   <div className="dropdown mr_10_login">
                     <div className="login_name">
-                      <div className="loginname"> {sellor && sellor.display_name ? sellor.display_name :sellor?.name }</div>
+                      <div className="loginname"> {globalData?.sellor && globalData?.sellor?.display_name ? globalData?.sellor?.display_name :globalData?.sellor?.name }</div>
                       <div></div>
                     </div>
                     {sellor?.selfActive == "Pending"  && (
@@ -446,9 +456,7 @@ const Header = () => {
                       >
                         Display Information
                       </Link>
-                      {/* <a className="drop-link" href={`${baseUrl}seller/al/display-information`}>
-                        Login Details
-                      </a> */}
+                     
                       <Link
                         className="drop-link"
                         href={`${baseUrl}seller/al/contact-details`}
@@ -503,12 +511,7 @@ const Header = () => {
                         >
                           Logout
                         </a>
-                      {/* <Link
-                        className="drop-link"
-                        href="#"
-                      >
-                        Manage Sub User
-                      </Link> */}
+                      
                     </div>
                     )}
                   </div>

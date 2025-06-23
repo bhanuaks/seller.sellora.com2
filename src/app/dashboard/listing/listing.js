@@ -18,7 +18,7 @@ const Listing = ({productList, editVariant, refreshList, setRefreshList, copyVar
       if(!confirm(`Are you sure to ${status} this`)){
         return
       }
-      $('.loaderouter').css('display', 'flex');
+      // $('.loaderouter').css('display', 'flex');
 
       fetch(`${baseUrl}api/seller/product/update-variant-status`,{
         method:"POST",
@@ -29,7 +29,7 @@ const Listing = ({productList, editVariant, refreshList, setRefreshList, copyVar
       }).then((response)=>{
 
         if(!response.ok){
-          $('.loaderouter').css('display', 'none');
+          // $('.loaderouter').css('display', 'none');
           throw new Error("Network Error")
         }
         return response.json();
@@ -43,9 +43,9 @@ const Listing = ({productList, editVariant, refreshList, setRefreshList, copyVar
 
 
     async function deleteDraftProduct(product_id){ 
-      $('.loaderouter').css('display', 'flex');
+      // $('.loaderouter').css('display', 'flex');
       const response = await apiRequest(`${baseUrl}api/seller/product/delete-draft-product`,"DELETE", {_id:product_id})
-      $('.loaderouter').css('display', 'none'); 
+      // $('.loaderouter').css('display', 'none'); 
       if(response.status){
         setRefreshList(refreshList+1)
         toast.success("Success! Product has been deleted successfully.")

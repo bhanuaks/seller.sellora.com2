@@ -52,7 +52,7 @@ function page() {
 
   useEffect(() => {
     if (globalData.sellor) {
-      $(".loaderouter").css("display", "flex");
+      // $(".loaderouter").css("display", "flex");
       fetch(
         `${baseUrl}api/seller/get-profile?user_id=${globalData.sellor._id}&with_data=businessDetails`,
         {
@@ -222,7 +222,7 @@ function page() {
 
   function submitUpdateForm(e) {
     e.preventDefault();
-    $(".loaderouter").css("display", "flex");
+    // $(".loaderouter").css("display", "flex");
     const formData = createFormData(businessDetails);
     fetch(`${baseUrl}api/seller/update-profile?update=businessDetails`, {
       method: "POST",
