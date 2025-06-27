@@ -236,6 +236,7 @@ async function updatereturnAddress(request) {
                 country_s_name:address.country_s_name,
                 mobile_code:address.mobile_code,
                 mobile:address.mobile,
+                return_address:address.return_address,
             })
         }else{
             const pickUpAddress = await sellerReturnAddressModel.create({ 

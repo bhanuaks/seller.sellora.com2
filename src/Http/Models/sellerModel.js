@@ -31,7 +31,7 @@ const sellerSchema = new Schema({
 
     password:{
         type:String,
-        required:[true, "Password is required"],
+       // required:[true, "Password is required"],
         select: false  
     },
     show_password:{
@@ -79,6 +79,24 @@ const sellerSchema = new Schema({
     },
     merchant_id:{
         type:String, 
+    },
+    role:{
+        type:String,
+        trim:true,
+        enum: ['Owner', 'Employee'],
+        default: 'Owner',
+    },
+    owner_id: {
+        type: mongoose.Types.ObjectId,
+        ref: "Seller",
+        validate: {
+                    validator: function (v) {
+                    // Only required if role is 'Employee'
+                    if (this.role === 'Employee' && !v) return false;
+                    return true;
+                    },
+                message: "owner_id is required for employees."
+        }
     }
 
 
@@ -128,6 +146,7 @@ const seller_return_address_schema = new Schema({
     country_s_name:String,
     mobile_code:String,
     mobile:String,
+    return_address:String,
 
 },{timestamps:true}) 
 
@@ -356,3 +375,18 @@ const sellerCountSchema = new Schema({
 }, { timestamps:true })
 
 export const sellerCountModel = mongoose.models.SellerCount ||  mongoose.model("SellerCount", sellerCountSchema)
+
+
+const subSellerCountSchema = new Schema({
+    seller_id:{
+        type:mongoose.Types.ObjectId,
+        ref:"Seller"
+    }, 
+    count:{
+        type:Number,
+        required:true,
+        default:1,
+    }
+}, { timestamps:true })
+
+export const subSellerCountModel = mongoose.models.SubSellerCount ||  mongoose.model("SubSellerCount", subSellerCountSchema)
