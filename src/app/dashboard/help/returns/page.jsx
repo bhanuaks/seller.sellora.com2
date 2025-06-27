@@ -1,45 +1,93 @@
-import { baseUrl } from '@/Http/helper'
-import React from 'react'
-import RightSideBar from '../RightSideBar'
-import Link from 'next/link'
+"use client"
+import React, { useEffect, useRef, useState } from 'react'  
+import RightSideBar from '../RightSideBar';
+import { ReturnsFaq } from '@/Http/PageData/ReturnsFaq';
 
-function Return() {
+function page() {
+   const [activeIndex, setActiveIndex] = useState(null);
+  const refs = useRef([]);
+
+  const toggle = (index) => {
+    setActiveIndex((prev) => (prev === index ? null : index));
+  };
+
+  useEffect(() => {
+    refs.current.forEach((ref, i) => {
+      if (ref) {
+        if(i == activeIndex){ 
+           ref.style.maxHeight = `${ref.scrollHeight}px`;
+        }
+        ref.style.maxHeight =  activeIndex === i ? `${ref.scrollHeight}px` : '0px';
+      }
+    });
+  }, [activeIndex])
+
   return (
-    <div className="sellora_045948">
-  <div className="container">
-    <div className="row">
-      <div className="col-lg-8">
-        <div className="head_234">
-          <h2>
-            <img src={`${baseUrl}front/assets/images/001.png`} /> <Link href={`${baseUrl}dashboard/help`}> Help </Link> / <span>Returns</span>
-          </h2>
-          <div className="listi_content_390">
-            <div className="card_34259">
-              <ul>
-                <li>
-                  <Link href={`${baseUrl}dashboard/help/returns/return-policy-concerns-or-suggestions`}
-                  >
-                    <span>Return Policy Concerns or Suggestions?</span>
-                  </Link>
-                </li>
-                
-                <li>
-                  <Link href={`${baseUrl}dashboard/help/returns/error-processing-customer-refund`} >
-                    <span>Error Processing Customer Refund</span>
-                  </Link>
-                </li>
-              </ul>
-            </div>
+     <>
+   
+  <div className="notification_breadcomb_rts-navigation-area-breadcrumb">
+    <div className="container">
+      <div className="row">
+        <div className="col-lg-12">
+          <div className="notification_breadcomb">
+            <ul>
+              <li>
+                <a href="#">Help</a>
+              </li>
+              <li>
+                <a href="#" className="active_002">
+                  Orders &amp; Delivery
+                </a>
+              </li>
+            </ul>
           </div>
         </div>
       </div>
-      
-      <RightSideBar />
     </div>
   </div>
-</div>
+  <div className="sellora_045948">
+    <div className="container">
+      <div className="row">
+        <div className="col-lg-9">
+          <div className="head_234">
+            <h3 className="light_bg animated fadeIn">Orders &amp; Delivery</h3>
+          </div>
+          {/* =================1st-question=open============ */}
+          {ReturnsFaq.map((item, index) => (
+        <div key={index} className="faq_outer_23">
+          <div
+            className={`question ${activeIndex === index ? 'active' : ''}`}
+            onClick={() => toggle(index)}
+          >
+            {item.question}
+          </div>
+          <div className="answercont"  ref={(el) => (refs.current[index] = el)}>
+            <div
+              ref={(el) => (refs.current[index] = el)}
+              className="answer"
+              style={{
+                overflow: 'hidden',
+                // maxHeight: '0px',
+                transition: 'max-height 0.3s ease',
+              }}
+            >
+              {item.answer}
+            </div>
+          </div>
+        </div>
+      ))}
+
+
+           
+        </div>
+         <RightSideBar />
+      </div>
+    </div>
+  </div>
+</>
+
 
   )
 }
 
-export default Return
+export default page

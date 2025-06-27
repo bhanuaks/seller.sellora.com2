@@ -1,26 +1,12 @@
 import { baseUrl } from '@/Http/helper'
 import Image from 'next/image'
 import Link from 'next/link'
-import React from 'react'
-import HelpAndVideoTopSection from '../../HelpAndVideoTop'
+import React from 'react' 
 
 function Page() {
   return (
     <div className="bg33">
-  <div className="rts-navigation-area-breadcrumb pb--10">
-    <div className="container">
-      <div className="row">
-        <div className="col-lg-6 col-md-6">
-          {/*  <div className="navigator-breadcrumb-wrapper">
-    <h3>Bulk Catalog Upload</h3>
-  </div> */}
-        </div>
-        <div className="col-lg-6 col-md-6">
-          <HelpAndVideoTopSection />
-        </div>
-      </div>
-    </div>
-  </div>
+   
   <div className="container">
     <div className="row">
       <div className="col-lg-8 offset-lg-2">

@@ -116,7 +116,7 @@ function Page() {
           <div className="notification_breadcomb">
             <ul>
               <li>
-                <a href="#">Dashboard</a>{" "}
+                <Link href="/dashboard">Dashboard</Link>{" "}
               </li>
               <li>
                 <a href="#" className="active_002">
@@ -130,21 +130,10 @@ function Page() {
     </div>
   </div>
 
-  <div className="rts-navigation-area-breadcrumb pb--10">
-    
-    {/* <div className="container">
-      <div className="row">
-        <div className="col-lg-6 col-md-6"> 
-        </div>
-        <div className="col-lg-6 col-md-6">
-          <HelpAndVideoTopSection />
-        </div>
-      </div>
-    </div> */}
-  </div>
+  
   <div className="container">
     <div className="row">
-      <div className="col-lg-9">
+      <div className="col-lg-10 offset-lg-1">
         <div>
          
           <div className="form_outer">
@@ -196,7 +185,7 @@ function Page() {
           </div>
         </div>
       </div>
-       <RightNav />
+       {/* <RightNav /> */}
     </div>
   </div>
 </div>

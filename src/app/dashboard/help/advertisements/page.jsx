@@ -1,121 +1,93 @@
-import { baseUrl } from '@/Http/helper'
-import React from 'react'
-import RightSideBar from '../RightSideBar'
-import Link from 'next/link'
+"use client" 
+import { advertisementFAQ } from '@/Http/PageData/advertisementFaq';
+import React, { useEffect, useRef, useState } from 'react'   
+import RightSideBar from '../RightSideBar';
 
-function Advertisements() {
+function page() {
+   const [activeIndex, setActiveIndex] = useState(null);
+  const refs = useRef([]);
+
+  const toggle = (index) => {
+    setActiveIndex((prev) => (prev === index ? null : index));
+  };
+
+  useEffect(() => {
+    refs.current.forEach((ref, i) => {
+      if (ref) {
+        if(i == activeIndex){ 
+           ref.style.maxHeight = `${ref.scrollHeight}px`;
+        }
+        ref.style.maxHeight =  activeIndex === i ? `${ref.scrollHeight}px` : '0px';
+      }
+    });
+  }, [activeIndex])
+
   return (
-    <div className="sellora_045948">
-  <div className="container">
-    <div className="row">
-      <div className="col-lg-8">
-        <div className="head_234">
-          <h2>
-            <img src={`${baseUrl}front/assets/images/advertisment.png`} /> <Link href={`${baseUrl}dashboard/help`}> Help </Link> /{" "}
-            <span>Advertisments</span>
-          </h2>
-          <div className="listi_content_390">
-            <div className="card_34259">
-              <ul>
-                <li>
-                  <a href="#">
-                    <span>How do I create an ad campaign on Sellora?</span>
-                  </a>
-                </li>
-                <li>
-                  <a href="#">
-                    <span>
-                      How can I stop automatic advertisements from running?
-                    </span>
-                  </a>
-                </li>
-                <li>
-                  <a href="#">
-                    <span>
-                      I’m experiencing an issue with an Ad Expert—how can I
-                      resolve it?
-                    </span>
-                  </a>
-                </li>
-                <li>
-                  <a href="#">
-                    <span>
-                      I have a problem with my advertising credit not applying
-                      correctly—what should I do?
-                    </span>
-                  </a>
-                </li>
-                <li>
-                  <a href="#">
-                    <span>Why am I unable to create a new advertisement?</span>
-                  </a>
-                </li>
-                <li>
-                  <a href="#">
-                    <span>
-                      What types of advertisements are available on the Sellora
-                      platform?
-                    </span>
-                  </a>
-                </li>
-                <li>
-                  <a href="#">
-                    <span>
-                      How do I opt out of the Sellora Managed Ads Program?
-                    </span>
-                  </a>
-                </li>
-                <li>
-                  <a href="#">
-                    <span>
-                      Are there video ad options on Sellora, and how can I
-                      create one?
-                    </span>
-                  </a>
-                </li>
-                <li>
-                  <a href="#">
-                    <span>
-                      Can I run sponsored product ads on Sellora, and how do
-                      they work?
-                    </span>
-                  </a>
-                </li>
-                <li>
-                  <a href="#">
-                    <span>
-                      What are the targeting options for Sellora’s ad formats
-                      (e.g., keywords, audiences)
-                    </span>
-                  </a>
-                </li>
-                <li>
-                  <a href="#">
-                    <span>
-                      How do I choose the best ad type for my products on
-                      Sellora?
-                    </span>
-                  </a>
-                </li>
-                <li>
-                  <a href="#">
-                    <span>
-                      Are there any restrictions on ad formats based on my
-                      seller account type?
-                    </span>
-                  </a>
-                </li>
-              </ul>
-            </div>
+     <>
+   
+  <div className="notification_breadcomb_rts-navigation-area-breadcrumb">
+    <div className="container">
+      <div className="row">
+        <div className="col-lg-12">
+          <div className="notification_breadcomb">
+            <ul>
+              <li>
+                <a href="#">Help</a>
+              </li>
+              <li>
+                <a href="#" className="active_002">
+                  Orders &amp; Delivery
+                </a>
+              </li>
+            </ul>
           </div>
         </div>
       </div>
-      <RightSideBar />
     </div>
   </div>
-</div>
+  <div className="sellora_045948">
+    <div className="container">
+      <div className="row">
+        <div className="col-lg-9">
+          <div className="head_234">
+            <h3 className="light_bg animated fadeIn">Orders &amp; Delivery</h3>
+          </div>
+          {/* =================1st-question=open============ */}
+          {advertisementFAQ.map((item, index) => (
+        <div key={index} className="faq_outer_23">
+          <div
+            className={`question ${activeIndex === index ? 'active' : ''}`}
+            onClick={() => toggle(index)}
+          >
+            {item.question}
+          </div>
+          <div className="answercont"  ref={(el) => (refs.current[index] = el)}>
+            <div
+              ref={(el) => (refs.current[index] = el)}
+              className="answer"
+              style={{
+                overflow: 'hidden',
+                // maxHeight: '0px',
+                transition: 'max-height 0.3s ease',
+              }}
+            >
+              {item.answer}
+            </div>
+          </div>
+        </div>
+      ))}
+
+
+           
+        </div>
+         <RightSideBar />
+      </div>
+    </div>
+  </div>
+</>
+
 
   )
 }
 
-export default Advertisements
+export default page

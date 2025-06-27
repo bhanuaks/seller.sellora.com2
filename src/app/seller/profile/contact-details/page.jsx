@@ -142,7 +142,7 @@ function Page() {
           <div className="notification_breadcomb">
             <ul>
               <li>
-                <a href="#">Dashboard</a>{" "}
+                <Link href="/dashboard">Dashboard</Link>{" "}
               </li>
               <li>
                 <a href="#" className="active_002">
@@ -167,7 +167,7 @@ function Page() {
       </div> */}
       <div className="container">
         <div className="row">
-          <div className="col-lg-9">
+          <div className="col-lg-10 offset-lg-1">
             <div>
               <div className="form_outer">
                 <div className="seller_edit_information">
@@ -238,7 +238,7 @@ function Page() {
               </div>
             </div>
           </div>
-          <RightNav />
+          {/* <RightNav /> */}
                
            
         </div>

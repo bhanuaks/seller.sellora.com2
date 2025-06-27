@@ -1,5 +1,5 @@
-import React from 'react'
-import RightNav from '../component/RightNav'
+import Link from 'next/link'
+import React from 'react' 
 
 function page() {
   return (
@@ -11,7 +11,7 @@ function page() {
           <div className="notification_breadcomb">
             <ul>
               <li>
-                <a href="#">Dashboard</a>{" "}
+               <Link href="/dashboard">Dashboard</Link>{" "}
               </li>
               <li>
                 <a href="#" className="active_002">
@@ -26,7 +26,7 @@ function page() {
   </div>
   <div className="container">
     <div className="row">
-      <div className="col-lg-9">
+      <div className="col-lg-10 offset-lg-1">
         <div className="content_areya border__10_6">
           <div className="mb-5" style={{ marginLeft: 20 }}>
             <p>Seller Fulfilled Returns</p>
@@ -222,8 +222,7 @@ function page() {
           </div>
         </div>
       </div>
-      
-        <RightNav />
+       
       
     </div>
   </div>

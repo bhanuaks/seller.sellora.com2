@@ -1,40 +1,93 @@
-import React from 'react'
+"use client"
+import React, { useEffect, useRef, useState } from 'react'
 import RightSideBar from '../../RightSideBar'
 import { baseUrl } from '@/Http/helper'
 import Link from 'next/link'
+import { ordersDeliveryFaq } from '@/Http/PageData/ordersDelivery'
 
 function page() {
+   const [activeIndex, setActiveIndex] = useState(null);
+  const refs = useRef([]);
+
+  const toggle = (index) => {
+    setActiveIndex((prev) => (prev === index ? null : index));
+  };
+
+  useEffect(() => {
+    refs.current.forEach((ref, i) => {
+      if (ref) {
+        if(i == activeIndex){ 
+           ref.style.maxHeight = `${ref.scrollHeight}px`;
+        }
+        ref.style.maxHeight =  activeIndex === i ? `${ref.scrollHeight}px` : '0px';
+      }
+    });
+  }, [activeIndex])
+
   return (
-    <div className="sellora_045948">
-  <div className="container">
-    <div className="row">
-      <div className="col-lg-8">
-        <div className="head_234">
-          <h2>
-            <img src={`${baseUrl}front/assets/images/001.png`} /> <Link href={`${baseUrl}dashboard/help/orders-delivery`}> Orders &amp; Delivery </Link>/{" "}
-            <span>Order alerts</span>
-          </h2>
-          <div className="listi_content_390">
-            <h3 className="light_bg">How do I set up order notifications?</h3>
+     <>
+   
+  <div className="notification_breadcomb_rts-navigation-area-breadcrumb">
+    <div className="container">
+      <div className="row">
+        <div className="col-lg-12">
+          <div className="notification_breadcomb">
             <ul>
               <li>
-                In Sellora Seller Center, select Notifications &gt; Settings.
+                <a href="#">Help</a>
               </li>
-              <li>Choose notifications via Seller Center, email, or both.</li>
-              <li>Check boxes for desired notification types.</li>
-              <li>Greyed-out options cannot be modified.</li>
               <li>
-                Click Save. Email notifications use your Sellora Seller Center
-                login email.
+                <a href="#" className="active_002">
+                  Orders &amp; Delivery
+                </a>
               </li>
             </ul>
           </div>
         </div>
       </div>
-       <RightSideBar />
     </div>
   </div>
-</div>
+  <div className="sellora_045948">
+    <div className="container">
+      <div className="row">
+        <div className="col-lg-9">
+          <div className="head_234">
+            <h3 className="light_bg animated fadeIn">Orders &amp; Delivery</h3>
+          </div>
+          {/* =================1st-question=open============ */}
+          {ordersDeliveryFaq.map((item, index) => (
+        <div key={index} className="faq_outer_23">
+          <div
+            className={`question ${activeIndex === index ? 'active' : ''}`}
+            onClick={() => toggle(index)}
+          >
+            {item.question}
+          </div>
+          <div className="answercont"  ref={(el) => (refs.current[index] = el)}>
+            <div
+              ref={(el) => (refs.current[index] = el)}
+              className="answer"
+              style={{
+                overflow: 'hidden',
+                // maxHeight: '0px',
+                transition: 'max-height 0.3s ease',
+              }}
+            >
+              {item.answer}
+            </div>
+          </div>
+        </div>
+      ))}
+
+
+           
+        </div>
+         <RightSideBar />
+      </div>
+    </div>
+  </div>
+</>
+
 
   )
 }

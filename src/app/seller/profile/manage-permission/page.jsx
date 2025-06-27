@@ -1,5 +1,6 @@
 import React from 'react'
 import RightNav from '../component/RightNav'
+import Link from 'next/link'
 
 function page() {
   return (
@@ -11,7 +12,7 @@ function page() {
           <div className="notification_breadcomb">
             <ul>
               <li>
-                <a href="#">Dashboard</a>{" "}
+                <Link href="/dashboard">Dashboard</Link>{" "}
               </li>
               <li>
                 <a href="#"> User Management</a>{" "}

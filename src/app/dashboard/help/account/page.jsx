@@ -1,85 +1,93 @@
-import { baseUrl } from '@/Http/helper'
-import React from 'react'
-import RightSideBar from '../RightSideBar'
-import Link from 'next/link'
+"use client"   
+import { AccountFaq } from '@/Http/PageData/AccountFaq';
+import React, { useEffect, useRef, useState } from 'react'   
+import RightSideBar from '../RightSideBar';
 
-function AccountPage() {
+function page() {
+   const [activeIndex, setActiveIndex] = useState(null);
+  const refs = useRef([]);
+
+  const toggle = (index) => {
+    setActiveIndex((prev) => (prev === index ? null : index));
+  };
+
+  useEffect(() => {
+    refs.current.forEach((ref, i) => {
+      if (ref) {
+        if(i == activeIndex){ 
+           ref.style.maxHeight = `${ref.scrollHeight}px`;
+        }
+        ref.style.maxHeight =  activeIndex === i ? `${ref.scrollHeight}px` : '0px';
+      }
+    });
+  }, [activeIndex])
+
   return (
-    <div className="sellora_045948">
-  <div className="container">
-    <div className="row">
-      <div className="col-lg-8">
-        <div className="head_234">
-          <h2>
-            <img src={`${baseUrl}front/assets/images/account.png`} /><Link href={`${baseUrl}dashboard/help`}> Help </Link>/ <span>Account</span>
-          </h2>
-          <div className="listi_content_390">
-            <div className="card_34259">
-              <ul>
-                <li>
-                  <a href="#">
-                    <span>My account is deactivated</span>
-                  </a>
-                </li>
-                <li>
-                  <a href="#">
-                    <span>I want to change my Pickup Address</span>
-                  </a>
-                </li>
-                <li>
-                  <a href="#">
-                    <span>I want to change my registered email address</span>
-                  </a>
-                </li>
-                <li>
-                  <a href="#">
-                    <span>I want to change my Display Name</span>
-                  </a>
-                </li>
-                <li>
-                  <a href="#">
-                    <span>I want to change my registered contact number</span>
-                  </a>
-                </li>
-                <li>
-                  <a href="#">
-                    <span>I have an issue with my Account manager</span>
-                  </a>
-                </li>
-                <li>
-                  <a href="#">
-                    <span>
-                      Can I update my Business Identification Number
-                      (EIN/GSTIN)?
-                    </span>
-                  </a>
-                </li>
-                <li>
-                  <a href="#">
-                    <span>How to update my bank details?</span>
-                  </a>
-                </li>
-                <li>
-                  <a href="#">
-                    <span>I need account manager</span>
-                  </a>
-                </li>
-                <li>
-                  <a href="#">
-                    <span>Other Issue</span>
-                  </a>
-                </li>
-              </ul>
-            </div>
+     <>
+   
+  <div className="notification_breadcomb_rts-navigation-area-breadcrumb">
+    <div className="container">
+      <div className="row">
+        <div className="col-lg-12">
+          <div className="notification_breadcomb">
+            <ul>
+              <li>
+                <a href="#">Help</a>
+              </li>
+              <li>
+                <a href="#" className="active_002">
+                  Orders &amp; Delivery
+                </a>
+              </li>
+            </ul>
           </div>
         </div>
       </div>
-       <RightSideBar />
     </div>
   </div>
-</div>
+  <div className="sellora_045948">
+    <div className="container">
+      <div className="row">
+        <div className="col-lg-9">
+          <div className="head_234">
+            <h3 className="light_bg animated fadeIn">Orders &amp; Delivery</h3>
+          </div>
+          {/* =================1st-question=open============ */}
+          {AccountFaq.map((item, index) => (
+        <div key={index} className="faq_outer_23">
+          <div
+            className={`question ${activeIndex === index ? 'active' : ''}`}
+            onClick={() => toggle(index)}
+          >
+            {item.question}
+          </div>
+          <div className="answercont"  ref={(el) => (refs.current[index] = el)}>
+            <div
+              ref={(el) => (refs.current[index] = el)}
+              className="answer"
+              style={{
+                overflow: 'hidden',
+                // maxHeight: '0px',
+                transition: 'max-height 0.3s ease',
+              }}
+            >
+              {item.answer}
+            </div>
+          </div>
+        </div>
+      ))}
+
+
+           
+        </div>
+         <RightSideBar />
+      </div>
+    </div>
+  </div>
+</>
+
 
   )
 }
 
-export default AccountPage
+export default page

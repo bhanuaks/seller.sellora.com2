@@ -1,5 +1,4 @@
-import React from 'react'
-import RightNav from '../component/RightNav'
+import React from 'react' 
 import Link from 'next/link'
 import { baseUrl } from '@/Http/helper'
 
@@ -13,7 +12,7 @@ function page() {
           <div className="notification_breadcomb">
             <ul>
               <li>
-                <a href="#">Dashboard</a>{" "}
+                <Link href="/dashboard">Dashboard</Link>{" "}
               </li>
               <li>
                 <a href="#" className="active_002">
@@ -28,7 +27,7 @@ function page() {
   </div>
   <div className="container">
     <div className="row">
-      <div className="col-lg-9">
+      <div className="col-lg-10 offset-lg-1">
         <div className="search_outer">
           <div className="row">
             <div className="col-lg-6">
@@ -137,8 +136,7 @@ function page() {
           </div>
         </div>
       </div>
-      
-        <RightNav />
+       
       
     </div>
   </div>

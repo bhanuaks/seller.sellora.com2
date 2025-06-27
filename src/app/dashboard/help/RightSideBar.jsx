@@ -12,47 +12,85 @@ function RightSideBar() {
   const return_path = ["/dashboard/help/returns", "/dashboard/help/returns/return-policy-concerns-or-suggestions", "/dashboard/help/returns/error-processing-customer-refund"];
 
   return (
-    <div className="col-lg-3 offset-lg-1">
-        <div className="right_sectio_45784">
-          <h2>Find More Help</h2>
-          <ul>
-            <li>
-              <Link href={`${baseUrl}dashboard/help/orders-delivery`} className={orders_delivery_path.includes(pathname)?"orange":""}>Orders &amp; Delivery</Link>
+     <div className="col-lg-3">
+          <div className="right_sectio_45784 sticky-top_19">
+            <h2>Find More Help</h2>
+            <ul>
+              <li>
+              <Link href={`${baseUrl}dashboard/help/orders-delivery`} className={orders_delivery_path.includes(pathname)?"active":""}>Orders &amp; Delivery</Link>
             </li>
             <li>
-              <Link href={`${baseUrl}dashboard/help/returns`}  className={return_path.includes(pathname)?"orange":""} >Returns</Link>
+              <Link href={`${baseUrl}dashboard/help/returns`}  className={return_path.includes(pathname)?"active":""} >Returns</Link>
             </li>
             <li>
-              <Link href={`${baseUrl}dashboard/help/listing-catalog`} className={pathname == "/dashboard/help/listing-catalog"?"orange":""} >Listing &amp; Catalog</Link>
+              <Link href={`${baseUrl}dashboard/help/listing-catalog`} className={pathname == "/dashboard/help/listing-catalog"?"active":""} >Listing &amp; Catalog</Link>
             </li>
             <li>
-              <Link href={`${baseUrl}dashboard/help/payments`} className={pathname == "/dashboard/help/payments"?"orange":""} >Payments</Link>
+              <Link href={`${baseUrl}dashboard/help/payments`} className={pathname == "/dashboard/help/payments"?"active":""} >Payments</Link>
             </li>
             <li>
-              <Link href={`${baseUrl}dashboard/help/advertisements`} className={pathname == "/dashboard/help/advertisements"?"orange":""} >Advertisements</Link>
+              <Link href={`${baseUrl}dashboard/help/advertisements`} className={pathname == "/dashboard/help/advertisements"?"active":""} >Advertisements</Link>
             </li>
             <li>
-              <Link href={`${baseUrl}dashboard/help/promotions`} className={pathname == "/dashboard/help/promotions"?"orange":""}>Promotions</Link>
+              <Link href={`${baseUrl}dashboard/help/promotions`} className={pathname == "/dashboard/help/promotions"?"active":""}>Promotions</Link>
             </li>
             <li>
-              <Link href={`${baseUrl}dashboard/help/seller-perfomance`} className={pathname == "/dashboard/help/seller-perfomance"?"orange":""} >Seller Perfomance</Link>
+              <Link href={`${baseUrl}dashboard/help/seller-perfomance`} className={pathname == "/dashboard/help/seller-perfomance"?"active":""} >Seller Perfomance</Link>
             </li>
             <li>
-              <Link href={`${baseUrl}dashboard/help/account`} className={pathname == "/dashboard/help/account"?"orange":""} >Account</Link>
+              <Link href={`${baseUrl}dashboard/help/account`} className={pathname == "/dashboard/help/account"?"active":""} >Account</Link>
             </li>
+           
             <li>
-              <Link href={`${baseUrl}dashboard/help/still-didn-t-find-the-answer`}  className={pathname == "/dashboard/help/still-didn-t-find-the-answer"?"orange":""}>
-                Still didn’t find the answer?
-              </Link>
-            </li>
-            <li>
-              <Link href={`${baseUrl}dashboard/help/raise-a-ticket`}   className={pathname == "/dashboard/help/raise-a-ticket"?"orange":""}>
+              <Link href={`${baseUrl}dashboard/help/raise-a-ticket`}   className={pathname == "/dashboard/help/raise-a-ticket"?"active":""}>
                 Still need help?Raise a ticket
               </Link>
             </li>
-          </ul>
+            </ul>
+          </div>
         </div>
-      </div>
+
+    // <div className="col-lg-3 offset-lg-1">
+    //     <div className="right_sectio_45784">
+    //       <h2>Find More Help</h2>
+    //       <ul>
+    //         <li>
+    //           <Link href={`${baseUrl}dashboard/help/orders-delivery`} className={orders_delivery_path.includes(pathname)?"active":""}>Orders &amp; Delivery</Link>
+    //         </li>
+    //         <li>
+    //           <Link href={`${baseUrl}dashboard/help/returns`}  className={return_path.includes(pathname)?"active":""} >Returns</Link>
+    //         </li>
+    //         <li>
+    //           <Link href={`${baseUrl}dashboard/help/listing-catalog`} className={pathname == "/dashboard/help/listing-catalog"?"active":""} >Listing &amp; Catalog</Link>
+    //         </li>
+    //         <li>
+    //           <Link href={`${baseUrl}dashboard/help/payments`} className={pathname == "/dashboard/help/payments"?"active":""} >Payments</Link>
+    //         </li>
+    //         <li>
+    //           <Link href={`${baseUrl}dashboard/help/advertisements`} className={pathname == "/dashboard/help/advertisements"?"active":""} >Advertisements</Link>
+    //         </li>
+    //         <li>
+    //           <Link href={`${baseUrl}dashboard/help/promotions`} className={pathname == "/dashboard/help/promotions"?"active":""}>Promotions</Link>
+    //         </li>
+    //         <li>
+    //           <Link href={`${baseUrl}dashboard/help/seller-perfomance`} className={pathname == "/dashboard/help/seller-perfomance"?"active":""} >Seller Perfomance</Link>
+    //         </li>
+    //         <li>
+    //           <Link href={`${baseUrl}dashboard/help/account`} className={pathname == "/dashboard/help/account"?"active":""} >Account</Link>
+    //         </li>
+    //         {/* <li>
+    //           <Link href={`${baseUrl}dashboard/help/still-didn-t-find-the-answer`}  className={pathname == "/dashboard/help/still-didn-t-find-the-answer"?"active":""}>
+    //             Still didn’t find the answer?
+    //           </Link>
+    //         </li> */}
+    //         <li>
+    //           <Link href={`${baseUrl}dashboard/help/raise-a-ticket`}   className={pathname == "/dashboard/help/raise-a-ticket"?"active":""}>
+    //             Still need help?Raise a ticket
+    //           </Link>
+    //         </li>
+    //       </ul>
+    //     </div>
+    //   </div>
   )
 }
 

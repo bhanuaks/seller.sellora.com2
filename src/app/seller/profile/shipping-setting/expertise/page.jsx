@@ -156,9 +156,9 @@ function Page() {
               <h3>Bulk Catalog Upload</h3>
             </div> */}
             </div>
-            <div className="col-lg-6 col-md-6">
+            {/* <div className="col-lg-6 col-md-6">
               <HelpAndVideoTopSection />
-            </div>
+            </div> */}
           </div>
         </div>
       </div>

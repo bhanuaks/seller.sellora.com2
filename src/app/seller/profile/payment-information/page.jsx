@@ -1,18 +1,14 @@
  
  
 "use client"
-import React, { useContext, useEffect, useRef, useState } from 'react'
-import Image from "next/image"; 
-import Link from 'next/link' 
-import 'intl-tel-input/build/css/intlTelInput.css';
-import intlTelInput from 'intl-tel-input';
+import React, { useContext, useEffect, useRef, useState } from 'react' 
+import 'intl-tel-input/build/css/intlTelInput.css'; 
 import { AppContext } from '@/app/contaxtData/contextData'
 import $ from 'jquery'
 import { baseUrl, decryptText } from '@/Http/helper'
 import { useRouter } from 'next/navigation' 
-import { ToastContainer, toast } from 'react-toastify'; 
-import HelpAndVideoTopSection from '../../HelpAndVideoTop';
-import RightNav from '../component/RightNav';
+import { ToastContainer, toast } from 'react-toastify';  
+import Link from 'next/link';
 
 
 function Page() {
@@ -201,7 +197,7 @@ function Page() {
           <div className="notification_breadcomb">
             <ul>
               <li>
-                <a href="#">Dashboard</a>{" "}
+                <Link href="/dashboard">Dashboard</Link>{" "}
               </li>
               <li>
                 <a href="#" className="active_002">
@@ -218,7 +214,7 @@ function Page() {
       <div className="container">
       <form action="#" onSubmit={(e) => submitUpdateForm(e)}>
         <div className="row">
-          <div className="col-lg-9">
+          <div className="col-lg-10 offset-lg-1">
             <div>
               <div className="form_outer">
                 <div className="seller_edit_information">
@@ -438,7 +434,7 @@ function Page() {
               </div>
             </div>
           </div>
-          <RightNav />
+          
         </div>
         </form>
       </div>

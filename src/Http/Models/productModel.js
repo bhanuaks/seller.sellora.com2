@@ -289,7 +289,11 @@ const productVariantSchema = new Schema({
     manual_product_id:String,
     manual_product_id_type:String,
     conditionType:String,
-    expireDate:String
+    expireDate:String,
+
+
+    update_impact_price_date: Date,
+    update_impact_price:String
 
 
 },{timestamps:true})

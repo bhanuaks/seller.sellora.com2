@@ -412,3 +412,96 @@ export function discountPrice(priceAmount, discount, discountType="percentage"){
   }
 
 }
+
+
+export function impactPriceAndPercentage(currentPrice, views, clicks) {
+  if (!views || views === 0) {
+    return {
+      impactPrice: currentPrice,
+      impactPercentage: 0,
+    };
+  }
+
+  const ctr = clicks / views; // Click-through rate
+  let dropPercentage = 0;
+  if (ctr >= 2) {
+    dropPercentage = 0; // Good CTR, no drop
+  } else if (ctr > 1 && ctr < 2) {
+    dropPercentage = 15; // Moderate CTR, moderate drop
+  } else if (ctr <= 1) {
+    dropPercentage = 20; // Poor CTR, high drop
+  }
+  const dropPrice = ( currentPrice * ( dropPercentage / 100 ) ) ; 
+  const impactPrice =  currentPrice - dropPrice;
+  const impactPercentage =  ( ( (currentPrice - impactPrice) / currentPrice) * 100)
+    
+
+  return {
+    impactPrice,
+    impactPercentage,
+  };
+}
+
+export function calculateListingQuality(product) {
+  let score = 0;
+
+  // Title quality
+  if (product.product_name && product.product_name.length >= 20) {
+    score += 8;
+  } else if (product.product_name && product.product_name.length >= 10) {
+    score += 5;
+  } else {
+    score += 2;
+  }
+
+  // Description
+  if (product.product_description && product.product_description.length > 200) {
+    score += 10;
+  } else if (product.product_description && product.product_description.length > 100) {
+    score += 7;
+  } else if (product.product_description && product.product_description.length > 50) {
+    score += 4;
+  }
+
+  // Images
+  const imageCount = [
+    product.main_image,
+    product.image_1,
+    product.image_2,
+    product.image_3,
+    product.image_4,
+    product.image_6,
+    product.image_6,
+    product.image_7,
+  ].filter(Boolean).length;
+
+  if (imageCount >= 7) score += 15;
+  else if (imageCount >= 4) score += 10;
+  else if (imageCount >= 2) score += 6;
+  else if (imageCount === 1) score += 3;
+
+ 
+
+  // Category
+  if (product.category_id) score += 3;
+  if (product.subcategory_id || product.childcategory_id) score += 2; 
+
+  // Variant Coverage 
+  if (product.variant) {
+    score += 5;
+     if (product.variant.stock && Number(product.variant.stock) > 0) score += 5;
+  }
+
+  // Final result
+  let quality = "Poor";
+  if (score >= 40) {
+    quality = "Good";
+  } else if (score >= 25) {
+    quality = "Average";
+  }
+
+  return {
+    score,
+    quality,
+  };
+}

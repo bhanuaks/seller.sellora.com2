@@ -80,7 +80,7 @@ function UploadVideoSection({fileRef, hendleInputChangeInput, campaign}) {
         </div> */}
         <div className="col-lg-4 col-12">
           <div className="adfor_boxs1 vidAud">
-            <p className="mb-2">See image guideline</p>
+            <p className="mb-2">See video guideline</p>
             <strong>Video</strong>
             <ul>
               <li>Aspect Ratio: 16:9</li>

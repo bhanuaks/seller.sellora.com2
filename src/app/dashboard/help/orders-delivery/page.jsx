@@ -1,53 +1,93 @@
-import { baseUrl } from '@/Http/helper'
-import React from 'react'
-import RightSideBar from '../RightSideBar'
-import Link from 'next/link'
+"use client"
+import React, { useEffect, useRef, useState } from 'react' 
+import { ordersDeliveryFaq } from '@/Http/PageData/ordersDelivery'
+import RightSideBar from '../RightSideBar';
 
-function OrderDelivery() {
+function page() {
+   const [activeIndex, setActiveIndex] = useState(null);
+  const refs = useRef([]);
+
+  const toggle = (index) => {
+    setActiveIndex((prev) => (prev === index ? null : index));
+  };
+
+  useEffect(() => {
+    refs.current.forEach((ref, i) => {
+      if (ref) {
+        if(i == activeIndex){ 
+           ref.style.maxHeight = `${ref.scrollHeight}px`;
+        }
+        ref.style.maxHeight =  activeIndex === i ? `${ref.scrollHeight}px` : '0px';
+      }
+    });
+  }, [activeIndex])
+
   return (
-    <div className="sellora_045948">
-  <div className="container">
-    <div className="row">
-      <div className="col-lg-8">
-        <div className="head_234">
-          <h2>
-            <img src={`${baseUrl}front/assets/images/diagram-1.png`} /> <Link href={`${baseUrl}dashboard/help`}> Help </Link> /{" "}
-            <span>Orders &amp; Delivery</span>
-          </h2>
-          <div className="listi_content_390">
-            <div className="card_34259">
-              <ul>
-                <li>
-                  <Link href={`${baseUrl}dashboard/help/orders-delivery/order-alerts`}>
-                    <span>Order Alerts</span>
-                  </Link>
-                </li>
-                <li>
-                  <Link href={`${baseUrl}dashboard/help/orders-delivery/unable-to-cancel-order`} >
-                    <span>Unable to Cancel Order</span>
-                  </Link>
-                </li>
-                <li>
-                  <Link href={`${baseUrl}dashboard/help/orders-delivery/issue-acknowledging-new-orders`}  >
-                    <span>Issue Acknowledging New Orders</span>
-                  </Link>
-                </li>
-                <li>
-                  <Link href={`${baseUrl}dashboard/help/orders-delivery/unable-to-update-tracking-information`} >
-                    <span>Unable to update tracking information</span>
-                  </Link>
-                </li>
-              </ul>
-            </div>
+     <>
+   
+  <div className="notification_breadcomb_rts-navigation-area-breadcrumb">
+    <div className="container">
+      <div className="row">
+        <div className="col-lg-12">
+          <div className="notification_breadcomb">
+            <ul>
+              <li>
+                <a href="/dashboard/help">Help</a>
+              </li>
+              <li>
+                <a href="#" className="active_002">
+                  Orders &amp; Delivery
+                </a>
+              </li>
+            </ul>
           </div>
         </div>
       </div>
-      <RightSideBar />
     </div>
   </div>
-</div>
+  <div className="sellora_045948">
+    <div className="container">
+      <div className="row">
+        <div className="col-lg-9">
+          <div className="head_234">
+            <h3 className="light_bg animated fadeIn">Orders &amp; Delivery</h3>
+          </div>
+          {/* =================1st-question=open============ */}
+          {ordersDeliveryFaq.map((item, index) => (
+        <div key={index} className="faq_outer_23">
+          <div
+            className={`question ${activeIndex === index ? 'active' : ''}`}
+            onClick={() => toggle(index)}
+          >
+            {item.question}
+          </div>
+          <div className="answercont"  ref={(el) => (refs.current[index] = el)}>
+            <div
+              ref={(el) => (refs.current[index] = el)}
+              className="answer"
+              style={{
+                overflow: 'hidden',
+                // maxHeight: '0px',
+                transition: 'max-height 0.3s ease',
+              }}
+            >
+              {item.answer}
+            </div>
+          </div>
+        </div>
+      ))}
+
+
+           
+        </div>
+         <RightSideBar />
+      </div>
+    </div>
+  </div>
+</>
+
 
   )
 }
 
-export default OrderDelivery
+export default page
