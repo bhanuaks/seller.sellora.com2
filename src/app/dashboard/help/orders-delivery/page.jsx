@@ -1,15 +1,41 @@
 "use client"
-import React, { useEffect, useRef, useState } from 'react' 
+import React, { Suspense, useEffect, useRef, useState } from 'react' 
 import { ordersDeliveryFaq } from '@/Http/PageData/ordersDelivery'
 import RightSideBar from '../RightSideBar';
+import { useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 
-function page() {
+function OrderAndDeleveryFAQ() {
+
+    const searchParam = useSearchParams(); 
+    const questionRef = searchParam.get("question") || null
+    
    const [activeIndex, setActiveIndex] = useState(null);
   const refs = useRef([]);
 
   const toggle = (index) => {
     setActiveIndex((prev) => (prev === index ? null : index));
   };
+  
+useEffect(() => {
+  if (questionRef !== null) {
+    const parsed = parseInt(questionRef, 10) - 1;
+    if (!isNaN(parsed)) {
+      setActiveIndex(parsed);
+
+      // Wait for the DOM to expand first
+      setTimeout(() => {
+        const el = refs.current[parsed];
+        if (el) {
+          el.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
+        }
+      }, 400);
+    }
+  }
+}, [questionRef]);
 
   useEffect(() => {
     refs.current.forEach((ref, i) => {
@@ -32,7 +58,7 @@ function page() {
           <div className="notification_breadcomb">
             <ul>
               <li>
-                <a href="/dashboard/help">Help</a>
+                <Link href="/dashboard/help">Help</Link>
               </li>
               <li>
                 <a href="#" className="active_002">
@@ -87,6 +113,14 @@ function page() {
 </>
 
 
+  )
+}
+
+function page(){
+  return (
+    <Suspense fallback={<></>}> 
+      <OrderAndDeleveryFAQ />
+    </Suspense>
   )
 }
 

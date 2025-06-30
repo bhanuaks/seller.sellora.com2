@@ -207,6 +207,7 @@ function Page() {
                                     name="mobile"
                                     value={sellor ? sellor.mobile : ""}
                                     onChange={(e) => updateInputData(e)}
+                                    readOnly={true}
                                   />
                                   {errors.mobile && errors.mobile != ""? ( 
                                                     <span id="name_error" className="input-error-tip" style={{display: 'inline-block'}}>{errors.mobile}</span>
@@ -220,6 +221,7 @@ function Page() {
                                     name="email"
                                     value={sellor ? sellor.email : ""}
                                     onChange={(e) => updateInputData(e)}
+                                    readOnly={true}
                                   />
                                    {errors.email && errors.email != ""? ( 
                                             <span id="name_error" className="input-error-tip" style={{display: 'inline-block'}}>{errors.email}</span>

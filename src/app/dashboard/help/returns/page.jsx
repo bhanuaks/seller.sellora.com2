@@ -1,15 +1,43 @@
 "use client"
-import React, { useEffect, useRef, useState } from 'react'  
+import React, { Suspense, useEffect, useRef, useState } from 'react'  
 import RightSideBar from '../RightSideBar';
 import { ReturnsFaq } from '@/Http/PageData/ReturnsFaq';
+import { useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 
-function page() {
+function RequrnFaq() {
    const [activeIndex, setActiveIndex] = useState(null);
   const refs = useRef([]);
+
+  
+    const searchParam = useSearchParams(); 
+    const questionRef = searchParam.get("question") || null
 
   const toggle = (index) => {
     setActiveIndex((prev) => (prev === index ? null : index));
   };
+
+
+  useEffect(() => {
+  if (questionRef !== null) {
+    const parsed = parseInt(questionRef, 10) - 1;
+    if (!isNaN(parsed)) {
+      setActiveIndex(parsed);
+
+      // Wait for the DOM to expand first
+      setTimeout(() => {
+        const el = refs.current[parsed];
+        if (el) {
+          el.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
+        }
+      }, 400);
+    }
+  }
+}, [questionRef]);
+
 
   useEffect(() => {
     refs.current.forEach((ref, i) => {
@@ -32,11 +60,11 @@ function page() {
           <div className="notification_breadcomb">
             <ul>
               <li>
-                <a href="#">Help</a>
+                <Link href="/dashboard/help">Help</Link>
               </li>
               <li>
                 <a href="#" className="active_002">
-                  Orders &amp; Delivery
+                  Returns
                 </a>
               </li>
             </ul>
@@ -50,7 +78,7 @@ function page() {
       <div className="row">
         <div className="col-lg-9">
           <div className="head_234">
-            <h3 className="light_bg animated fadeIn">Orders &amp; Delivery</h3>
+            <h3 className="light_bg animated fadeIn">Returns</h3>
           </div>
           {/* =================1st-question=open============ */}
           {ReturnsFaq.map((item, index) => (
@@ -90,4 +118,11 @@ function page() {
   )
 }
 
+function page(){
+    return (
+      <Suspense fallback={<></>}>
+        <RequrnFaq />
+      </Suspense>
+    )
+}
 export default page

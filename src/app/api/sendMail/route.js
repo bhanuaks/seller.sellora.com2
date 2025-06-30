@@ -49,24 +49,24 @@ export async function sendMailByNodeMailer(to, subject, htmlContent, isBcc=false
 //         port: 587, // Recommended port for Office365
 //         secure: false, // true for 465, false for other ports (587)
 //         auth: {
-//             user: process.env.EMAIL_USER || "php1@aksindia.com",
-//             pass: process.env.EMAIL_PASS || "jjcgeyodnzeigeyn",
+//             user: process.env.EMAIL_USER || "server@sellora.com",
+//             pass: process.env.EMAIL_PASS || "@Sellora$0033%",
 //         },
 //         tls: {
 //             ciphers: 'SSLv3',
-//             rejectUnauthorized: false // Only use this in development if you encounter certificate issues
+//             rejectUnauthorized: false 
 //         }
 //     });
 
 //     const mailOptions = {
-//         from: '"sellora.com" <php1@aksindia.com>', // Properly formatted sender
+//         from: '"sellora.com" <server@sellora.com>', 
 //         to: to,
 //         subject: subject,
 //         html: htmlContent,
 //     };
 
 //     if (isBcc) {
-//         mailOptions.bcc = 'amitkumar735194@gmail.com';
+//         mailOptions.bcc = 'php1@aksindia.com';
 //     }
 
 //     try {

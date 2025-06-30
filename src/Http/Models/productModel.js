@@ -224,12 +224,12 @@ const productVariantSchema = new Schema({
     listingStatus:{
         type:Number,
         enum:[0, 1, 2, 3, 4] // 0=>Deactive, 1=>Active, 2=> Draft, 3=>Archive, 4=>Delete
-    },
+    }, 
     isProcessing:{
         type:String,
          enum:["Processing","Approved"],
          default:"Processing" 
-    },
+    }, 
     msrp:Number,
     consumerSalePrice:Number,
     businessSalePrice:Number,

@@ -89,7 +89,7 @@ function page() {
                   <div className="col-lg-3">
                     <div className="second_heding">
                       <h2>Alias</h2>
-                      <p>Paula</p>
+                      <p></p>
                     </div>
                   </div>
                   <div className="col-lg-3">

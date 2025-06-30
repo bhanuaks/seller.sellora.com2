@@ -2,6 +2,7 @@
 import { AccountFaq } from '@/Http/PageData/AccountFaq';
 import React, { useEffect, useRef, useState } from 'react'   
 import RightSideBar from '../RightSideBar';
+import Link from 'next/link';
 
 function page() {
    const [activeIndex, setActiveIndex] = useState(null);
@@ -32,11 +33,11 @@ function page() {
           <div className="notification_breadcomb">
             <ul>
               <li>
-                <a href="#">Help</a>
+                <Link href="/dashboard/help">Help</Link>
               </li>
               <li>
                 <a href="#" className="active_002">
-                  Orders &amp; Delivery
+                  Account
                 </a>
               </li>
             </ul>
@@ -50,7 +51,7 @@ function page() {
       <div className="row">
         <div className="col-lg-9">
           <div className="head_234">
-            <h3 className="light_bg animated fadeIn">Orders &amp; Delivery</h3>
+            <h3 className="light_bg animated fadeIn">Account</h3>
           </div>
           {/* =================1st-question=open============ */}
           {AccountFaq.map((item, index) => (
