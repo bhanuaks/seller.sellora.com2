@@ -1,10 +1,366 @@
-import Link from 'next/link'
-import React from 'react' 
+"use client";
+import Image from "next/image";
+import React, { useContext, useEffect, useRef, useState } from "react";
+import Link from "next/link";
+import "intl-tel-input/build/css/intlTelInput.css";
+import intlTelInput from "intl-tel-input";
+import { AppContext } from "@/app/contaxtData/contextData";
+import $ from "jquery";
+import { baseUrl } from "@/Http/helper";
+import { useRouter } from "next/navigation";
+import { ToastContainer, toast } from "react-toastify";
+import { citizenshipList } from "@/Http/citizenList"; 
 
 function page() {
+  
+  const { globalData, setGlobalData } = useContext(AppContext);
+    const countryRef = useRef();
+    const router = useRouter();
+    const [errors, setErrors] = useState({});
+    const [errorsWin, setErrorsWin] = useState({});
+    const [errorsRep, setErrorsRep] = useState({});
+    const [sellor, setSellor] = useState(null);
+    const phoneInputRef = useRef(null);
+    const [addressData, setAddressData] = useState({
+      
+      
+      name: "",
+      address_line_1: "",
+      address_line_2: "",
+      city: "",
+      state: "",
+      zip_code: "",
+      return_address: "",
+    });
+    const [addressDataShow, setAddressDataShow] = useState({
+      
+      
+      name: "",
+      address_line_1: "",
+      address_line_2: "",
+      city: "",
+      state: "",
+      zip_code: "",
+      return_address: "",
+    });
+    const [replacementData, setReplacementData] = useState({
+      
+      
+      replacement_department: "",
+      enable:""
+      
+    });
+
+    const [allCategory, setAllCategory] = useState([]);
+     const [inputValues, setInputValues] = useState({});
+
+    useEffect(() => {
+
+      fetch(`${baseUrl}api/front/get-active-category`)
+                .then((response)=>{
+                    if(!response.ok){
+                        throw new Error("Network Error");
+                    }
+                    return response.json();
+                }).then((res)=>{
+                    if(res.status){
+                        //console.log(res.data);
+                        setAllCategory(res.data || [])
+                    }
+                })
+
+    }, [])
+
+    
+  
+    useEffect(() => {
+      if (globalData.sellor) {
+        // $(".loaderouter").css("display", "flex");
+        fetch(
+          `${baseUrl}api/seller/get-profile?user_id=${globalData.sellor._id}&with_data=returnAddress`,
+          {
+            method: "GET",
+          }
+        )
+          .then((response) => {
+            if (!response.ok) {
+              $(".loaderouter").css("display", "none");
+              throw new Error("Network Error");
+            }
+            return response.json();
+          })
+          .then((res) => {
+            $(".loaderouter").css("display", "none");
+            if (res.status) {
+              // check complete step
+              //alert(res.data.data.complete_step)
+              if (
+                !res.data.data.complete_step ||
+                res.data.data.complete_step < 3
+              ) {
+                router.push("/seller/al/contact-details");
+              }
+              setSellor(res.data.data);
+              if (res.data.referData) {
+                setAddressData(res.data.referData);
+                setAddressDataShow(res.data.referData);
+              }
+            }
+          });
+
+          
+          fetch(
+          `${baseUrl}api/seller/update-profile/return-window?seller_id=${globalData.sellor._id}`,
+          {
+            method: "GET",
+          }
+        )
+          .then((response) => {
+            
+            return response.json();
+          })
+          .then((res) => {
+            $(".loaderouter").css("display", "none");
+            if (res.status) {
+              // check complete step
+              //alert(res.data.data.complete_step)
+              console.log('datatass',res.data.data)
+              setInputValues(res.data.data);
+              
+            }
+          });
+
+
+      }
+    }, [globalData.sellor]);
+  
+    
+  
+    const updateInputData = (e) => {
+      const { name, value } = e.target;
+  
+      if(name=="zip_code"){
+        let alphaNumericValue = value.replace(/[^a-zA-Z0-9]/g, '');
+        if(alphaNumericValue && alphaNumericValue.length >8){
+          alphaNumericValue = alphaNumericValue.slice(0,8)
+        }
+        setAddressData((preData)=>({
+            ...preData,
+            [name]:alphaNumericValue
+          })) 
+        return
+      }
+  
+      if (name == "mobile") {
+        const numericValue = value.replace(/[^0-9]/g, "");
+        setAddressData((preData) => ({
+          ...preData,
+          [name]: numericValue,
+        }));
+        return;
+      }
+      setAddressData((preData) => ({
+        ...preData,
+        [name]: value,
+      }));
+    };
+  
+    function submitUpdateForm(e) {
+      e.preventDefault();
+      setErrors({});
+  
+      // $(".loaderouter").css("display", "flex");
+      fetch(`${baseUrl}api/seller/update-profile?update=returnAddress`, {
+        method: "POST",
+        body: JSON.stringify({
+          ...sellor,
+          address: addressData,
+        }),
+      })
+        .then((response) => {
+          if (!response.ok) {
+            $(".loaderouter").css("display", "none");
+            throw new Error("Network Error");
+          }
+          return response.json();
+        })
+        .then((res) => {
+          $(".loaderouter").css("display", "none");
+          if (res.status) {
+            setAddressDataShow(addressData);
+            toast.success("Success! Return Address Saved.");
+            //router.push("/seller/profile/business-details");
+            //$("#return-address-Modal").modal('hide')
+
+            //$('#return-address-Modal').hide(true)
+            //$('.modal-backdrop').remove();
+            //$('body').removeClass('modal-open');
+            //$('body').css('padding-right', '');
+
+            const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('return-address-Modal'));
+            modal.hide();
+
+          } else if (res.data.status_code == 403) {
+            setErrors(res.data.errors);
+          }
+        });
+    }
+
+     const handleInputChange = (index, value, minValue) => {
+      
+      if(value >= minValue){
+      
+      
+
+      setErrorsWin(prev => ({
+        ...prev,
+        [index]: ''
+      }));
+
+    } else {
+      setErrorsWin(prev => ({
+        ...prev,
+        [index]: 'This value not less than '+minValue+' days'
+      }));
+
+    }
+
+    setInputValues(prev => ({
+        ...prev,
+        [index]: value
+      }));
+
+
+    };
+
+
+    const submitUpdateReturnWindow = (e) => {
+      e.preventDefault();
+      //setErrorsWin({})
+      //console.log(errorsWin);
+      for (const [key, value] of Object.entries(errorsWin)) {
+      if(value !=''){
+        
+      return;
+      }
+      }
+
+    //console.log('yessssssss')
+       fetch(`${baseUrl}api/seller/update-profile/return-window`, {
+        method: "POST",
+        body: JSON.stringify({
+          seller_id:sellor._id,
+          return_window: inputValues,
+        }),
+      })
+        .then((response) => {
+          if (!response.ok) {
+            $(".loaderouter").css("display", "none");
+            throw new Error("Network Error");
+          }
+          return response.json();
+        })
+        .then((res) => {
+          
+          $(".loaderouter").css("display", "none");
+          if (res.status) {
+           //setAddressDataShow(addressData);
+            toast.success("Success! Return Window Saved.");
+            //router.push("/seller/profile/business-details");
+            //$("#return-address-Modal").modal('hide')
+
+            //$('#return-address-Modal').hide(true)
+            //$('.modal-backdrop').remove();
+            //$('body').removeClass('modal-open');
+            //$('body').css('padding-right', '');
+
+            const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('rules-by-department-Modal'));
+            modal.hide();
+
+          } else if (res.data.status_code == 403) {
+            setErrorsWin(res.data.errors);
+          }
+        });
+      
+      //console.log(inputValues)
+
+
+    }
+
+    const submitUpdateReturnReplacement = (e) => {
+      e.preventDefault();
+      //setErrorsWin({})
+     // console.log(replacementData);
+      
+
+    //console.log('yessssssss')
+      /* fetch(`${baseUrl}api/seller/update-profile/return-window`, {
+        method: "POST",
+        body: JSON.stringify({
+          seller_id:sellor._id,
+          return_window: inputValues,
+        }),
+      })
+        .then((response) => {
+          if (!response.ok) {
+            $(".loaderouter").css("display", "none");
+            throw new Error("Network Error");
+          }
+          return response.json();
+        })
+        .then((res) => {
+          
+          $(".loaderouter").css("display", "none");
+          if (res.status) {
+           //setAddressDataShow(addressData);
+            toast.success("Success! Return Window Saved.");
+            //router.push("/seller/profile/business-details");
+            //$("#return-address-Modal").modal('hide')
+
+            //$('#return-address-Modal').hide(true)
+            //$('.modal-backdrop').remove();
+            //$('body').removeClass('modal-open');
+            //$('body').css('padding-right', '');
+
+            const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('rules-by-department-Modal'));
+            modal.hide();
+
+          } else if (res.data.status_code == 403) {
+            setErrorsWin(res.data.errors);
+          }
+        });
+      */
+      //console.log(inputValues)
+
+
+    }
+
+    const updateInputDataReplacement = (e) => {
+      const { name, value, checked } = e.target;
+      //console.log(name, value, checked)
+      setReplacementData(prev => ({
+        ...prev,
+        [name]: value
+      }));
+
+    }
+  
+  
   return (
     <>
   <div className="notification_breadcomb_rts-navigation-area-breadcrumb">
+    <ToastContainer
+            position="top-center"
+            autoClose={3000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme="colored"
+          />
     <div className="container">
       <div className="row">
         <div className="col-lg-12">
@@ -88,20 +444,20 @@ function page() {
                 <div className="row">
                   <div className="col-lg-3">
                     <div className="second_heding">
-                      <h2>Alias</h2>
-                      <p></p>
+                      <h2>Display Name</h2>
+                      <p>{addressDataShow.name}</p>
                     </div>
                   </div>
                   <div className="col-lg-3">
                     <div className="second_heding">
                       <h2>Street Address</h2>
-                      <p>asdfghj</p>
+                      <p>{addressDataShow.address_line_1}</p>
                     </div>
                   </div>
                   <div className="col-lg-3">
                     <div className="second_heding">
                       <h2>City, State, Zip</h2>
-                      <p>asdfghj</p>
+                      <p>{addressDataShow.city}, {addressDataShow.state}, {addressDataShow.zip_code}</p>
                     </div>
                   </div>
                   <div className="col-lg-3">
@@ -237,6 +593,7 @@ function page() {
   >
     <div className="modal-dialog modal-dialog-centered">
       <div className="modal-content">
+        <form action="#" onSubmit={(e) => submitUpdateForm(e)}>
         <div className="modal-header">
           <h5 className="modal-title title_request" id="exampleModalLabel">
             Edit Return Address
@@ -250,74 +607,170 @@ function page() {
         </div>
         <div className="modal-body">
           <div className="request_form">
-            <label>Display name</label>
+            <label>Display name<span className="mandatory_field">*</span></label>
             <input
               type="text"
-              name=""
-              placeholder="Mailed It LLC"
+              
+              placeholder=""
               className="form-control"
-            />
+              name="name"
+                                    value={addressData.name}
+                                    onChange={(e) => updateInputData(e)}
+                                  />
+                                  {errors.name && errors.name != "" ? (
+                                    <span
+                                      id="name_error"
+                                      className="input-error-tip"
+                                      style={{ display: "inline-block" }}
+                                    >
+                                      {errors.name}
+                                    </span>
+                                  ) : (
+                                    ""
+                                  )}
+            
             <div className="printed">
               Printed on the 'To' field on the return label
             </div>
             <div className="printed">
               Printed as the second line on the return label
             </div>
-            <label>Address Line 1</label>
+            <label>Address Line 1<span className="mandatory_field">*</span></label>
             <input
               type="text"
-              name=""
-              placeholder="1703 Evans Rd."
+              
+              placeholder=""
               className="form-control"
-            />
-            <label>Address Line 1</label>
-            <input
-              type="text"
-              name=""
-              placeholder="1703 Evans Rd."
-              className="form-control"
-            />
+              name="address_line_1"
+                                    value={addressData.address_line_1}
+                                    onChange={(e) => updateInputData(e)}
+                                  />
+                                  {errors.address_line_1 &&
+                                  errors.address_line_1 != "" ? (
+                                    <span
+                                      id="name_error"
+                                      className="input-error-tip"
+                                      style={{ display: "inline-block" }}
+                                    >
+                                      {errors.address_line_1}
+                                    </span>
+                                  ) : (
+                                    ""
+                                  )}
+            
             <label>Address Line 2 (Optional)</label>
             <input
               type="text"
-              name=""
-              placeholder={14211}
+              
+              placeholder=""
               className="form-control"
-            />
+              name="address_line_2"
+                                    value={addressData.address_line_2}
+                                    onChange={(e) => updateInputData(e)}
+                                  />
+                                  {errors.address_line_2 &&
+                                  errors.address_line_2 != "" ? (
+                                    <span
+                                      id="name_error"
+                                      className="input-error-tip"
+                                      style={{ display: "inline-block" }}
+                                    >
+                                      {errors.address_line_2}
+                                    </span>
+                                  ) : (
+                                    ""
+                                  )}
             <div className="row">
               <div className="col-lg-4">
-                <label>City</label>
+                <label>City<span className="mandatory_field">*</span></label>
                 <input
                   type="text"
-                  name=""
+                  
                   placeholder="San Antonio"
                   className="form-control"
-                />
+                  name="city"
+                                        value={addressData.city}
+                                        onChange={(e) => updateInputData(e)}
+                                      />
+                                      {errors.city && errors.city != "" ? (
+                                        <span
+                                          id="name_error"
+                                          className="input-error-tip"
+                                          style={{ display: "inline-block" }}
+                                        >
+                                          {errors.city}
+                                        </span>
+                                      ) : (
+                                        ""
+                                      )}
               </div>
               <div className="col-lg-4">
                 <label>State</label>
-                <select className="select_344390 form-select">
-                  <option value="">All Services Types</option>
-                  <option>Texas</option>
-                </select>
+                <input
+                                        type="text"
+                                        name="state"
+                                        value={addressData.state}
+                                        onChange={(e) => updateInputData(e)}
+                                      />
+                                      {errors.state && errors.state != "" ? (
+                                        <span
+                                          id="name_error"
+                                          className="input-error-tip"
+                                          style={{ display: "inline-block" }}
+                                        >
+                                          {errors.state}
+                                        </span>
+                                      ) : (
+                                        ""
+                                      )}
               </div>
               <div className="col-lg-4">
-                <label>Zip</label>
+                <label>Zip Code<span className="mandatory_field">*</span></label>
                 <input
                   type="text"
-                  name=""
-                  placeholder={78258}
+                  
+                  placeholder=""
                   className="form-control"
-                />
+                  name="zip_code"
+                                        value={addressData.zip_code}
+                                        onChange={(e) => updateInputData(e)}
+                                      />
+                                      {errors.zip_code &&
+                                      errors.zip_code != "" ? (
+                                        <span
+                                          id="name_error"
+                                          className="input-error-tip"
+                                          style={{ display: "inline-block" }}
+                                        >
+                                          {errors.zip_code}
+                                        </span>
+                                      ) : (
+                                        ""
+                                      )}
               </div>
             </div>
             <label>Return Address (Not printed on the return label)</label>
             <input
               type="text"
-              name=""
-              placeholder="Mailed It, LLC"
+              
+              placeholder=""
               className="form-control"
-            />
+              name="return_address"
+                                        value={addressData.return_address}
+                                        onChange={(e) => updateInputData(e)}
+                                      />
+                                      {errors.return_address &&
+                                      errors.return_address != "" ? (
+                                        <span
+                                          id="name_error"
+                                          className="input-error-tip"
+                                          style={{ display: "inline-block" }}
+                                        >
+                                          {errors.return_address}
+                                        </span>
+                                      ) : (
+                                        ""
+                                      )}
           </div>
         </div>
         <div className="modal_button">
@@ -328,10 +781,11 @@ function page() {
           >
             Cancel
           </button>
-          <button type="button" className="orange-btn">
+          <button className="orange-btn">
             Save
           </button>
         </div>
+        </form>
       </div>
     </div>
   </div>
@@ -345,6 +799,7 @@ function page() {
   >
     <div className="modal-dialog modal-dialog-centered">
       <div className="modal-content">
+        <form action="#" onSubmit={(e) => submitUpdateReturnWindow(e)}>
         <div className="modal-header">
           <h5 className="modal-title title_request" id="exampleModalLabel">
             Edit Department Rule
@@ -359,7 +814,75 @@ function page() {
         <div className="modal-body">
           <div className="request_form">
             <p>Please see the Marketplace Return’s Policy for return center.</p>
-            <label>Department </label>
+            
+            
+            <div className="table-responsive">
+          <table
+            className="table table-bordered user-man"
+            style={{ marginTop: 20 }}
+          >
+            <thead className="table__head">
+              <tr className="winner__table">
+                <th width={210}>Category</th>
+                <th width={100}></th>
+                <th width={330}></th>
+                
+              </tr>
+            </thead>
+            <tbody>
+
+              {allCategory && allCategory.map((categoryList, index) => {
+
+                return (
+
+                  <tr className="winner__table" key={`categoryList-${index}`}>
+                <td>
+                  <div className="name_348937">{categoryList.name}</div>
+                </td>
+                <td>{categoryList.min_return} Days</td>
+                <td>
+                  <div className="position-relateve">
+                  <input
+                    type="number"
+                    min="1"
+                    name="seller_return"
+                    placeholder=""
+                    className="form-control"
+                    required
+                    value={inputValues[categoryList._id]}
+                  onChange={(e) => handleInputChange(categoryList._id, e.target.value, categoryList.min_return)}
+                  />
+                  <span className="days">Days</span>
+                </div>
+                {errorsWin[categoryList._id] &&
+                                      errorsWin[categoryList._id] != "" ? (
+                                        <span
+                                          id="name_error"
+                                          className="input-error-tip"
+                                          style={{ display: "inline-block" }}
+                                        >
+                                          {errorsWin[categoryList._id]}
+                                        </span>
+                                      ) : (
+                                        ""
+                                      )}
+                </td>
+                
+              </tr>
+
+                )
+
+              })
+            }
+              
+
+            </tbody>
+          </table>
+        </div>
+            
+            
+            
+            { /* <label>Department </label>
             <input
               type="text"
               name=""
@@ -379,6 +902,8 @@ function page() {
               />
               <span className="days">Days</span>
             </div>
+*/ }
+
           </div>
         </div>
         <div className="modal_button">
@@ -389,10 +914,11 @@ function page() {
           >
             Cancel
           </button>
-          <button type="button" className="orange-btn">
+          <button className="orange-btn">
             Save
           </button>
         </div>
+        </form>
       </div>
     </div>
   </div>
@@ -406,6 +932,7 @@ function page() {
   >
     <div className="modal-dialog modal-dialog-centered">
       <div className="modal-content">
+        <form action="#" onSubmit={(e) => submitUpdateReturnReplacement(e)}>
         <div className="modal-header">
           <h5 className="modal-title title_request" id="exampleModalLabel">
             Edit Department Rule
@@ -423,10 +950,24 @@ function page() {
             <label>Department </label>
             <input
               type="text"
-              name=""
-              placeholder="All"
+              name="replacement_department"
+              placeholder=""
               className="form-control"
-            />
+              value={replacementData.replacement_department}
+                                        onChange={(e) => updateInputDataReplacement(e)}
+                                      />
+                                      {errorsRep.replacement_department &&
+                                      errorsRep.replacement_department != "" ? (
+                                        <span
+                                          id="name_error"
+                                          className="input-error-tip"
+                                          style={{ display: "inline-block" }}
+                                        >
+                                          {errorsRep.replacement_department}
+                                        </span>
+                                      ) : (
+                                        ""
+                                      )}
             <div className="printed">
               Printed on the 'To' field on the return label
             </div>
@@ -435,16 +976,32 @@ function page() {
               <div className="radio">
                 <input
                   id="radio-1"
-                  name="radio"
+                  name="enable"
                   type="radio"
                   defaultChecked=""
-                />
+                  value="Yes"
+                onChange={(e) => updateInputDataReplacement(e)}
+                                      />
+                                      {errorsRep.enable &&
+                                      errorsRep.enable != "" ? (
+                                        <span
+                                          id="name_error"
+                                          className="input-error-tip"
+                                          style={{ display: "inline-block" }}
+                                        >
+                                          {errorsRep.enable}
+                                        </span>
+                                      ) : (
+                                        ""
+                                      )}
                 <label htmlFor="radio-1" className="radio-label">
                   Yes{" "}
                 </label>
               </div>
               <div className="radio">
-                <input id="radio-2" name="radio" type="radio" />
+                <input id="radio-2" name="enable" type="radio" value="No"
+                onChange={(e) => updateInputDataReplacement(e)}
+                />
                 <label htmlFor="radio-2" className="radio-label">
                   No
                 </label>
@@ -464,10 +1021,11 @@ function page() {
           >
             Cancel
           </button>
-          <button type="button" className="orange-btn">
+          <button className="orange-btn">
             Save
           </button>
         </div>
+      </form>
       </div>
     </div>
   </div>
