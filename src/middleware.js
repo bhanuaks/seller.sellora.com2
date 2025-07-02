@@ -17,7 +17,7 @@ export function middleware(request){
     const isAdminLogin = adminAuth && adminAuth.name == "adminAuthToken";
     const isUserLogin = userAuth && userAuth.name == "userAuthToken";
     
-     const accesWithoutLoginPage = ['/seller/sell-online', '/seller/fees-n-commission', '/seller/grow', '/seller/learn', '/seller/login', '/seller/register', '/seller/login-otp']
+     const accesWithoutLoginPage = ['/seller/sell-online', '/seller/fees-n-commission', '/seller/grow', '/seller/learn', '/seller/login', '/seller/register', '/seller/login-otp','/seller/user-verify']
     if((requestUrl.pathname.startsWith('/seller')  && !accesWithoutLoginPage.includes(requestUrl.pathname)) || requestUrl.pathname.startsWith('/dashboard')){
          
         if(!isSellerLogin){

@@ -1,11 +1,180 @@
-import React from 'react'
+'use client'
+import React, { useEffect, useState } from 'react'
 import RightNav from '../component/RightNav'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
+import { baseUrl } from '@/Http/helper'
+import SubMenu from './SubMenu'
+import { toast, ToastContainer } from 'react-toastify'
 
 function page() {
+
+  //const searchParams = useSearchParams()
+  //const token = searchParams.get('token')
+  
+  const [menuList, setMenuList] = useState([])
+  const [userDetail, setUserDetail] = useState([])
+  const [token, setToken] = useState()
+  const [userPermission, setUserPermission] = useState({})
+  const [show, setShow] = useState(false)
+  
+
+const fetchUserDetail = (token) => {
+fetch(
+            `${baseUrl}api/seller/user-permission?token=${token}`,
+            {
+              method: "GET",
+            }
+          )
+            .then((response) => {
+              
+              return response.json();
+            })
+            .then((res) => {
+              $(".loaderouter").css("display", "none");
+              if (res.status) {
+                //console.log(res.data)
+                setUserPermission(res.data)
+                //setMenuList(res.data.data)
+                
+                
+              }
+            });
+
+}
+
+  useEffect(() => {
+      if (typeof window !== 'undefined') {
+        const params = new URLSearchParams(window.location.search);
+        const tokenValue = params.get('token');
+        setToken(tokenValue);
+      }
+    }, []);
+  
+  useEffect(() => {
+        //console.log(token)
+        if(token){
+        fetch(
+            `${baseUrl}api/get-menu-list?token=${token}`,
+            {
+              method: "GET",
+            }
+          )
+            .then((response) => {
+              
+              return response.json();
+            })
+            .then((res) => {
+              $(".loaderouter").css("display", "none");
+              if (res.status) {
+                
+                setMenuList(res.data.data)
+                
+                
+              }
+            });
+
+            fetchUserDetail(token);
+
+          }
+
+          
+  
+      },[token])
+
+const modalShow = (e, id, value) => {
+  
+
+  setUserDetail((prev) => {
+    const updated = prev.filter((item) => item.id !== id);
+    return [...updated, { id:id, value:value }];
+  });
+
+  setShow(true)
+
+  
+  //console.log(userPermission)
+  //const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('edit-Modal'));
+  //modal.show();
+
+}
+
+const popupCancel = () => {
+  setUserDetail([])
+  fetchUserDetail(token);
+  setShow(false)
+}
+
+const popupSubmit = (e) => {
+//console.log(userDetail, token)
+e.preventDefault();
+      //setErrors({});
+  
+      
+      
+    $(".loaderouter").css("display", "flex");
+      fetch(`${baseUrl}api/seller/user-permission`, {
+        method: "POST",
+        body: JSON.stringify({
+          userDetail:userDetail,
+          token:token
+          
+        }),
+      })
+        .then((response) => {
+          if (!response.ok) {
+            $(".loaderouter").css("display", "none");
+            throw new Error("Network Error");
+          }
+          return response.json();
+        })
+        .then((res) => {
+          $(".loaderouter").css("display", "none");
+          if (res.status) {
+            
+            toast.success("Permission change successfully.");
+            fetchUserDetail(token);
+            setShow(false)
+            //const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('edit-Modal'));
+            //modal.hide();
+
+          } else if (res.data.status_code == 403) {
+            //setErrors(ress.data.errors);
+            toast.warning("Seller not found.");
+            fetchUserDetail(token);
+            setShow(false)
+            //const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('edit-Modal'));
+            //modal.hide();
+          }
+        });
+        
+
+
+}
+
+
+
   return (
     <>
   <div className="notification_breadcomb_rts-navigation-area-breadcrumb">
+    <ToastContainer
+            position="top-center"
+            autoClose={3000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme="colored"
+          />
+          {/* loader start */}
+      <div className="loaderouter">
+        <div className="loader"></div>
+      </div>
+      {/* loader end */}
+    
     <div className="container">
       <div className="row">
         <div className="col-lg-12">
@@ -30,7 +199,7 @@ function page() {
   </div>
   <div className="container">
     <div className="row">
-      <div className="col-lg-9">
+      <div className="col-lg-10 offset-lg-1">
         <div className="adjust_outer">
           <div className="container">
             <div className="radio">
@@ -71,14 +240,26 @@ function page() {
           </div>
         </div>
         {/* ======================Listing-table==open============================= */}
-        <div className="table-responsive">
+        
+        {menuList && menuList.map((list, index) => {
+
+          let subMenuList;
+          if(list.submenu.length > 0){
+            subMenuList = list.submenu 
+          } else {
+            subMenuList = [list]
+
+          }
+
+          return (
+            <div className="table-responsive" key={`menu-${index}`}>
           <table
             className="table table-bordered user-man"
             style={{ marginTop: 20 }}
           >
             <thead className="table__head">
               <tr className="winner__table">
-                <th width={510}>Listings</th>
+                <th width={510}>{list.name}</th>
                 <th width={100}>
                   <span className="white-button">None</span>
                 </th>
@@ -94,10 +275,16 @@ function page() {
               </tr>
             </thead>
             <tbody>
-              <tr className="winner__table">
+              
+              {subMenuList && subMenuList.map((subList, subIndex) => {
+
+                const selectedPermission = userPermission[subList._id] || 'none';
+                
+            return (
+            <tr className="winner__table" key={`sub-menu-${subIndex}`}>
                 <td>
                   <div className="content_p2">
-                    Advertisment{" "}
+                    {subList.name} {" "}
                     <span
                       className="tooltiptext"
                       data-tooltip="Success Hub Pricing Suggestions"
@@ -110,1320 +297,83 @@ function page() {
                 <td>
                   <div className="text-center">
                     <label className="radio-container_120">
-                      <input type="radio" name="group" defaultChecked="checked" />
-                    </label>
-                  </div>
-                </td>
-                <td>
-                  <div className="text-center">
-                    <label className="radio-container_120">
-                      <input type="radio" name="group" />
-                    </label>
-                  </div>
-                </td>
-                <td>
-                  <div className="text-center">
-                    <label className="radio-container_120">
-                      <input type="radio" name="group" />
-                    </label>
-                  </div>
-                </td>
-                <td />
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        {/* ======================Listing-table==end============================= */}
-        {/* ======================Growth-table==open============================= */}
-        <div className="table-responsive">
-          <table
-            className="table table-bordered user-man"
-            style={{ marginTop: 20 }}
-          >
-            <thead className="table__head">
-              <tr className="winner__table">
-                <th width={510}>Growth</th>
-                <th width={100}>
-                  <span className="white-button">None</span>
-                </th>
-                <th width={100}>
-                  <span className="white-button">View</span>
-                </th>
-                <th width={100}>
-                  <span className="white-button">Edit</span>
-                </th>
-                <th width={100}>
-                  <span className="white-button">Admin</span>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr className="winner__table">
-                <td>
-                  <div className="content_p2">
-                    Sellora Insights{" "}
-                    <span
-                      className="tooltiptext"
-                      data-tooltip="Success Hub Pricing Suggestions"
-                    >
-                      {" "}
-                      <i className="far fa-exclamation-circle" />
-                    </span>{" "}
-                  </div>
-                </td>
-                <td>
-                  <div className="text-center">
-                    <label className="radio-container_120">
-                      <input type="radio" name="group2" defaultChecked="" />
-                    </label>
-                  </div>
-                </td>
-                <td></td>
-                <td>
-                  <div className="text-center">
-                    <label className="radio-container_120">
-                      <input type="radio" name="group2" />
-                    </label>
-                  </div>
-                </td>
-                <td />
-              </tr>
-              <tr className="winner__table">
-                <td>
-                  <div className="content_p2">
-                    Advertising Recommendations{" "}
-                    <span
-                      className="tooltiptext"
-                      data-tooltip="Success Hub Pricing Suggestions"
-                    >
-                      {" "}
-                      <i className="far fa-exclamation-circle" />
-                    </span>{" "}
-                  </div>
-                </td>
-                <td>
-                  <div className="text-center">
-                    <label className="radio-container_120">
-                      <input type="radio" name="group3" defaultChecked="" />
-                    </label>
-                  </div>
-                </td>
-                <td></td>
-                <td>
-                  <div className="text-center">
-                    <label className="radio-container_120">
-                      <input type="radio" name="group3" />
-                    </label>
-                  </div>
-                </td>
-                <td />
-              </tr>
-              <tr className="winner__table">
-                <td>
-                  <div className="content_p2">
-                    Price Recommendations
-                    <span
-                      className="tooltiptext"
-                      data-tooltip="Success Hub Pricing Suggestions"
-                    >
-                      {" "}
-                      <i className="far fa-exclamation-circle" />
-                    </span>{" "}
-                  </div>
-                </td>
-                <td>
-                  <div className="text-center">
-                    <label className="radio-container_120">
-                      <input type="radio" name="group4" defaultChecked="" />
-                    </label>
-                  </div>
-                </td>
-                <td></td>
-                <td>
-                  <div className="text-center">
-                    <label className="radio-container_120">
-                      <input type="radio" name="group4" />
-                    </label>
-                  </div>
-                </td>
-                <td />
-              </tr>
-              <tr className="winner__table">
-                <td>
-                  <div className="content_p2">
-                    Sellora Promotions{" "}
-                    <span
-                      className="tooltiptext"
-                      data-tooltip="Success Hub Pricing Suggestions"
-                    >
-                      {" "}
-                      <i className="far fa-exclamation-circle" />
-                    </span>{" "}
-                  </div>
-                </td>
-                <td>
-                  <div className="text-center">
-                    <label className="radio-container_120">
-                      <input type="radio" name="group5" defaultChecked="" />
-                    </label>
-                  </div>
-                </td>
-                <td></td>
-                <td>
-                  <div className="text-center">
-                    <label className="radio-container_120">
-                      <input type="radio" name="group5" />
-                    </label>
-                  </div>
-                </td>
-                <td />
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        {/* ======================Growth-table==end============================= */}
-        {/* ======================Advertising-table==open============================= */}
-        <div className="table-responsive">
-          <table
-            className="table table-bordered user-man"
-            style={{ marginTop: 20 }}
-          >
-            <thead className="table__head">
-              <tr className="winner__table">
-                <th width={510}>Advertising</th>
-                <th width={100}>
-                  <span className="white-button">None</span>
-                </th>
-                <th width={100}>
-                  <span className="white-button">View</span>
-                </th>
-                <th width={100}>
-                  <span className="white-button">Edit</span>
-                </th>
-                <th width={100}>
-                  <span className="white-button">Admin</span>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr className="winner__table">
-                <td>
-                  <div className="content_p2">
-                    Advertisment{" "}
-                    <span
-                      className="tooltiptext"
-                      data-tooltip="Success Hub Pricing Suggestions"
-                    >
-                      {" "}
-                      <i className="far fa-exclamation-circle" />
-                    </span>{" "}
-                  </div>
-                </td>
-                <td>
-                  <div className="text-center">
-                    <label className="radio-container_120">
-                      <input type="radio" name="group6" defaultChecked="" />
-                    </label>
-                  </div>
-                </td>
-                <td>
-                  <div className="text-center">
-                    <label className="radio-container_120">
-                      <input type="radio" name="group6" />
-                    </label>
-                  </div>
-                </td>
-                <td>
-                  <div className="text-center">
-                    <label className="radio-container_120">
-                      <input type="radio" name="group6" />
-                    </label>
-                  </div>
-                </td>
-                <td />
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        {/* ======================Advertising-table==end============================= */}
-        {/* ======================Orders-table==open============================= */}
-        <div className="table-responsive">
-          <table
-            className="table table-bordered user-man"
-            style={{ marginTop: 20 }}
-          >
-            <thead className="table__head">
-              <tr className="winner__table">
-                <th width={510}>Orders</th>
-                <th width={100}>
-                  <span className="white-button">None</span>
-                </th>
-                <th width={100}>
-                  <span className="white-button">View</span>
-                </th>
-                <th width={100}>
-                  <span className="white-button">Edit</span>
-                </th>
-                <th width={100}>
-                  <span className="white-button">Admin</span>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr className="winner__table">
-                <td>
-                  <div className="content_p2">
-                    Manage Orders{" "}
-                    <span
-                      className="tooltiptext"
-                      data-tooltip="Success Hub Pricing Suggestions"
-                    >
-                      {" "}
-                      <i className="far fa-exclamation-circle" />
-                    </span>{" "}
-                  </div>
-                </td>
-                <td>
-                  <div className="text-center">
-                    <label className="radio-container_120">
-                      <input type="radio" name="group7" defaultChecked="" />
-                    </label>
-                  </div>
-                </td>
-                <td></td>
-                <td>
-                  <div className="text-center">
-                    <label className="radio-container_120">
-                      <input type="radio" name="group7" />
-                    </label>
-                  </div>
-                </td>
-                <td />
-              </tr>
-              <tr className="winner__table">
-                <td>
-                  <div className="content_p2">
-                    Returns{" "}
-                    <span
-                      className="tooltiptext"
-                      data-tooltip="Success Hub Pricing Suggestions"
-                    >
-                      {" "}
-                      <i className="far fa-exclamation-circle" />
-                    </span>{" "}
-                  </div>
-                </td>
-                <td>
-                  <div className="text-center">
-                    <label className="radio-container_120">
-                      <input type="radio" name="group8" defaultChecked="" />
-                    </label>
-                  </div>
-                </td>
-                <td></td>
-                <td>
-                  <div className="text-center">
-                    <label className="radio-container_120">
-                      <input type="radio" name="group8" />
-                    </label>
-                  </div>
-                </td>
-                <td />
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        {/* ======================Orders-table==end============================= */}
-        {/* ======================Store-table==open============================= */}
-        <div className="table-responsive">
-          <table
-            className="table table-bordered user-man"
-            style={{ marginTop: 20 }}
-          >
-            <thead className="table__head">
-              <tr className="winner__table">
-                <th width={510}>Store</th>
-                <th width={100}>
-                  <span className="white-button">None</span>
-                </th>
-                <th width={100}>
-                  <span className="white-button">View</span>
-                </th>
-                <th width={100}>
-                  <span className="white-button">Edit</span>
-                </th>
-                <th width={100}>
-                  <span className="white-button">Admin</span>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr className="winner__table">
-                <td>
-                  <div className="content_p2">
-                    Store{" "}
-                    <span
-                      className="tooltiptext"
-                      data-tooltip="Success Hub Pricing Suggestions"
-                    >
-                      {" "}
-                      <i className="far fa-exclamation-circle" />
-                    </span>{" "}
-                  </div>
-                </td>
-                <td>
-                  <div className="text-center">
-                    <label className="radio-container_120">
-                      <input type="radio" name="group9" defaultChecked="" />
-                    </label>
-                  </div>
-                </td>
-                <td></td>
-                <td>
-                  <div className="text-center">
-                    <label className="radio-container_120">
-                      <input type="radio" name="group9" />
-                    </label>
-                  </div>
-                </td>
-                <td />
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        {/* ======================Store-table==end============================= */}
-        {/* ======================Perfomance-table==open============================= */}
-        <div className="table-responsive">
-          <table
-            className="table table-bordered user-man"
-            style={{ marginTop: 20 }}
-          >
-            <thead className="table__head">
-              <tr className="winner__table">
-                <th width={510}>Perfomance</th>
-                <th width={100}>
-                  <span className="white-button">None</span>
-                </th>
-                <th width={100}>
-                  <span className="white-button">View</span>
-                </th>
-                <th width={100}>
-                  <span className="white-button">Edit</span>
-                </th>
-                <th width={100}>
-                  <span className="white-button">Admin</span>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr className="winner__table">
-                <td>
-                  <div className="content_p2">
-                    Ratings &amp; Reviews{" "}
-                    <span
-                      className="tooltiptext"
-                      data-tooltip="Success Hub Pricing Suggestions"
-                    >
-                      {" "}
-                      <i className="far fa-exclamation-circle" />
-                    </span>{" "}
-                  </div>
-                </td>
-                <td>
-                  <div className="text-center">
-                    <label className="radio-container_120">
-                      <input type="radio" name="group10" defaultChecked="" />
-                    </label>
-                  </div>
-                </td>
-                <td></td>
-                <td>
-                  <div className="text-center">
-                    <label className="radio-container_120">
-                      <input type="radio" name="group10" />
-                    </label>
-                  </div>
-                </td>
-                <td />
-              </tr>
-              <tr className="winner__table">
-                <td>
-                  <div className="content_p2">
-                    Questions{" "}
-                    <span
-                      className="tooltiptext"
-                      data-tooltip="Success Hub Pricing Suggestions"
-                    >
-                      {" "}
-                      <i className="far fa-exclamation-circle" />
-                    </span>{" "}
-                  </div>
-                </td>
-                <td>
-                  <div className="text-center">
-                    <label className="radio-container_120">
-                      <input type="radio" name="group11" defaultChecked="" />
-                    </label>
-                  </div>
-                </td>
-                <td></td>
-                <td>
-                  <div className="text-center">
-                    <label className="radio-container_120">
-                      <input type="radio" name="group11" />
-                    </label>
-                  </div>
-                </td>
-                <td />
-              </tr>
-              <tr className="winner__table">
-                <td>
-                  <div className="content_p2">
-                    Seller Feedback{" "}
-                    <span
-                      className="tooltiptext"
-                      data-tooltip="Success Hub Pricing Suggestions"
-                    >
-                      {" "}
-                      <i className="far fa-exclamation-circle" />
-                    </span>{" "}
-                  </div>
-                </td>
-                <td>
-                  <div className="text-center">
-                    <label className="radio-container_120">
-                      <input type="radio" name="group12" defaultChecked="" />
-                    </label>
-                  </div>
-                </td>
-                <td></td>
-                <td>
-                  <div className="text-center">
-                    <label className="radio-container_120">
-                      <input type="radio" name="group12" />
-                    </label>
-                  </div>
-                </td>
-                <td />
-              </tr>
-              <tr className="winner__table">
-                <td>
-                  <div className="content_p2">
-                    Product quality{" "}
-                    <span
-                      className="tooltiptext"
-                      data-tooltip="Success Hub Pricing Suggestions"
-                    >
-                      {" "}
-                      <i className="far fa-exclamation-circle" />
-                    </span>{" "}
-                  </div>
-                </td>
-                <td>
-                  <div className="text-center">
-                    <label className="radio-container_120">
-                      <input type="radio" name="group13" defaultChecked="" />
-                    </label>
-                  </div>
-                </td>
-                <td></td>
-                <td>
-                  <div className="text-center">
-                    <label className="radio-container_120">
-                      <input type="radio" name="group13" />
-                    </label>
-                  </div>
-                </td>
-                <td />
-              </tr>
-              <tr className="winner__table">
-                <td>
-                  <div className="content_p2">
-                    Returns{" "}
-                    <span
-                      className="tooltiptext"
-                      data-tooltip="Success Hub Pricing Suggestions"
-                    >
-                      {" "}
-                      <i className="far fa-exclamation-circle" />
-                    </span>{" "}
-                  </div>
-                </td>
-                <td>
-                  <div className="text-center">
-                    <label className="radio-container_120">
-                      <input type="radio" name="group14" defaultChecked="" />
-                    </label>
-                  </div>
-                </td>
-                <td></td>
-                <td>
-                  <div className="text-center">
-                    <label className="radio-container_120">
-                      <input type="radio" name="group14" />
-                    </label>
-                  </div>
-                </td>
-                <td />
-              </tr>
-              <tr className="winner__table">
-                <td>
-                  <div className="content_p2">
-                    Cancellations{" "}
-                    <span
-                      className="tooltiptext"
-                      data-tooltip="Success Hub Pricing Suggestions"
-                    >
-                      {" "}
-                      <i className="far fa-exclamation-circle" />
-                    </span>{" "}
-                  </div>
-                </td>
-                <td>
-                  <div className="text-center">
-                    <label className="radio-container_120">
-                      <input type="radio" name="group15" defaultChecked="" />
-                    </label>
-                  </div>
-                </td>
-                <td></td>
-                <td>
-                  <div className="text-center">
-                    <label className="radio-container_120">
-                      <input type="radio" name="group15" />
-                    </label>
-                  </div>
-                </td>
-                <td />
-              </tr>
-              <tr className="winner__table">
-                <td>
-                  <div className="content_p2">
-                    Your seller tier{" "}
-                    <span
-                      className="tooltiptext"
-                      data-tooltip="Success Hub Pricing Suggestions"
-                    >
-                      {" "}
-                      <i className="far fa-exclamation-circle" />
-                    </span>{" "}
-                  </div>
-                </td>
-                <td>
-                  <div className="text-center">
-                    <label className="radio-container_120">
-                      <input type="radio" name="group16" defaultChecked="" />
-                    </label>
-                  </div>
-                </td>
-                <td></td>
-                <td>
-                  <div className="text-center">
-                    <label className="radio-container_120">
-                      <input type="radio" name="group16" />
-                    </label>
-                  </div>
-                </td>
-                <td />
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        {/* ======================Perfomance-table==end============================= */}
-        {/* ======================Report -table==open============================= */}
-        <div className="table-responsive">
-          <table
-            className="table table-bordered user-man"
-            style={{ marginTop: 20 }}
-          >
-            <thead className="table__head">
-              <tr className="winner__table">
-                <th width={510}>Report </th>
-                <th width={100}>
-                  <span className="white-button">None</span>
-                </th>
-                <th width={100}>
-                  <span className="white-button">View</span>
-                </th>
-                <th width={100}>
-                  <span className="white-button">Edit</span>
-                </th>
-                <th width={100}>
-                  <span className="white-button">Admin</span>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr className="winner__table">
-                <td>
-                  <div className="content_p2">
-                    Report Center{" "}
-                    <span
-                      className="tooltiptext"
-                      data-tooltip="Success Hub Pricing Suggestions"
-                    >
-                      {" "}
-                      <i className="far fa-exclamation-circle" />
-                    </span>{" "}
-                  </div>
-                </td>
-                <td>
-                  <div className="text-center">
-                    <label className="radio-container_120">
-                      <input type="radio" name="group17" defaultChecked="" />
-                    </label>
-                  </div>
-                </td>
-                <td></td>
-                <td>
-                  <div className="text-center">
-                    <label className="radio-container_120">
-                      <input type="radio" name="group17" />
-                    </label>
-                  </div>
-                </td>
-                <td />
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        {/* ======================Report -table==end============================= */}
-        {/* ======================Payments-table==open============================= */}
-        <div className="table-responsive">
-          <table
-            className="table table-bordered user-man"
-            style={{ marginTop: 20 }}
-          >
-            <thead className="table__head">
-              <tr className="winner__table">
-                <th width={510}>Payments</th>
-                <th width={100}>
-                  <span className="white-button">None</span>
-                </th>
-                <th width={100}>
-                  <span className="white-button">View</span>
-                </th>
-                <th width={100}>
-                  <span className="white-button">Edit</span>
-                </th>
-                <th width={100}>
-                  <span className="white-button">Admin</span>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr className="winner__table">
-                <td>
-                  <div className="content_p2">
-                    Payments Overview{" "}
-                    <span
-                      className="tooltiptext"
-                      data-tooltip="Success Hub Pricing Suggestions"
-                    >
-                      {" "}
-                      <i className="far fa-exclamation-circle" />
-                    </span>{" "}
-                  </div>
-                </td>
-                <td>
-                  <div className="text-center">
-                    <label className="radio-container_120">
-                      <input type="radio" name="group18" defaultChecked="" />
-                    </label>
-                  </div>
-                </td>
-                <td></td>
-                <td>
-                  <div className="text-center">
-                    <label className="radio-container_120">
-                      <input type="radio" name="group18" />
-                    </label>
-                  </div>
-                </td>
-                <td />
-              </tr>
-              <tr className="winner__table">
-                <td>
-                  <div className="content_p2">
-                    Transaction{" "}
-                    <span
-                      className="tooltiptext"
-                      data-tooltip="Success Hub Pricing Suggestions"
-                    >
-                      {" "}
-                      <i className="far fa-exclamation-circle" />
-                    </span>{" "}
-                  </div>
-                </td>
-                <td>
-                  <div className="text-center">
-                    <label className="radio-container_120">
-                      <input type="radio" name="group19" defaultChecked="" />
-                    </label>
-                  </div>
-                </td>
-                <td></td>
-                <td>
-                  <div className="text-center">
-                    <label className="radio-container_120">
-                      <input type="radio" name="group19" />
-                    </label>
-                  </div>
-                </td>
-                <td />
-              </tr>
-              <tr className="winner__table">
-                <td>
-                  <div className="content_p2">
-                    Disdursements{" "}
-                    <span
-                      className="tooltiptext"
-                      data-tooltip="Success Hub Pricing Suggestions"
-                    >
-                      {" "}
-                      <i className="far fa-exclamation-circle" />
-                    </span>{" "}
-                  </div>
-                </td>
-                <td>
-                  <div className="text-center">
-                    <label className="radio-container_120">
-                      <input type="radio" name="group20" defaultChecked="" />
-                    </label>
-                  </div>
-                </td>
-                <td></td>
-                <td>
-                  <div className="text-center">
-                    <label className="radio-container_120">
-                      <input type="radio" name="group20" />
-                    </label>
-                  </div>
-                </td>
-                <td />
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        {/* ======================Payments-table==end============================= */}
-        {/* ======================Partner services-table==open============================= */}
-        <div className="table-responsive">
-          <table
-            className="table table-bordered user-man"
-            style={{ marginTop: 20 }}
-          >
-            <thead className="table__head">
-              <tr className="winner__table">
-                <th width={510}>Partner services</th>
-                <th width={100}>
-                  <span className="white-button">None</span>
-                </th>
-                <th width={100}>
-                  <span className="white-button">View</span>
-                </th>
-                <th width={100}>
-                  <span className="white-button">Edit</span>
-                </th>
-                <th width={100}>
-                  <span className="white-button">Admin</span>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr className="winner__table">
-                <td>
-                  <div className="content_p2">
-                    All Service{" "}
-                    <span
-                      className="tooltiptext"
-                      data-tooltip="Success Hub Pricing Suggestions"
-                    >
-                      {" "}
-                      <i className="far fa-exclamation-circle" />
-                    </span>{" "}
-                  </div>
-                </td>
-                <td>
-                  <div className="text-center">
-                    <label className="radio-container_120">
-                      <input type="radio" name="group21" defaultChecked="" />
-                    </label>
-                  </div>
-                </td>
-                <td></td>
-                <td>
-                  <div className="text-center">
-                    <label className="radio-container_120">
-                      <input type="radio" name="group21" />
-                    </label>
-                  </div>
-                </td>
-                <td />
-              </tr>
-              <tr className="winner__table">
-                <td>
-                  <div className="content_p2">
-                    My Service
-                    <span
-                      className="tooltiptext"
-                      data-tooltip="Success Hub Pricing Suggestions"
-                    >
-                      {" "}
-                      <i className="far fa-exclamation-circle" />
-                    </span>{" "}
-                  </div>
-                </td>
-                <td>
-                  <div className="text-center">
-                    <label className="radio-container_120">
-                      <input type="radio" name="group22" defaultChecked="" />
-                    </label>
-                  </div>
-                </td>
-                <td></td>
-                <td>
-                  <div className="text-center">
-                    <label className="radio-container_120">
-                      <input type="radio" name="group22" />
-                    </label>
-                  </div>
-                </td>
-                <td />
-              </tr>
-              <tr className="winner__table">
-                <td>
-                  <div className="content_p2">
-                    Help{" "}
-                    <span
-                      className="tooltiptext"
-                      data-tooltip="Success Hub Pricing Suggestions"
-                    >
-                      {" "}
-                      <i className="far fa-exclamation-circle" />
-                    </span>{" "}
-                  </div>
-                </td>
-                <td>
-                  <div className="text-center">
-                    <label className="radio-container_120">
-                      <input type="radio" name="group23" defaultChecked="" />
-                    </label>
-                  </div>
-                </td>
-                <td></td>
-                <td>
-                  <div className="text-center">
-                    <label className="radio-container_120">
-                      <input type="radio" name="group23" />
-                    </label>
-                  </div>
-                </td>
-                <td />
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        {/* ======================Partner services-table==end============================= */}
-        {/* ======================Setting-table==open============================= */}
-        <div className="table-responsive">
-          <table
-            className="table table-bordered user-man"
-            style={{ marginTop: 20 }}
-          >
-            <thead className="table__head">
-              <tr className="winner__table">
-                <th width={510}>Setting</th>
-                <th width={100}>
-                  <span className="white-button">None</span>
-                </th>
-                <th width={100}>
-                  <span className="white-button">View</span>
-                </th>
-                <th width={100}>
-                  <span className="white-button">Edit</span>
-                </th>
-                <th width={100}>
-                  <span className="white-button">Admin</span>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr className="winner__table">
-                <td>
-                  <div className="content_p2">
-                    Notification Setting
-                    <span
-                      className="tooltiptext"
-                      data-tooltip="Success Hub Pricing Suggestions"
-                    >
-                      {" "}
-                      <i className="far fa-exclamation-circle" />
-                    </span>{" "}
-                  </div>
-                </td>
-                <td>
-                  <div className="text-center">
-                    <label className="radio-container_120">
-                      <input type="radio" name="group24" defaultChecked="" />
-                    </label>
-                  </div>
-                </td>
-                <td></td>
-                <td>
-                  <div className="text-center">
-                    <label className="radio-container_120">
-                      <input type="radio" name="group24" />
-                    </label>
-                  </div>
-                </td>
-                <td />
-              </tr>
-              <tr className="winner__table">
-                <td>
-                  <div className="content_p2">
-                    Contact Details{" "}
-                    <span
-                      className="tooltiptext"
-                      data-tooltip="Success Hub Pricing Suggestions"
-                    >
-                      {" "}
-                      <i className="far fa-exclamation-circle" />
-                    </span>{" "}
-                  </div>
-                </td>
-                <td>
-                  <div className="text-center">
-                    <label className="radio-container_120">
-                      <input type="radio" name="group25" defaultChecked="" />
-                    </label>
-                  </div>
-                </td>
-                <td></td>
-                <td>
-                  <div className="text-center">
-                    <label className="radio-container_120">
-                      <input type="radio" name="group25" />
-                    </label>
-                  </div>
-                </td>
-                <td />
-              </tr>
-              <tr className="winner__table">
-                <td>
-                  <div className="content_p2">
-                    Display Information
-                    <span
-                      className="tooltiptext"
-                      data-tooltip="Success Hub Pricing Suggestions"
-                    >
-                      {" "}
-                      <i className="far fa-exclamation-circle" />
-                    </span>{" "}
-                  </div>
-                </td>
-                <td>
-                  <div className="text-center">
-                    <label className="radio-container_120">
-                      <input type="radio" name="group26" defaultChecked="" />
-                    </label>
-                  </div>
-                </td>
-                <td></td>
-                <td>
-                  <div className="text-center">
-                    <label className="radio-container_120">
-                      <input type="radio" name="group26" />
-                    </label>
-                  </div>
-                </td>
-                <td />
-              </tr>
-              <tr className="winner__table">
-                <td>
-                  <div className="content_p2">
-                    Pick up Address
-                    <span
-                      className="tooltiptext"
-                      data-tooltip="Success Hub Pricing Suggestions"
-                    >
-                      {" "}
-                      <i className="far fa-exclamation-circle" />
-                    </span>{" "}
-                  </div>
-                </td>
-                <td>
-                  <div className="text-center">
-                    <label className="radio-container_120">
-                      <input type="radio" name="group27" defaultChecked="" />
-                    </label>
-                  </div>
-                </td>
-                <td></td>
-                <td>
-                  <div className="text-center">
-                    <label className="radio-container_120">
-                      <input type="radio" name="group27" />
-                    </label>
-                  </div>
-                </td>
-                <td />
-              </tr>
-              <tr className="winner__table">
-                <td>
-                  <div className="content_p2">
-                    Return Setting
-                    <span
-                      className="tooltiptext"
-                      data-tooltip="Success Hub Pricing Suggestions"
-                    >
-                      {" "}
-                      <i className="far fa-exclamation-circle" />
-                    </span>{" "}
-                  </div>
-                </td>
-                <td>
-                  <div className="text-center">
-                    <label className="radio-container_120">
-                      <input type="radio" name="group28" defaultChecked="" />
-                    </label>
-                  </div>
-                </td>
-                <td></td>
-                <td>
-                  <div className="text-center">
-                    <label className="radio-container_120">
-                      <input type="radio" name="group28" />
-                    </label>
-                  </div>
-                </td>
-                <td />
-              </tr>
-              <tr className="winner__table">
-                <td>
-                  <div className="content_p2">
-                    Return Address
-                    <span
-                      className="tooltiptext"
-                      data-tooltip="Success Hub Pricing Suggestions"
-                    >
-                      {" "}
-                      <i className="far fa-exclamation-circle" />
-                    </span>{" "}
-                  </div>
-                </td>
-                <td>
-                  <div className="text-center">
-                    <label className="radio-container_120">
-                      <input type="radio" name="group29" defaultChecked="" />
-                    </label>
-                  </div>
-                </td>
-                <td></td>
-                <td>
-                  <div className="text-center">
-                    <label className="radio-container_120">
-                      <input type="radio" name="group29" />
-                    </label>
-                  </div>
-                </td>
-                <td />
-              </tr>
-              <tr className="winner__table">
-                <td>
-                  <div className="content_p2">
-                    Business Details
-                    <span
-                      className="tooltiptext"
-                      data-tooltip="Success Hub Pricing Suggestions"
-                    >
-                      {" "}
-                      <i className="far fa-exclamation-circle" />
-                    </span>{" "}
-                  </div>
-                </td>
-                <td>
-                  <div className="text-center">
-                    <label className="radio-container_120">
-                      <input type="radio" name="group30" defaultChecked="" />
-                    </label>
-                  </div>
-                </td>
-                <td></td>
-                <td>
-                  <div className="text-center">
-                    <label className="radio-container_120">
-                      <input type="radio" name="group30" />
-                    </label>
-                  </div>
-                </td>
-                <td />
-              </tr>
-              <tr className="winner__table">
-                <td>
-                  <div className="content_p2">
-                    Tax Information
-                    <span
-                      className="tooltiptext"
-                      data-tooltip="Success Hub Pricing Suggestions"
-                    >
-                      {" "}
-                      <i className="far fa-exclamation-circle" />
-                    </span>{" "}
-                  </div>
-                </td>
-                <td>
-                  <div className="text-center">
-                    <label className="radio-container_120">
-                      <input type="radio" name="group31" defaultChecked="" />
-                    </label>
-                  </div>
-                </td>
-                <td></td>
-                <td>
-                  <div className="text-center">
-                    <label className="radio-container_120">
-                      <input type="radio" name="group31" />
-                    </label>
-                  </div>
-                </td>
-                <td />
-              </tr>
-              <tr className="winner__table">
-                <td>
-                  <div className="content_p2">
-                    Shipping Setting
-                    <span
-                      className="tooltiptext"
-                      data-tooltip="Success Hub Pricing Suggestions"
-                    >
-                      {" "}
-                      <i className="far fa-exclamation-circle" />
-                    </span>{" "}
-                  </div>
-                </td>
-                <td>
-                  <div className="text-center">
-                    <label className="radio-container_120">
-                      <input type="radio" name="group32" defaultChecked="" />
-                    </label>
-                  </div>
-                </td>
-                <td></td>
-                <td>
-                  <div className="text-center">
-                    <label className="radio-container_120">
-                      <input type="radio" name="group32" />
-                    </label>
-                  </div>
-                </td>
-                <td />
-              </tr>
-              <tr className="winner__table">
-                <td>
-                  <div className="content_p2">
-                    User Management
-                    <span
-                      className="tooltiptext"
-                      data-tooltip="Success Hub Pricing Suggestions"
-                    >
-                      {" "}
-                      <i className="far fa-exclamation-circle" />
-                    </span>{" "}
-                  </div>
-                </td>
-                <td>
-                  <div className="text-center">
-                    <label className="radio-container_120">
-                      <input type="radio" name="group33" defaultChecked="" />
-                    </label>
-                  </div>
-                </td>
-                <td></td>
-                <td>
-                  <div className="text-center">
-                    <label className="radio-container_120">
-                      <input type="radio" name="group33" />
-                    </label>
-                  </div>
-                </td>
-                <td />
-              </tr>
-              <tr className="winner__table">
-                <td>
-                  <div className="content_p2">
-                    Login Setting
-                    <span
-                      className="tooltiptext"
-                      data-tooltip="Success Hub Pricing Suggestions"
-                    >
-                      {" "}
-                      <i className="far fa-exclamation-circle" />
-                    </span>{" "}
-                  </div>
-                </td>
-                <td>
-                  <div className="text-center">
-                    <label className="radio-container_120">
-                      <input type="radio" name="group34" defaultChecked="" />
-                    </label>
-                  </div>
-                </td>
-                <td></td>
-                <td>
-                  <div className="text-center">
-                    <label className="radio-container_120">
-                      <input type="radio" name="group34" />
-                    </label>
-                  </div>
-                </td>
-                <td />
-              </tr>
-              <tr className="winner__table">
-                <td>
-                  <div className="content_p2">
-                    Logout
-                    <span
-                      className="tooltiptext"
-                      data-tooltip="Success Hub Pricing Suggestions"
-                    >
-                      {" "}
-                      <i className="far fa-exclamation-circle" />
-                    </span>{" "}
-                  </div>
-                </td>
-                <td>
-                  <div className="text-center">
-                    <label className="radio-container_120">
-                      <input type="radio" name="group35" defaultChecked="" />
-                    </label>
-                  </div>
-                </td>
-                <td></td>
-                <td>
-                  <div className="text-center">
-                    <label className="radio-container_120">
-                      <input
-                        type="radio"
-                        name="group35"
-                        data-bs-toggle="modal"
-                        data-bs-target="#edit-Modal"
+                      <input type="radio" name={`group-${list._id}-${subList._id}`} onClick={(e) => modalShow(e, subList._id, 'none')} checked={selectedPermission === 'none'}
+                      onChange={() =>
+                                              setUserPermission((prev) => ({
+                                                ...prev,
+                                                [subList._id]: 'none'
+                                              }))
+                                            }
                       />
                     </label>
                   </div>
                 </td>
-                <td />
+                <td>
+                  <div className="text-center">
+                    <label className="radio-container_120">
+                      <input type="radio" name={`group-${list._id}-${subList._id}`} onClick={(e) => modalShow(e, subList._id, 'view')} checked={selectedPermission === 'view'} onChange={() =>
+                                              setUserPermission((prev) => ({
+                                                ...prev,
+                                                [subList._id]: 'view'
+                                              }))
+                                            } />
+                    </label>
+                  </div>
+                </td>
+                <td>
+                  <div className="text-center">
+                    <label className="radio-container_120">
+                      <input type="radio" name={`group-${list._id}-${subList._id}`} onClick={(e) => modalShow(e, subList._id, 'edit')} checked={selectedPermission === 'edit'} 
+                      onChange={() =>
+                                              setUserPermission((prev) => ({
+                                                ...prev,
+                                                [subList._id]: 'edit'
+                                              }))
+                                            }
+                      />
+                    </label>
+                  </div>
+                </td>
+                <td>
+                  <div className="text-center">
+                    <label className="radio-container_120">
+                      <input type="radio" name={`group-${list._id}-${subList._id}`} onClick={(e) => modalShow(e, subList._id, 'admin')} checked={selectedPermission === 'admin'} 
+                      onChange={() =>
+                                              setUserPermission((prev) => ({
+                                                ...prev,
+                                                [subList._id]: 'admin'
+                                              }))
+                                            }
+                      />
+                    </label>
+                  </div>
+                </td>
               </tr>
+            )})
+          
+          
+          }
             </tbody>
           </table>
+          
         </div>
+        
+
+          )
+        })}
+        
+        
+        
+        
+        
         {/* ======================Setting-table==end============================= */}
       </div>
       
-        <RightNav />
+        
       
     </div>
   </div>
-  {/* popup-1-edit-Modal */}
+  {/* popup-1-edit-Modal 
   <div
     className="modal fade"
     id="edit-Modal"
@@ -1453,7 +403,7 @@ function page() {
                 >
                   Cancel
                 </button>
-                <button type="button" className="white-btn">
+                <button type="button" className="white-btn" onClick={popupSubmit}>
                   Save Changes
                 </button>
                 <button
@@ -1471,6 +421,48 @@ function page() {
       </div>
     </div>
   </div>
+  */ }
+
+  {show && 
+ <div className="footer_form">
+    <div className="container">
+      <div className="row">
+        <div className="col-lg-10 offset-lg-1">
+            <div className="footer_form_inner">
+
+          <div className="row">
+            <div className="col-lg-7">
+              <div className="addvertise_ment_10">
+                {" "}
+                <span className="modified">{userDetail?.length} Modified</span>{" "}
+                
+              </div>
+            </div>
+            <div className="col-lg-5">
+              <div className="modal_button modal_button2">
+                <button
+                  type="button"
+                  className="orange-btn cancel3"
+                  data-bs-dismiss="modal"
+                  onClick={popupCancel}
+                >
+                  Cancel
+                </button>
+                <button type="button" className="white-btn" onClick={popupSubmit}>
+                  Save Changes
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+  }
+ 
+
 </>
 
   )

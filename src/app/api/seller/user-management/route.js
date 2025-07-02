@@ -1,3 +1,4 @@
+import React from "react";
 import { encryptText, isEmpty, responseFun } from "@/Http/helper";
 import { sellerCountModel, sellerModel, subSellerCountModel } from "@/Http/Models/sellerModel";
 import bcrypt from "bcryptjs";
@@ -5,6 +6,35 @@ import { connectDb } from "../../../../../lib/dbConnect";
 import { NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 import { sellerNotificationSetting } from "@/Http/Models/sellerNotificationModal";
+import UserStatusEmail from "@/app/userEmailTemplate/UserStatusEmail";
+import { sendUserMail } from "./sendUserMail/route";
+const ReactDOMServer =  require('react-dom/server');
+
+
+
+export async function GET(request) {
+    connectDb(); 
+    const { searchParams } = new URL(request.url);
+    const seller_id = searchParams.get('seller_id')
+    const errors = {};
+    if (isEmpty(seller_id)) errors.name = "Seller is required";
+    if (Object.keys(errors).length > 0) {
+      return responseFun(false, { errors, status_code: 403 }, 200);
+    } 
+
+    try{
+ 
+      
+      const query = {owner_id:seller_id, role:'Employee'}; 
+      const userList = await sellerModel.find(query); 
+     
+        return responseFun(true, userList, 200)
+        
+    }catch(error){
+        console.log(error);
+        return responseFun(false,{error},200)
+    }
+}
 
 export async function POST(request) {
   await connectDb();
@@ -54,6 +84,17 @@ export async function POST(request) {
         owner_id:seller_id,
         merchant_id:subMerchantId
       });
+
+      //const encoded = btoa("12345"); // "MTIzNDU="
+      //const decoded = atob(encoded);
+      const idDetail = btoa(seller._id); 
+      const link = `https://seller.sellora.com/seller/user-verify?token=${idDetail}`;
+      const subject = "Account Status Verification";
+
+      const htmlContent = ReactDOMServer.renderToString(
+            React.createElement(UserStatusEmail, {name:name, link: link})
+      )
+      await sendUserMail(email, subject, htmlContent)
   
       const response = NextResponse.json(
         {
