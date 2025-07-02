@@ -30,6 +30,7 @@ const { globalData, setGlobalData } = useContext(AppContext);
       mobile: "",
       
     });
+    const [loadingPopup, setLoadingPopup] = useState(false);
     
     
     useEffect(() => {
@@ -99,7 +100,8 @@ const { globalData, setGlobalData } = useContext(AppContext);
       e.preventDefault();
       setErrors({});
       //console.log(globalData.sellor._id, addressData)
-      $(".loaderouter").css("display", "flex");
+      //$(".loaderouter").css("display", "flex");
+      setLoadingPopup(true)
       fetch(`${baseUrl}api/seller/user-management`, {
         method: "POST",
         body: JSON.stringify({
@@ -114,6 +116,7 @@ const { globalData, setGlobalData } = useContext(AppContext);
       })
         .then((response) => {
           if (!response.ok) {
+            setLoadingPopup(false)
             $(".loaderouter").css("display", "none");
             throw new Error("Network Error");
           }
@@ -121,6 +124,7 @@ const { globalData, setGlobalData } = useContext(AppContext);
         })
         .then((res) => {
           $(".loaderouter").css("display", "none");
+          setLoadingPopup(false)
           if (res.status) {
             //console.log(res.seller)
             //setAddressData(addressData);
@@ -140,6 +144,7 @@ const { globalData, setGlobalData } = useContext(AppContext);
           } else if (res.data.status_code == 403) {
             setErrors(res.data.errors);
           }
+          
         });
         
     }
@@ -298,11 +303,14 @@ const { globalData, setGlobalData } = useContext(AppContext);
             type="button"
             className="orange-btn cancel"
             data-bs-dismiss="modal"
+            disabled={loadingPopup}
           >
             Cancel
           </button>
-          <button className="orange-btn">
-            Save
+          <button className="orange-btn"
+          disabled={loadingPopup}
+          >
+            {loadingPopup ? 'Please wait...' : 'Save'}
           </button>
           
         </div>

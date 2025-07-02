@@ -71,8 +71,10 @@ export async function GET(request) {
             )  
         }
 
+        const sellerCount = await sellerModel.countDocuments({owner_id:user_id,role:'Employee'});
 
-        return responseFun(true,{data:sellor, referData:with_another_data, categories:categories}, 200) 
+
+        return responseFun(true,{data:sellor, referData:with_another_data, categories:categories, sellerCount:sellerCount}, 200) 
     }catch(error){
         console.log(error);
         return responseFun(false,{error}, 200)
