@@ -8,9 +8,7 @@ import { useRouter } from "next/navigation";
 import { ToastContainer, toast } from "react-toastify";
 import $ from "jquery";
 import "intl-tel-input/build/css/intlTelInput.css";
-import intlTelInput from "intl-tel-input";
-import HelpAndVideoTopSection from "../../HelpAndVideoTop";
-import RightNav from "../component/RightNav";
+import intlTelInput from "intl-tel-input"; 
 
 
 function Page() {
@@ -28,7 +26,7 @@ function Page() {
     if (input) {
       const iti = intlTelInput(phoneInputRef.current, {
         initialCountry:
-          sellor && sellor.country_s_name ? sellor.country_s_name : "in",
+          sellor && sellor.country_s_name ? sellor.country_s_name : "us",
         separateDialCode: true,
         // utilsScript: 'https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.12/js/utils.js',
       });

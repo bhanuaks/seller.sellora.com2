@@ -61,6 +61,7 @@ export async function POST(request) {
         const htmlContent = ReactDOMServer.renderToString(
             React.createElement(SellerLoginEmail, {name:seller.name, otp: new_otp})
         )
+        // await sendMailByNodeMailer(seller.email, subject, htmlContent)
         await sendMailByNodeMailer(seller.email, subject, htmlContent)
         const sender = "sellora";
         const receiver = `+${seller.mobile_code}${seller.mobile}`;
