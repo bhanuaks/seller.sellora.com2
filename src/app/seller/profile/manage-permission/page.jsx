@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { baseUrl } from '@/Http/helper'
 import SubMenu from './SubMenu'
+import { toast, ToastContainer } from 'react-toastify'
 
 function page() {
 
@@ -12,8 +13,36 @@ function page() {
   //const token = searchParams.get('token')
   
   const [menuList, setMenuList] = useState([])
-  const [userDetail, setUserDetail] = useState({})
+  const [userDetail, setUserDetail] = useState([])
   const [token, setToken] = useState()
+  const [userPermission, setUserPermission] = useState({})
+  const [show, setShow] = useState(false)
+  
+
+const fetchUserDetail = (token) => {
+fetch(
+            `${baseUrl}api/seller/user-permission?token=${token}`,
+            {
+              method: "GET",
+            }
+          )
+            .then((response) => {
+              
+              return response.json();
+            })
+            .then((res) => {
+              $(".loaderouter").css("display", "none");
+              if (res.status) {
+                //console.log(res.data)
+                setUserPermission(res.data)
+                //setMenuList(res.data.data)
+                
+                
+              }
+            });
+
+}
+
   useEffect(() => {
       if (typeof window !== 'undefined') {
         const params = new URLSearchParams(window.location.search);
@@ -44,25 +73,82 @@ function page() {
                 
               }
             });
+
+            fetchUserDetail(token);
+
           }
+
+          
   
       },[token])
 
 const modalShow = (e, id, value) => {
-  const obj = {
-    id:id,
-    value:value
-  }
-
-  setUserDetail(obj)
   
-  const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('edit-Modal'));
-  modal.show();
+
+  setUserDetail((prev) => {
+    const updated = prev.filter((item) => item.id !== id);
+    return [...updated, { id:id, value:value }];
+  });
+
+  setShow(true)
+
+  
+  //console.log(userPermission)
+  //const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('edit-Modal'));
+  //modal.show();
 
 }
 
-const popupSubmit = () => {
+const popupCancel = () => {
+  setUserDetail([])
+  fetchUserDetail(token);
+  setShow(false)
+}
+
+const popupSubmit = (e) => {
 //console.log(userDetail, token)
+e.preventDefault();
+      //setErrors({});
+  
+      
+      
+    $(".loaderouter").css("display", "flex");
+      fetch(`${baseUrl}api/seller/user-permission`, {
+        method: "POST",
+        body: JSON.stringify({
+          userDetail:userDetail,
+          token:token
+          
+        }),
+      })
+        .then((response) => {
+          if (!response.ok) {
+            $(".loaderouter").css("display", "none");
+            throw new Error("Network Error");
+          }
+          return response.json();
+        })
+        .then((res) => {
+          $(".loaderouter").css("display", "none");
+          if (res.status) {
+            
+            toast.success("Permission change successfully.");
+            fetchUserDetail(token);
+            setShow(false)
+            //const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('edit-Modal'));
+            //modal.hide();
+
+          } else if (res.data.status_code == 403) {
+            //setErrors(ress.data.errors);
+            toast.warning("Seller not found.");
+            fetchUserDetail(token);
+            setShow(false)
+            //const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('edit-Modal'));
+            //modal.hide();
+          }
+        });
+        
+
 
 }
 
@@ -71,6 +157,24 @@ const popupSubmit = () => {
   return (
     <>
   <div className="notification_breadcomb_rts-navigation-area-breadcrumb">
+    <ToastContainer
+            position="top-center"
+            autoClose={3000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme="colored"
+          />
+          {/* loader start */}
+      <div className="loaderouter">
+        <div className="loader"></div>
+      </div>
+      {/* loader end */}
+    
     <div className="container">
       <div className="row">
         <div className="col-lg-12">
@@ -173,6 +277,8 @@ const popupSubmit = () => {
             <tbody>
               
               {subMenuList && subMenuList.map((subList, subIndex) => {
+
+                const selectedPermission = userPermission[subList._id] || 'none';
                 
             return (
             <tr className="winner__table" key={`sub-menu-${subIndex}`}>
@@ -191,28 +297,54 @@ const popupSubmit = () => {
                 <td>
                   <div className="text-center">
                     <label className="radio-container_120">
-                      <input type="radio" name={`group-${list._id}-${subList._id}`} onClick={(e) => modalShow(e, subList._id, 1)} defaultChecked="checked" />
+                      <input type="radio" name={`group-${list._id}-${subList._id}`} onClick={(e) => modalShow(e, subList._id, 'none')} checked={selectedPermission === 'none'}
+                      onChange={() =>
+                                              setUserPermission((prev) => ({
+                                                ...prev,
+                                                [subList._id]: 'none'
+                                              }))
+                                            }
+                      />
                     </label>
                   </div>
                 </td>
                 <td>
                   <div className="text-center">
                     <label className="radio-container_120">
-                      <input type="radio" name={`group-${list._id}-${subList._id}`} onClick={(e) => modalShow(e, subList._id, 2)} />
+                      <input type="radio" name={`group-${list._id}-${subList._id}`} onClick={(e) => modalShow(e, subList._id, 'view')} checked={selectedPermission === 'view'} onChange={() =>
+                                              setUserPermission((prev) => ({
+                                                ...prev,
+                                                [subList._id]: 'view'
+                                              }))
+                                            } />
                     </label>
                   </div>
                 </td>
                 <td>
                   <div className="text-center">
                     <label className="radio-container_120">
-                      <input type="radio" name={`group-${list._id}-${subList._id}`} onClick={(e) => modalShow(e, subList._id, 3)} />
+                      <input type="radio" name={`group-${list._id}-${subList._id}`} onClick={(e) => modalShow(e, subList._id, 'edit')} checked={selectedPermission === 'edit'} 
+                      onChange={() =>
+                                              setUserPermission((prev) => ({
+                                                ...prev,
+                                                [subList._id]: 'edit'
+                                              }))
+                                            }
+                      />
                     </label>
                   </div>
                 </td>
                 <td>
                   <div className="text-center">
                     <label className="radio-container_120">
-                      <input type="radio" name={`group-${list._id}-${subList._id}`} onClick={(e) => modalShow(e, subList._id, 4)} />
+                      <input type="radio" name={`group-${list._id}-${subList._id}`} onClick={(e) => modalShow(e, subList._id, 'admin')} checked={selectedPermission === 'admin'} 
+                      onChange={() =>
+                                              setUserPermission((prev) => ({
+                                                ...prev,
+                                                [subList._id]: 'admin'
+                                              }))
+                                            }
+                      />
                     </label>
                   </div>
                 </td>
@@ -241,7 +373,7 @@ const popupSubmit = () => {
       
     </div>
   </div>
-  {/* popup-1-edit-Modal */}
+  {/* popup-1-edit-Modal 
   <div
     className="modal fade"
     id="edit-Modal"
@@ -289,6 +421,48 @@ const popupSubmit = () => {
       </div>
     </div>
   </div>
+  */ }
+
+  {show && 
+ <div className="footer_form">
+    <div className="container">
+      <div className="row">
+        <div className="col-lg-10 offset-lg-1">
+            <div className="footer_form_inner">
+
+          <div className="row">
+            <div className="col-lg-7">
+              <div className="addvertise_ment_10">
+                {" "}
+                <span className="modified">{userDetail?.length} Modified</span>{" "}
+                
+              </div>
+            </div>
+            <div className="col-lg-5">
+              <div className="modal_button modal_button2">
+                <button
+                  type="button"
+                  className="orange-btn cancel3"
+                  data-bs-dismiss="modal"
+                  onClick={popupCancel}
+                >
+                  Cancel
+                </button>
+                <button type="button" className="white-btn" onClick={popupSubmit}>
+                  Save Changes
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+  }
+ 
+
 </>
 
   )

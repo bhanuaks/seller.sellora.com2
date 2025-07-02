@@ -29,7 +29,7 @@ export async function sendUserMail(to, subject, htmlContent, isBcc=false) {
         // Send the email
         try {
             const info = await transporter.sendMail(mailOptions);
-            console.log('Email sent:', info.messageId);
+            //console.log('Email sent:', info.messageId);
             return  info.messageId
         } catch (error) {
             console.log(error);

@@ -22,5 +22,5 @@ const PermissionSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const UserPermissionModel = mongoose.models.UserPermission || mongoose.model("UserPermission", PermissionSchema);
-export default UserPermissionModel
+const SellerUserPermissionModel = mongoose.models.SellerUserPermission || mongoose.model("SellerUserPermission", PermissionSchema);
+export default SellerUserPermissionModel
