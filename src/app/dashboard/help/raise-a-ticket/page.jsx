@@ -12,19 +12,38 @@ const RaiseTicket = () => {
   };
 
   return (
+    <>
+    <div className="notification_breadcomb_rts-navigation-area-breadcrumb">
+  
+  <div className="container">
+    <div className="row">
+     
+      <div className="col-lg-12">
+        <div className="notification_breadcomb">
+          <ul>
+            <li><Link href="/dashboard/help">Help</Link> </li>
+            <li><a href="#" className="active_002">Still need help? Raise a ticket.</a> </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  </div>
+  
     <div className="sellora_045948">
       <div className="container">
         <div className="row">
-          <div className="col-lg-8">
+          <div className="col-lg-9">
+            <div className="box_2349083_1"> 
             <div className="raise-a-ticket">
-              <h2>
-                <Link href={`${baseUrl}dashboard/help`}> Help </Link> / <span>Raise a Ticket</span>
-              </h2>
+              {/* <h2>
+                <Link href={`${baseUrl}dashboard/help`}> Help </Link> / <span>Still need help? Raise a ticket.</span>
+              </h2> */}
               <h3 style={{ margin: 0, padding: 0 }}>Fill out the form below</h3>
               <p style={{ margin: 0, padding: 0 }}>
                 And help us understand how we can support you.
               </p>
-              <div className="form-container">
+              <div className="form-container form-container2">
                 <form>
                   <label htmlFor="category" className="backgrund_with_position">
                     Issue Categories <span style={{ color: "red" }}>*</span>
@@ -161,11 +180,14 @@ const RaiseTicket = () => {
               </div>
             </div>
           </div>
+          </div>
+          
 
            <RightSideBar />
         </div>
       </div>
     </div>
+    </>
   );
 };
 

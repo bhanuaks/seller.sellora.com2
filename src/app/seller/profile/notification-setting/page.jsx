@@ -1,12 +1,17 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import RightNav from "../component/RightNav";
 import { isValidEmail, testEmail } from "@/Http/helper";
 import Swal from "sweetalert2";
 import { toast } from "sonner";
 import { Toaster } from "sonner";
+import "intl-tel-input/build/css/intlTelInput.css";
+import intlTelInput from "intl-tel-input"; 
 
 function page() {
+
+    const phoneInputRef = useRef(null);
+
   const [formData, setFormData] = useState({
     ListingCreation: true,
     ListingCreationEmail: "",
@@ -46,10 +51,41 @@ function page() {
 
     EmergencyNotificationEmail: "",
     EmergencyNotificationNumber: "",
+    country_s_name:"us",
+    mobile_code:"1"
+
   });
 
   const [updateField, setUpdateField] = useState("");
   const [editEmergency, setEditEmergency] = useState(false);
+
+  
+    useEffect(() => {
+      const input = document.querySelector("#mobile_code");
+  
+      if (input) {
+        const iti = intlTelInput(phoneInputRef.current, {
+          initialCountry:
+            formData && formData.country_s_name ? formData.country_s_name : "us",
+          separateDialCode: true,
+          // utilsScript: 'https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.12/js/utils.js',
+        });
+  
+        const onCountryChange = () => {
+          const selectedCountryData = iti.getSelectedCountryData();
+          setFormData((preData) => ({
+            ...preData,
+            mobile_code: selectedCountryData.dialCode,
+            country_s_name: selectedCountryData.iso2,
+          }));
+        };
+        phoneInputRef.current.addEventListener("countrychange", onCountryChange);
+  
+        return () => {
+          iti.destroy();
+        };
+      }
+    }, [setFormData, formData?.country_s_name]);
 
   useEffect(() => {
     fetch(`/api/seller/notifiaction/save-setting`)
@@ -169,6 +205,8 @@ function page() {
     const data = {
       EmergencyNotificationNumber: formData.EmergencyNotificationNumber,
       EmergencyNotificationEmail: formData.EmergencyNotificationEmail,
+      mobile_code: formData.mobile_code,
+      country_s_name: formData.country_s_name,
     };
 
     const toastId = toast.loading("Saving Info...");
@@ -714,34 +752,24 @@ function page() {
                       </div>
                     </div>
                     {/* =============devider====end============================= */}
-                    <div className="ewr0_footer_text4290">
-                      <div className="row">
-                        {!editEmergency && (
-                          <div
-                            className="col-lg-12 "
-                            style={{ display: "flex", justifyContent: "right" }}
-                          >
-                            <div className="edit-icon">
-                              <i
-                                className="fa fa-pencil"
-                                onClick={(e) => setEditEmergency(true)}
-                              />
-                            </div>
-                          </div>
-                        )}
+                   
+                  </div>
+                </div>
 
-                        <div className="col-lg-5">
-                          <div className="noti">
-                            <strong>Emergency Notification</strong>
-                          </div>
-                        </div>
-                        <div className="col-lg-7">
-                          <div className="d-flex mb-2">
-                            <div className="email_459804">Email</div>
-                            <div className=" input-container">
-                              {editEmergency ? (
-                                <input
-                                  type="email"
+                <div class="noti_footer">
+                  <div class="row">
+                    <div class="col-lg-5">
+                      <div class="noti">
+                        <strong>Emergency Notification</strong>
+                      </div>
+                    </div>
+                    <div class="col-lg-7">
+                      <div class="d-flex mb-3">
+                        <div class="email_459804">Email</div>
+                        <div class="orange_349">
+                          <input type=""
+                            // type="email"
+                             disabled={!editEmergency}
                                   placeholder="Email"
                                   value={
                                     formData?.EmergencyNotificationEmail || ""
@@ -753,77 +781,39 @@ function page() {
                                         e.target.value,
                                     }));
                                   }}
-                                />
-                              ) : (
-                                formData?.EmergencyNotificationEmail
-                              )}
-                            </div>
-                          </div>
-                          <div className="d-flex mb-2">
-                            <div className="email_459804 ">Phone Number</div>
-                            <div className=" input-container">
-                              {editEmergency ? (
-                                <input
-                                  type="text"
-                                  value={
-                                    formData?.EmergencyNotificationNumber || ""
-                                  }
+                           />
+                        </div>
+                        {!editEmergency && (
+                        <div class="edit-icon2"  onClick={(e) => setEditEmergency(true)}>
+                            {" "}
+                            <i class="fa fa-pencil"></i>{" "}
+                        </div>
+                        )}
+                       
+                      </div>
+                      <div class="d-flex mb-3">
+                        <div class="email_459804">Phone Number</div>
+                        <div class="orange_349">
+                          <input type="" name=""  
+                          disabled={!editEmergency}
+                           value={formData?.EmergencyNotificationNumber || ""}
                                   placeholder="Phone Number"
                                   onChange={(e) => {
                                     const value = e.target.value;
-                                    const numericValue = value.replace(
-                                      /[^0-9]/g,
-                                      ""
-                                    );
+                                    const numericValue = value.replace(/[^0-9]/g,  ""  );
                                     setFormData((preData) => ({
                                       ...preData,
                                       EmergencyNotificationNumber: numericValue,
                                     }));
                                   }}
-                                />
-                              ) : (
-                                formData?.EmergencyNotificationNumber
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                        {editEmergency && (
-                          <div
-                            className="col-lg-12 "
-                            style={{ display: "flex", justifyContent: "right" }}
-                          >
-                            <div className="edit-icon">
-                              <a href="#" onClick={(e) => saveEmergencyInfo(e)}>
-                                save
-                              </a>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="noti_footer">
-                  <div className="row">
-                    <div className="col-lg-5">
-                      <div className="noti">
-                        <strong>Emergency Notification</strong>
-                      </div>
-                    </div>
-                    <div className="col-lg-7">
-                      <div className="d-flex">
-                        <div className="email_459804">Email</div>
-                        <div className="orange_349">abc@gmail.com</div>
-                        <div className="edit-icon2">
-                          {" "}
-                          <i className="fa fa-pencil"></i>{" "}
+                                  id="mobile_code"
+                                    ref={phoneInputRef}
+                                  />
                         </div>
                       </div>
-                      <div className="d-flex">
-                        <div className="email_459804">Phone Number</div>
-                        <div className="orange_349">123456781</div>
-                      </div>
+                      {editEmergency && ( 
+                         <div class="save_button"  onClick={(e) => saveEmergencyInfo(e)} >Save</div>
+                      )}
                     </div>
                   </div>
                 </div>

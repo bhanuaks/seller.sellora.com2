@@ -12,10 +12,10 @@ const Header = () => {
   const pathname = usePathname();
 
   useEffect(() => {
-    if (globalData.sellor) {
+    // if (globalData.sellor) {
       // $(".loaderouter").css("display", "none");
       fetch(
-        `${baseUrl}api/seller/get-profile?user_id=${globalData.sellor._id}&with_data=businessDetails`,
+        `${baseUrl}api/seller/get-profile?with_data=businessDetails`,
         {
           method: "GET",
         }
@@ -37,7 +37,7 @@ const Header = () => {
             }
           }
         });
-    }
+    // }
   }, []);
 
   const sellorLogout = (e) => {

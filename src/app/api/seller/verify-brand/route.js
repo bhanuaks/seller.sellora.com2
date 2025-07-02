@@ -7,7 +7,7 @@ export async function POST(request) {
     const {seller_id, name } = await request.json();
     
     const errors = {};
-    if(isEmpty(name))errors.name ="brand name is required"
+    if(isEmpty(name))errors.name ="Brand name is required"
     if(Object.keys(errors).length>0){
         return responseFun(false, {errors, status_code:403},200)
     }
@@ -30,9 +30,9 @@ export async function POST(request) {
             return responseFun(false, {errors, status_code:403},200)
         }
 
-        return responseFun(true, {message:"brand has been verified"},200)
+        return responseFun(true, {message:"Brand has been verified"},200)
     }catch(error){
         console.log(error);
-        return responseFun(false, {error}, 200)
+        return responseFun(false, {message:error.message}, 200)
     }
 }

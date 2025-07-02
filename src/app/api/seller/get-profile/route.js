@@ -4,15 +4,21 @@ import { connectDb } from "../../../../../lib/dbConnect";
 import mongoose from "mongoose";
 import { sellerTaxInformationModel } from "@/Http/Models/sellerTaxInformation";
 import { brandModel, brandSellerModel } from "@/Http/Models/branModel";
-import { Category } from "../../../../../lib/categoryModel";
+import { Category } from "../../../../../lib/categoryModel"; 
+import { getLoginSeller } from "../../getLoginUser/route";
 
 
 export async function GET(request) {
     await connectDb();
     const { searchParams } = new URL(request.url);
-    const user_id = searchParams.get('user_id')
+    // const user_id = searchParams.get('user_id')
     const with_data = searchParams.get('with_data')
     const category = searchParams.get('category')
+    const sellerData = await getLoginSeller() 
+    if(!sellerData){
+        return responseFun(false, {message:"unauthorized request"}, 403);
+    }
+    const user_id = sellerData._id;
     try{  
         let with_another_data = null;
         const sellor = await sellerModel.findById(user_id)

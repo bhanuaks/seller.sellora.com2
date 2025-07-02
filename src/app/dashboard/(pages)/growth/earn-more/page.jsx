@@ -1,35 +1,47 @@
+"use client"
 import { baseUrl } from '@/Http/helper'
 import Image from 'next/image'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import TabSection from '../TabSection'
+ 
 
 function Page() {
+
+  
+  const [summary, setSummary] =  useState({})
+  const [filter, setFilter] =  useState(7)
+
+  useEffect(()=>{ 
+    LoadData()
+  },[filter])
+
+
+ async function LoadData() {
+
+  
+    fetch(`/api/seller/insights/recent-business-summary?filter=${filter}`)
+    .then(async (response)=>{ 
+      const res = await response.json();
+      if(response.ok){
+        setSummary(res.data)
+      }else{
+        new Error(res.message || "Failed to create coupon")
+      }
+    })
+    .catch((error)=>{
+      reject(new Error(error.message))
+    })
+ 
+
+   
+
+ }
+
   return (
     <>
   <div className="rts-navigation-area-breadcrumb pb--10">
     <div className="container">
-      <div className="row">
-        <div className="col-lg-12 col-md-12">
-          <div className="navigator-breadcrumb-wrapper seller-central-dash-board-breadcrumb">
-            <ul>
-              <li>
-                <a href="#">
-                <Image src={`${baseUrl}front/assets/images/hand_shaking.png`} 
-                  alt=''
-                  loading='lazy'
-                  width={0}
-                  height={0}
-                  sizes='100vw'
-                  style={{width:"auto", height:"auto"}}
-                  />
-                  
-                  Help
-                </a>{" "}
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
+      
       <div className="row">
         <div className="col-lg-10 offset-lg-1">
           <div className="navigator-breadcrumb-wrapper text-center mt--20 mb--20">
@@ -63,14 +75,21 @@ function Page() {
               </div>
             </div>
             <div className="col-lg-3 col-md-3 col-sm-3 col-xs-12">
-              <select className="form-select2 form-select">
-                <option>7 Days</option>
-                <option>Today, 24 Jan</option>
+              <select className="form-select2 form-select" 
+              value={filter || 7}
+              onChange={(e)=>setFilter(e.target.value)}>
+                <option value={7}>7 Days</option>
+                <option value={1}>Today, {new Date().toLocaleDateString("en-US",{
+                  day:"2-digit",
+                  month: "long"
+                })}</option>
               </select>
             </div>
             <div className="col-lg-3 col-md-3 col-sm-3 col-xs-12">
               <div>
-                <h5 style={{ marginBottom: 0 }}>(24 Dec 22 Jan)</h5>
+                <h5 style={{ marginBottom: 0 }}>
+                  {/* (24 Dec 22 Jan) */}
+                  </h5>
               </div>
             </div>
           </div>
@@ -82,36 +101,36 @@ function Page() {
           <div className="b1">
             <div className="summry_box p-20">
               <div className="total-gross-sales">Total Gross Sales</div>
-              <div className="price02">$500</div>
-              <div className="unit">Unit 53</div>
+              <div className="price02">${summary?.grossSales?.sale || 0}</div>
+              <div className="unit">Unit {summary?.grossSales?.unit || 0}</div>
             </div>
           </div>
           <div className="b1">
             <div className="summry_box p-20">
               <div className="total-gross-sales">Total Cancellation</div>
-              <div className="price02">$50</div>
-              <div className="unit">Unit 2</div>
+              <div className="price02">${summary?.cancellation?.sale || 0}</div>
+              <div className="unit">Unit {summary?.cancellation?.unit || 0}</div>
             </div>
           </div>
           <div className="b1">
             <div className="summry_box p-20">
               <div className="total-gross-sales">Sales After Cancellations</div>
-              <div className="price02">$450</div>
-              <div className="unit">Unit 51</div>
+              <div className="price02">${summary?.afterCancelData?.sale || 0}</div>
+              <div className="unit">Unit {summary?.afterCancelData?.unit || 0}</div>
             </div>
           </div>
           <div className="b1">
             <div className="summry_box p-20">
               <div className="total-gross-sales">Returns</div>
-              <div className="price02">$0</div>
-              <div className="unit">Unit 0</div>
+              <div className="price02">${summary?.returnDa?.sale || 0}</div>
+              <div className="unit">Unit {summary?.returnDa?.unit || 0}</div>
             </div>
           </div>
           <div className="b1">
             <div className="summry_box p-20">
               <div className="total-gross-sales">Net Sales</div>
-              <div className="price02">$450</div>
-              <div className="unit">Unit 0</div>
+              <div className="price02">${summary?.netSale?.sale || 0}</div>
+              <div className="unit">Unit {summary?.netSale?.unit || 0}</div>
             </div>
           </div>
         </div>

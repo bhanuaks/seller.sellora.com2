@@ -60,23 +60,23 @@ function HelpPage() {
       <div className="col-lg-4">
         <div className="card">
           <h3>
-            <img src={`${baseUrl}front/assets/images/order3.png`} /> Orders &amp; Delivery
+            <img src={`/front/assets/images/order3.png`} /> Orders &amp; Delivery
           </h3>
           <ul>
             <li>
-              <Link href={`${baseUrl}dashboard/help/orders-delivery/order-alerts`}>Order Alerts</Link>
+              <Link href={`/dashboard/help/orders-delivery?question=1`}>Order Alerts</Link>
             </li>
             <li>
-              <Link href={`${baseUrl}dashboard/help/orders-delivery/unable-to-cancel-order`}>Unable to Cancel Order</Link>
+              <Link href={`/dashboard/help/orders-delivery?question=2`}>Unable to Cancel Order</Link>
             </li>
             <li>
-              <Link href={`${baseUrl}dashboard/help/orders-delivery/issue-acknowledging-new-orders`}>
+              <Link href={`/dashboard/help/orders-delivery?question=3`}>
                 Issue Acknowledging New Orders
               </Link>
             </li>
           </ul>
           <div className="view-all">
-            <Link href={`${baseUrl}dashboard/help/orders-delivery`}>View All</Link>
+            <Link href={`/dashboard/help/orders-delivery`}>View All</Link>
           </div>
         </div>
       </div>
@@ -87,13 +87,13 @@ function HelpPage() {
           </h3>
           <ul>
             <li>
-              <Link href={`${baseUrl}dashboard/help/returns/return-policy-concerns-or-suggestions`}>
-                Return Policy Concerns or Suggestions?
+              <Link href={`/dashboard/help/returns?question=1`}>
+               Unable to update tracking information
               </Link>
             </li>
             <li>
-              <Link href={`${baseUrl}dashboard/help/returns/error-processing-customer-refund`} >
-                Error Processing Customer Refund
+              <Link href={`/dashboard/help/returns?question=2`} >
+                 Error Processing Customer Refund
               </Link>
             </li>
           </ul>
@@ -109,19 +109,19 @@ function HelpPage() {
           </h3>
           <ul>
             <li>
-              <a href="#my-uploaded-file-is-not-live-yet.html">
-                My uploaded file is not live yet
-              </a>
+              <Link href="/dashboard/help/listing-catalog?question=1">
+                Why is my uploaded file not live yet on Sellora?
+              </Link>
             </li>
             <li>
-              <a href="#i-want-to-edit-catalog-details.html">
-                I want to edit catalog details
-              </a>
+              <Link href="/dashboard/help/listing-catalog?question=2">
+               How can I edit my catalog details on Sellora?
+              </Link>
             </li>
             <li>
-              <a href="#i-want-catalog-upload-training.thml">
+              <Link href="/dashboard/help/listing-catalog?question=3">
                 I want catalog upload training
-              </a>
+              </Link>
             </li>
           </ul>
           <div className="view-all">
