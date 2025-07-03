@@ -11,12 +11,14 @@ import { useRouter } from "next/navigation";
 import { ToastContainer, toast } from "react-toastify";
 import { citizenshipList } from "@/Http/citizenList";
 import { list } from "postcss";
+import TableskeltonLoader from "@/app/skeleton_loader/TableskeltonLoader";
 
 function page() {
- 
+ const sanitize = (val) => typeof val === "string" ? val.replace(/\?/g, "") : val;
  const { globalData, setGlobalData } = useContext(AppContext);
      const countryRef = useRef();
      const router = useRouter();
+    // const queryParam = new URLSearchParams(window.location.search);
      const [errors, setErrors] = useState({});
      const [sellor, setSellor] = useState(null);
      const phoneInputRef = useRef(null);
@@ -31,6 +33,48 @@ function page() {
      });
 
      const [userList, setUserList] = useState([])
+     const [loadingPopup, setLoadingPopup] = useState(false);
+     
+    //const currentPage = sanitize(router.query?.page || '1');
+    //const pageSize = sanitize(router.query?.size || '10');
+     
+      
+     //const queryParam = new URLSearchParams(window.location.search);
+     //const pageSize = sanitize(queryParam.get('size')) || 10
+     //const currentPage = sanitize(queryParam.get('page')) || 1
+
+    //const [pageSize, setPageSize] = useState(10)
+    //const [currentPage, setCurrentPage] = useState(1)
+
+    const [pagination, setPagination] = useState(null)
+      const [paginationError, setPaginationError] = useState(null)
+      const [refreshList, setRefreshList] = useState(1)
+      const [totalData, setTotalData] = useState({})
+      const [isLoading, setIsLoading] = useState(false)
+    
+      const [searchText, setSearchText] = useState({search:''})
+        function updateSearchTaxt(e){
+          const {name, value} = e.target
+          setSearchText((preData)=>({
+            ...preData,
+            [name]:value
+          }))
+
+          //searchProduct();
+
+        }
+        const [currentPage, setCurrentPage] = useState(1)
+        const [pageSize, setPageSize] = useState(10)
+        useEffect(() => {
+            if (typeof window !== 'undefined') {
+              const queryParam = new URLSearchParams(window.location.search);
+              //const tokenValue = params.get('token');
+              //setToken(tokenValue);
+              setCurrentPage(sanitize(queryParam.get('page')));
+              setPageSize(sanitize(queryParam.get('size')))
+            }
+          }, []);
+          
      
      
      useEffect(() => {
@@ -62,12 +106,19 @@ function page() {
          }
        }, [setAddressData, addressData.country_s_name]);
      
-   
-     useEffect(() => {
-      if (globalData.sellor) {
-        // $(".loaderouter").css("display", "flex");
-        fetch(
-          `${baseUrl}api/seller/user-management?seller_id=${globalData.sellor._id}`,
+   const fetchUserList = (sellerId, currentPage, pageSize) => {
+    setIsLoading(true)
+    const params = new URLSearchParams(); 
+      params.append("seller_id", sellerId);
+      params.append("page", currentPage || 1);
+      params.append("pageSize", pageSize || 10);
+      if(searchText.search){ 
+        params.append("searchText", searchText.search);
+        //params.append("searchBy", searchText.searchBy); 
+      }  
+    
+    fetch(
+          `${baseUrl}api/seller/user-management?${params.toString()}`,
           {
             method: "GET",
           }
@@ -75,25 +126,81 @@ function page() {
           .then((response) => {
             if (!response.ok) {
               $(".loaderouter").css("display", "none");
+              setIsLoading(false)
               throw new Error("Network Error");
             }
             return response.json();
           })
           .then((res) => {
             $(".loaderouter").css("display", "none");
+            
             if (res.status) {
               // check complete step
               //alert(res.data.data.complete_step)
               //console.log(res)
-              setUserList(res.data)
+              setUserList(res.data.list)
+              setPagination(res.data.pagination)
+              //setTotalData(res.data.totalData || {})
             }
+            setIsLoading(false)
+            
           });
 
+   }
+
+function searchProduct(e){
+  e.preventDefault();  
+  if(globalData.sellor){  
+      const params = new URLSearchParams(); 
+      params.append("seller_id", globalData.sellor?._id);
+      params.append("page", currentPage || 1);
+      params.append("pageSize", pageSize || 10);
+      if(searchText.search){ 
+        params.append("searchText", searchText.search);
+       //params.append("searchBy", searchText.searchBy);
+        
+      }
+      
          
+          fetch(`${baseUrl}api/seller/user-management?${params.toString()}`,{
+              method:"GET", 
+          }).then((response)=>{
+              if(!response.ok){ 
+                  throw new Error("Network Error")
+              }
+              return response.json();
+          }).then((res)=>{ 
+              if(res.status){
+                setUserList(res.data.list)
+                setPagination(res.data.pagination)
+                //setTotalData(res.data.totalData || {})
+              }  
+          })
+      }
+  }
+
+
+  function paginationFun(page, size, e){
+    e.preventDefault();
+    const params = new URLSearchParams(); 
+    //params.append("type", type);
+    setCurrentPage(page)
+    setPageSize(size)
+    
+    let link = `${baseUrl}seller/profile/user-management-list?size=${size}&page=${page}&${params}`
+    router.push(link); 
+  }
+
+     useEffect(() => {
+      if (globalData.sellor) {
+        // $(".loaderouter").css("display", "flex");
+        
+
+         fetchUserList(globalData.sellor._id, currentPage, pageSize);
 
 
       }
-    }, [globalData.sellor]);
+    }, [globalData.sellor, currentPage, pageSize]);
    
      
    
@@ -130,7 +237,8 @@ function page() {
        e.preventDefault();
        setErrors({});
        //console.log(globalData.sellor._id, addressData)
-       $(".loaderouter").css("display", "flex");
+       //$(".loaderouter").css("display", "flex");
+       setLoadingPopup(true)
        fetch(`${baseUrl}api/seller/user-management`, {
          method: "POST",
          body: JSON.stringify({
@@ -145,20 +253,24 @@ function page() {
        })
          .then((response) => {
            if (!response.ok) {
-             $(".loaderouter").css("display", "none");
+             //$(".loaderouter").css("display", "none");
+             setLoadingPopup(false)
              throw new Error("Network Error");
            }
            return response.json();
          })
          .then((res) => {
-           $(".loaderouter").css("display", "none");
+           //$(".loaderouter").css("display", "none");
+           setLoadingPopup(false)
            if (res.status) {
              //console.log(res.seller)
              //setAddressData(addressData);
              //toast.success("Success! Return Address Saved.");
+             setAddressData({name:"", email:"", mobile:""})
+             fetchUserList(globalData.sellor._id, currentPage, pageSize);
              const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('add-new-user-Modal'));
              modal.hide();
-             router.push("/seller/profile/user-management-list");
+             //router.push("/seller/profile/user-management-list");
              //$("#return-address-Modal").modal('hide')
  
              //$('#return-address-Modal').hide(true)
@@ -174,6 +286,12 @@ function page() {
          });
          
      }
+
+     function changeListSize(e){
+         const { name, value } = e.target
+         let link = `${baseUrl}seller/profile/user-management-list?size=${value}&page=${1}`
+         router.push(link); 
+       }
  
  
   return (
@@ -224,15 +342,18 @@ function page() {
               <div className="row">
                 <div className="col-lg-6 col-md-6 col-sm-6 col-xs-12">
                   <div className="breadcome-heading">
-                    <form role="search" className="sr-input-func">
+                    <form role="search" onSubmit={searchProduct} className="sr-input-func">
                       <input
                         type="text"
                         placeholder="Search"
                         className="search-int form-control"
+                        name='search'
+                        value={searchText.search}
+                        onChange={(e)=>updateSearchTaxt(e)}
                       />
-                      <a href="#">
+                      <Link href="#" onClick={searchProduct}>
                         <i className="far fa-search" />
-                      </a>
+                      </Link>
                     </form>
                   </div>
                 </div>
@@ -242,7 +363,8 @@ function page() {
               <div className="right_button">
                 <ul>
                   <li>
-                    <a href="#">Add New User</a>
+                    <a href="#" data-bs-toggle="modal"
+                  data-bs-target="#add-new-user-Modal">Add New User</a>
                   </li>
                 </ul>
               </div>
@@ -263,8 +385,10 @@ function page() {
               </tr>
             </thead>
             <tbody>
-              
-              {userList && userList.map((list, index) => {
+              {isLoading?(
+                <TableskeltonLoader totalRows={11} totalColumns={4} />
+            ):
+              userList && userList.map((list, index) => {
                 return (
 
                   <tr className="winner__table" key={`userList-${index}`}>
@@ -281,6 +405,7 @@ function page() {
                 </tr>
 
                 )
+              
 
               })
             }
@@ -293,14 +418,66 @@ function page() {
         <div className="fixed-table-pagination" style={{ padding: 0 }}>
           <div className="row">
             <div className="col-lg-3">
-              <select className="form-select">
-                <option>10 results per page</option>
-                <option>10 results per page</option>
+              <select className="form-select" name="size"
+                value={pagination?pagination.pageSize:10}
+                onChange={(e)=>changeListSize(e)}>
+                  <option value={20}>20 results per page</option>
+                  <option value={10}>10 results per page</option>
               </select>
             </div>
             <div className="col-lg-9">
               <div className="pull-right pagination">
-                <ul className="pagination">
+                {pagination && pagination.totalPages>1 ?(
+                                  <ul className="pagination">
+                
+                                    
+                                  <li className={`page-pre ${pagination.page <= 1? "pointer-events-none opacity-50 deactive_btn":""}`}>
+                                    <Link href="#" onClick={(e)=>{
+                                      if(pagination.page > 1){ 
+                                        paginationFun((pagination.page-1),  pagination.pageSize, e)
+                                      }else{
+                                        e.preventDefault();
+                                      }
+                                    }
+                                      }>
+                                      <i className="fa-solid fa-arrow-left" />
+                                    </Link>
+                                  </li>
+                                   
+                
+                            {Array.from({length:pagination.totalPages}, (_, i)=>{
+                                if (Math.abs(pagination.page - (i + 1)) <= 3) {
+                                  return ( 
+                                    <li className={`page-number current  ${i} ${pagination.page== (i+1)?'active':''}`} key={i} >
+                                        <a   href="#"  onClick={(e)=>paginationFun((i+1),  pagination.pageSize, e)}>
+                                          {i + 1} 
+                                        </a>
+                                    </li> 
+                                  );
+                                } 
+                                return null; 
+                               })} 
+                                  
+                                  <li
+                                      className={`page-next ${pagination.page == pagination.totalPages ? "pointer-events-none opacity-10 deactive_btn" : ""}`}
+                                    >
+                                      <Link
+                                        href="#"
+                                        onClick={(e) => {
+                                          if (pagination.page < pagination.totalPages) {
+                                            paginationFun(parseInt(pagination.page) + 1, pagination.pageSize, e);
+                                          } else {
+                                            e.preventDefault();
+                                          }
+                                        }}
+                                      >
+                                        <i className="fa-solid fa-arrow-right" />
+                                      </Link>
+                                    </li>
+                                  </ul>
+                              ):null}
+                
+                { /* <ul className="pagination">
                   <li className="page-pre">
                     <a href="#">
                       <i className="fa-solid fa-arrow-left" />
@@ -321,6 +498,7 @@ function page() {
                     </a>
                   </li>
                 </ul>
+                */ }
               </div>
             </div>
           </div>
@@ -428,11 +606,16 @@ function page() {
             type="button"
             className="orange-btn cancel"
             data-bs-dismiss="modal"
+            disabled={loadingPopup}
+
           >
             Cancel
           </button>
-          <button className="orange-btn">
-            Save
+          <button className="orange-btn"
+          disabled={loadingPopup}
+
+          >
+             {loadingPopup ? 'Please wait...' : 'Save'}
           </button>
           
         </div>

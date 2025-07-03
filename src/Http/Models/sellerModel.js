@@ -50,7 +50,7 @@ const sellerSchema = new Schema({
     status:{
         type:String,
         trim:true,
-        enum: ['Active', 'Deactive'],
+        enum: ['Active', 'Deactive', 'Pending'],
         default: 'Active',
     },
     approvalStatus:{

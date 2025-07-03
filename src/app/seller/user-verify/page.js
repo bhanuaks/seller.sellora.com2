@@ -26,6 +26,9 @@ function Page() {
     const [errors, setErrors] =useState({})
   
     const [viewPassword, setViewPassword] = useState(false)
+    const [viewPasswordConfirm, setViewPasswordConfirm] = useState(false)
+
+    
 
     useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -206,14 +209,14 @@ function Page() {
                                   </label>
                                 
                                   <input
-                                    type="password"
+                                    type={`${viewPasswordConfirm?'text':"password"}`}
                                     className="form-control"
                                     placeholder="Confirm Password"
                                     name='confirm_password' 
                                     value={loginData.confirm_password}
                                     onChange={(e)=>updateLoginData(e)}
                                   />
-                                    <i className={`toggle-password fa fa-fw fa-eye${!viewPassword?'-slash':""}`} onClick={()=>setViewPassword(!viewPassword)}/>
+                                    <i className={`toggle-password fa fa-fw fa-eye${!viewPasswordConfirm?'-slash':""}`} onClick={()=>setViewPasswordConfirm(!viewPasswordConfirm)}/>
        
                                 
                                 {errors.confirm_password && errors.confirm_password != ""? ( 

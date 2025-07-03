@@ -27,7 +27,7 @@ export async function GET(request) {
      return responseFun(true, permissionMap, 200)
         
     }catch(error){
-        console.log(error);
+        // console.log(error);
         return responseFun(false,{error},200)
     }
         
