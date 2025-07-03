@@ -69,3 +69,27 @@ export async function POST(request) {
          
 }
 
+export async function DELETE(request) {
+    await connectDb();
+    const { token } = await request.json();
+    
+    const user_id = atob(token);
+    try {
+    if(user_id){
+       const sellerDetail = await sellerModel.findByIdAndDelete(user_id);
+        const sellerDetailPermission = await SellerUserPermissionModel.deleteMany({ user_id });
+          
+
+        return responseFun(true,{message:'Permission delete successfully.'}, 200)
+    } else {
+        return responseFun(false,{message:'Seller not found.'}, 403)
+    }
+    
+    }catch(error){
+        console.log(error);
+        return responseFun(false,{error}, 200)
+    }
+
+         
+}
+

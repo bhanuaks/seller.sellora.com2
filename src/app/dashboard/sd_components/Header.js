@@ -10,6 +10,7 @@ const Header = () => {
   const [businessData, setBusinessData] = useState(null);
   const [sellor, setSellor] = useState(null);
   const pathname = usePathname();
+  const [sellerCount, setSellerCount] = useState(0)
 
   useEffect(() => {
     // if (globalData.sellor) {
@@ -30,6 +31,9 @@ const Header = () => {
         .then((res) => {
           // $(".loaderouter").css("display", "none");
           if (res.status) {
+            
+            
+            setSellerCount(res.data.sellerCount)
             setSellor(res.data.data);
             setGlobalData((preData) => ({ sellor: res.data.data }));
             if (res.data.referData) {
@@ -589,12 +593,21 @@ const Header = () => {
                                         : ""
                                     }`}
                                   >
+                                    {sellerCount > 0 ?
+                                    <Link
+                                      href={`/seller/profile/user-management-list`}
+                                      className="title"
+                                    >
+                                      User Management
+                                    </Link>
+                                    :
                                     <Link
                                       href={`/seller/profile/user-management`}
                                       className="title"
                                     >
                                       User Management
                                     </Link>
+                                    }
                                   </div>
                                 </div>
                                 <div className="order-card2">
@@ -888,12 +901,23 @@ const Header = () => {
                                         : ""
                                     }`}
                                   >
+                                    {sellerCount > 0 ?
+                                    <Link
+                                      href={`/seller/profile/user-management-list`}
+                                      className="title"
+                                    >
+                                      User Management
+                                    </Link>
+                                    :
                                     <Link
                                       href={`/seller/profile/user-management`}
                                       className="title"
                                     >
                                       User Management
-                                    </Link>
+                                    </Link>  
+                                    }
+
+
                                   </div>
                                 </div>
                                 <div className="order-card2">

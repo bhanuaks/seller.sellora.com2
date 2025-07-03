@@ -67,11 +67,16 @@ function page() {
         const [pageSize, setPageSize] = useState(10)
         useEffect(() => {
             if (typeof window !== 'undefined') {
+              //console.log('kkkkkkkkkk')
               const queryParam = new URLSearchParams(window.location.search);
               //const tokenValue = params.get('token');
               //setToken(tokenValue);
+              if(pageSize == 1 && currentPage == 10){
+
+              } else {
               setCurrentPage(sanitize(queryParam.get('page')));
               setPageSize(sanitize(queryParam.get('size')))
+              }
             }
           }, []);
           
@@ -292,6 +297,43 @@ function searchProduct(e){
          let link = `${baseUrl}seller/profile/user-management-list?size=${value}&page=${1}`
          router.push(link); 
        }
+
+       const statusChange = (e, id) => {
+           // $(".loaderouter").css("display", "flex");
+                  fetch(`${baseUrl}api/seller/user-status-change`, {
+                    method: "POST",
+                    body: JSON.stringify({
+                      user_id:id,
+                      
+                      
+                    }),
+                  })
+                    .then((response) => {
+                      if (!response.ok) {
+                        
+                        $(".loaderouter").css("display", "none");
+                        throw new Error("Network Error");
+                      }
+                      return response.json();
+                    })
+                    .then((res) => {
+                      $(".loaderouter").css("display", "none");
+                      
+                      
+                      if (res.status) {
+                        
+                        fetchUserList(globalData.sellor._id, currentPage, pageSize);           
+                        
+                        
+            
+                      } else if (res.data.status_code == 403) {
+                        
+                        fetchUserList(globalData.sellor._id, currentPage, pageSize);
+                        
+                      }
+                    });
+
+       }
  
  
   return (
@@ -396,7 +438,15 @@ function searchProduct(e){
                     <div className="name_348937">{list.name}</div>
                   </td>
                   <td>{list.email}</td>
-                  <td>{list.status}</td>
+                  <td>
+                    {list.status != 'Pending' ?
+                    <a href="#" onClick={(e) => statusChange(e, list._id)}>{list.status}</a>
+                    :
+                    list.status
+
+                  }
+                    </td>
+                  
                   <td>
                     <div className="manage_permission">
                       <Link href={`${baseUrl}/seller/profile/manage-permission?token=${btoa(list._id)}`}>Manage Permission</Link>
