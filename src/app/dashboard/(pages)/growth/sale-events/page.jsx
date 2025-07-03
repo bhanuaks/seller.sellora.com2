@@ -1,6 +1,6 @@
 "use client"
 import EventSkelton from '@/app/skeleton_loader/EventSkelton'
-import { baseUrl, websiteUrl } from '@/Http/helper'
+import { baseUrl, checkDiscountApplyTime, websiteUrl } from '@/Http/helper'
 import { fileBasePath } from '@/Http/urlHelper'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -135,8 +135,8 @@ function Page() {
         {eventList.length>0 && eventList.map((event, index)=>(
 
           <div className="col-lg-4" key={index}>
-          <div className="upcoming_event">
-            <div className="d-flex align-items-center">
+          <div className="upcoming_event" >
+            <div className="d-flex align-items-center"  style={{ opacity:`${status=="Expired"?"0.4":"1"}`}}>
               {/* black_friday christmas_sale */}
               <div className="_immg_934">
               <img src={`${websiteUrl}${event.image}`} 
@@ -152,20 +152,20 @@ function Page() {
                 </p>
               </div>
             </div>
-            <div className="list_34847">
+            <div className="list_34847" style={{ opacity:`${status=="Expired"?"0.4":"1"}`}}>
               <ul>
                 <li>
-                <img src={`${baseUrl}front/assets/images/cart_01.jpg`} 
+                <img src={`/front/assets/images/cart_01.jpg`} 
                   alt=''  />   
                   More Orders
                 </li>
                 <li>
-                <img src={`${baseUrl}front/assets/images/visibility.jpg`} 
+                <img src={`/front/assets/images/visibility.jpg`} 
                   alt=''  />   
                   More Visibility
                 </li>
                 <li>
-                <img src={`${baseUrl}front/assets/images/shoppers.jpg`} 
+                <img src={`/front/assets/images/shoppers.jpg`} 
                   alt='' />   
                   More Shoppers
                 </li>
@@ -173,8 +173,25 @@ function Page() {
               <div className="clearfix" />
             </div>
             <div className="apply_button_e4437983">
-               
-              <Link href={`${baseUrl}dashboard/growth/event/${event.slug}`}>Apply</Link> 
+               {status=="Expired"? ( 
+                    <span href={`/dashboard/growth/event/${event.slug}`} aria-disabled={true} >Expired</span> 
+               ):(() => {
+                // if(checkDiscountApplyTime(event.startDate, event.closeDate, event.startTime, event.closeTime)){
+                  return (
+                    <Link href={`/dashboard/growth/event/${event.slug}`}>
+                      {event.appliedInfo ? "Edit" : "Apply"}
+                    </Link>  
+                  )
+                // }else{
+                //   return (
+                //       <span >
+                //       Expired 
+                //       </span>  
+                //     )
+                   
+                // }
+                 
+                })()} 
             </div>
           </div>
         </div>

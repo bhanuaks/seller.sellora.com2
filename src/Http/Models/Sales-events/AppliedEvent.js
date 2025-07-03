@@ -50,7 +50,12 @@ const appliedEventProductSchema = new Schema({
     discount:{
         type:Number, 
         default:0, 
-    }
+    },
+
+    seller_id:{
+        type:mongoose.Types.ObjectId,
+        ref:"Seller"
+    },
 
 
 }, {timestamps:true})

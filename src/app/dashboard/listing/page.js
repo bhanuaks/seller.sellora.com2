@@ -35,6 +35,7 @@ const page = () => {
   const [refreshList, setRefreshList] = useState(1)
   const [totalData, setTotalData] = useState({})
 
+  const [firstLoading, setFirstLoading] = useState(true)
   const [isLoading, setIsLoading] = useState(false)
 
 
@@ -103,41 +104,40 @@ const page = () => {
         }
  
     // $('.loaderouter').css('display',"flex") 
-    setIsLoading(true)
-      fetch(`${baseUrl}api/seller/product/product-listing?seller_id=${globalData.sellor._id}&page=${currentPage}&pageSize=${pageSize}&type=${type}`,{
-        method:"GET", 
-    }).then((response)=>{
-        if(!response.ok){
-           setIsLoading(false)
-            // $('.loaderouter').css('display',"none") 
-            throw new Error("Network Error")
-        }
-        return response.json();
-    }).then((res)=>{ 
-        if(res.status){
-          setProductList(res.data.list)
-          setPagination(res.data.pagination)
-          setTotalData(res.data.totalData || {})
+     searchProduct();
+    // setIsLoading(true)
+    //   fetch(`${baseUrl}api/seller/product/product-listing?seller_id=${globalData.sellor._id}&page=${currentPage}&pageSize=${pageSize}&type=${type}`,{
+    //     method:"GET", 
+    // }).then((response)=>{
+    //     if(!response.ok){
+    //        setIsLoading(false)
+    //         // $('.loaderouter').css('display',"none") 
+    //         throw new Error("Network Error")
+    //     }
+    //     return response.json();
+    // }).then((res)=>{ 
+    //     if(res.status){
+    //       setProductList(res.data.list)
+    //       setPagination(res.data.pagination)
+    //       setTotalData(res.data.totalData || {})
           
-        } 
-        // $('.loaderouter').css('display',"none") 
-        setIsLoading(false)
-    })
+    //     } 
+    //     // $('.loaderouter').css('display',"none") 
+    //     setIsLoading(false)
+    // })
   }
   },[globalData.sellor, currentPage, pageSize,refreshList, type])
 
 
   useEffect(()=>{
-    // control search time
-    const timeoutId = setTimeout(() => {
-      if(type != "Errors"){ 
-        searchProduct()
-      }
-      // else{
-      //   searchErrorProduct() 
-      // }
-    }, 300); 
-    return ()=> clearTimeout(timeoutId)
+     
+        const timeoutId = setTimeout(() => {
+          if(type != "Errors"){ 
+            searchProduct()
+          } 
+        }, 300); 
+        return ()=> clearTimeout(timeoutId)
+    
   },[searchText.search, searchText.searchBy])
 
   function searchProduct(){
@@ -148,8 +148,7 @@ const page = () => {
       params.append("pageSize", pageSize || 10);
       if(searchText.search){ 
         params.append("searchText", searchText.search);
-        params.append("searchBy", searchText.searchBy);
-        
+        params.append("searchBy", searchText.searchBy); 
       }
       if(type){  
         params.append("type", type); 
@@ -165,15 +164,17 @@ const page = () => {
           }
         } 
 
-         
+         setIsLoading(true);
           fetch(`${baseUrl}api/seller/product/product-listing?${params.toString()}`,{
               method:"GET", 
           }).then((response)=>{
-              if(!response.ok){ 
-                  throw new Error("Network Error")
+          setIsLoading(false)
+              if(!response.ok){
+                  throw new Error("Network Error");
               }
               return response.json();
-          }).then((res)=>{ 
+
+          }).then((res)=>{
               if(res.status){
                 setProductList(res.data.list)
                 setPagination(res.data.pagination)
@@ -350,6 +351,7 @@ const page = () => {
     let link = `${baseUrl}dashboard/listing?size=${size}&page=${page}&type=${type}`
     router.push(link); 
   }
+  
   function changeListSize(e){
     const { name, value } = e.target
     let link = `${baseUrl}dashboard/listing?size=${value}&page=${1}`
@@ -450,7 +452,7 @@ const page = () => {
   </div>
   <div className="container">
     <div>
-      <div className="table-responsive">
+      <div className="table-responsive fixTableHead">
         <table
           className="table table-bordered table-striped"
           style={{ marginTop: 20 }}

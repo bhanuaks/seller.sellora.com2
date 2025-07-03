@@ -19,8 +19,8 @@ export async function GET(request) {
     
     // const condition = searchParams.get('condition')
     // const listing_quantity = searchParams.get('listing_quantity')
-    const min_price = searchParams.get('min_price') || 0
-    const max_price = searchParams.get('max_price') || 1000000
+    const min_price = searchParams.get('min_price') || null
+    const max_price = searchParams.get('max_price') || null
     const variantsFilterType = searchParams.get('variants')
 
     let page = parseInt(searchParams.get('page')) || 1
@@ -403,7 +403,7 @@ async function publishedProduct(requestData) {
         //         { listingStatus:1 }
         //     ]
         // });
-         
+       
         const productListing = await productModel.aggregate([
             {
                 $match:matchCondition,
@@ -789,10 +789,15 @@ export async function countTotalProduct(requestData){
           }
         },
         {
-          $match: {
-            "variants.0": { $exists: true } // only include products with at least 1 matching variant
+          $unwind:{
+            path:"$variants"
           }
         },
+        // {
+        //   $match: {
+        //     "variants.0": { $exists: true } // only include products with at least 1 matching variant
+        //   }
+        // },
         {
           $count: "totalProcessing"
         }

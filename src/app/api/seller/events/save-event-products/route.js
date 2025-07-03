@@ -53,6 +53,7 @@ export async function POST(request) {
             }
                const productData = selectedProduct.map((prod)=>{
                     return {
+                        seller_id        : seller_id,
                         event_id        : event_id,
                         appliedEventId  : AppliedEvent._id,
                         product_id      : prod.product_id,

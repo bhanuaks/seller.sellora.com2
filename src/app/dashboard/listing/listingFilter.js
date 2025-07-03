@@ -29,8 +29,7 @@ const ListingFilter = ({seller, resetFilter, submitFilter, filterData, setFilter
 
     function updatefilterData(e){
       const { name, value, checked } = e.target
-
-        console.log({filterData});
+ 
       if (name === "brand") {
         setFilterData((prevData) => {
           const brandList = prevData.brand || [];
@@ -288,6 +287,14 @@ const ListingFilter = ({seller, resetFilter, submitFilter, filterData, setFilter
                         onChange={(e)=>updatefilterData(e)}
                         value={filterData.min_price || ""}
                         name='min_price'
+                         onBlur={() => { 
+                            if (Number(filterData.max_price) < Number(filterData.min_price)) {
+                              setFilterData((preData) => ({
+                                ...preData, 
+                                max_price: filterData.min_price 
+                              }))
+                            }
+                          }}
                         />
                     </li>
                     <li>
@@ -295,6 +302,14 @@ const ListingFilter = ({seller, resetFilter, submitFilter, filterData, setFilter
                         onChange={(e)=>updatefilterData(e)}
                         value={filterData.max_price || ""}
                         name='max_price'
+                       onBlur={() => { 
+                            if (Number(filterData.max_price) < Number(filterData.min_price)) {
+                              setFilterData((preData) => ({
+                                ...preData, 
+                                max_price: filterData.min_price 
+                              }))
+                            }
+                          }}
                         />
                     </li>
                   </ul>

@@ -1,13 +1,14 @@
 "use client"
 import { baseUrl, convertTo12Hour, websiteUrl } from "@/Http/helper";
 import Image from "next/image";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import EventProductSection from "./EventProductSection";
+import Swal from "sweetalert2";
 
 function Page() {
 
-  
+    const router = useRouter();
     const [event, setEvent] = useState(null); 
     const [selectedProduct, setSelectedProduct] = useState([])
     const [selectedDiscount, setSelectedDiscount] = useState(0)
@@ -24,8 +25,32 @@ function Page() {
         })
         .then((res)=>{
           if(res.status){
+            if(res.data.event.expired){
+              Swal.fire({
+                text:"This event has been expired.",
+                icon:"error",
+                title:"Validation Error"
+              }).then(()=>{
+                router.push("/dashboard/growth/sale-events");
+              })
+            }
             setEvent(res.data.event); 
-            setSelectedDiscount(res.data.event.discountData[0].discountUpTo); 
+            if(res.data.selectedDiscount){
+              setSelectedDiscount(res.data.selectedDiscount);  
+            }else{
+              setSelectedDiscount(res.data.event.discountData[0].discountUpTo);  
+            }
+            if(res.data.selectedProduct){
+              const sProduct = res.data.selectedProduct.map((item)=>{
+                return {
+                  product_id:item.product_id,
+                  variant_id:item.variant_id,
+                }
+              })
+            
+              setSelectedProduct(sProduct)
+            }
+              
           }
         })
         .catch((error)=>{
