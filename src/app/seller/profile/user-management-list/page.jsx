@@ -242,7 +242,7 @@ function page() {
               <div className="right_button">
                 <ul>
                   <li>
-                    <a href="add-catalog.html">Add New User</a>
+                    <a href="#">Add New User</a>
                   </li>
                 </ul>
               </div>

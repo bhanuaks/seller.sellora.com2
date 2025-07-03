@@ -2,10 +2,11 @@ import { getLoginSeller } from "@/app/api/getLoginUser/route";
 import { responseFun } from "@/Http/helper";
 import { productModel } from "@/Http/Models/productModel";
 import mongoose from "mongoose";
+import { connectDb } from "../../../../../../lib/dbConnect";
 
 
 export async function GET(request) {
-    
+    await connectDb();
 
      const { searchParams } = new URL(request.url); 
     const searchBy = searchParams.get("searchBy") || null;

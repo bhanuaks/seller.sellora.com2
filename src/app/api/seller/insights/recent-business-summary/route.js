@@ -9,7 +9,7 @@ export async function GET(request) {
   connectDb();
 
   const { searchParams } = new URL(request.url);
-    const reportDay = searchParams.get("filter") || "";
+  const reportDay = searchParams.get("filter") || "";
 
   const seller = await getLoginSeller();
   if (!seller) {
@@ -128,11 +128,11 @@ export async function GET(request) {
       unit: result[0].netSale[0]?.unit || 0,
     };
 
-    const product = await sellingProduct(seller_id, filterDays);
-    console.log({product});
     return responseFun(
       true,
-      {product, grossSales, cancellation, returnDa, afterCancelData, netSale },
+      {
+        data: { grossSales, cancellation, returnDa, afterCancelData, netSale },
+      },
       200
     );
   } catch (error) {
@@ -141,136 +141,288 @@ export async function GET(request) {
   }
 }
 
+export async function POST(request) {
 
-
-async function sellingProduct(seller_id, reportDay) {
-
- 
-    try{
-
-
-
-const product = await productModel.aggregate([
-  {
-    $match: {
-      seller_id: new mongoose.Types.ObjectId(seller_id),
-      save_as_draft: "0",
-    },
-  },
-  {
-    $lookup: {
-      from: "productvarinats",
-      let: { productId: "$_id" },
-      pipeline: [
-        {
-          $match: {
-            $expr: {
-              $and: [
-                { $eq: ["$product_id", "$$productId"] },
-                // { $eq: ["$isProcessing", "Approved"] },
-                // { $eq: ["$listingStatus", 1] }
-              ]
-            }
-          }
-        }
-      ],
-      as: "varinat"
-    }
-  },
-//   {
-//     $unwind: {
-//       path: "$varinat",
-//       preserveNullAndEmptyArrays: false
-//     }
-//   },
-//   {
-//     $lookup: {
-//       from: "orderproducts",
-//       let: {
-//         productId: "$_id",
-//         variantId: "$varinat._id",
-//         reportDay: reportDay
-//       },
-//       pipeline: [
-//         {
-//           $match: {
-//             $expr: {
-//               $and: [
-//                 { $eq: ["$product_id", "$$productId"] },
-//                 { $eq: ["$variant_id", "$$variantId"] },
-//                 { $gte: ["$createdAt", "$$reportDay"] }
-//               ]
-//             }
-//           }
-//         },
-//         {
-//           $group: {
-//             _id: null,
-//             grossSale: { $sum: "$price" },
-//             grossUnit: { $sum: "$quantity" },
-//             afterCancelSale: {
-//               $sum: {
-//                 $cond: [
-//                   { $not: { $in: ["$order_status", [5, 6]] } },
-//                   "$price",
-//                   0
-//                 ]
-//               }
-//             },
-//             afterCancelUnit: {
-//               $sum: {
-//                 $cond: [
-//                   { $not: { $in: ["$order_status", [5, 6]] } },
-//                   "$quantity",
-//                   0
-//                 ]
-//               }
-//             },
-//             cancellationSale: {
-//               $sum: {
-//                 $cond: [
-//                   { $in: ["$order_status", [5, 6]] },
-//                   "$price",
-//                   0
-//                 ]
-//               }
-//             },
-//             cancellationUnit: {
-//               $sum: {
-//                 $cond: [
-//                   { $in: ["$order_status", [5, 6]] },
-//                   "$quantity",
-//                   0
-//                 ]
-//               }
-//             }
-//           }
-//         }
-//       ],
-//       as: "orderStats"
-//     }
-//   },
-//   {
-//     $addFields: {
-//       grossSale: { $ifNull: [ { $arrayElemAt: [ "$orderStats.grossSale", 0 ] }, 0 ] },
-//       grossUnit: { $ifNull: [ { $arrayElemAt: [ "$orderStats.grossUnit", 0 ] }, 0 ] },
-//       afterCancelSale: { $ifNull: [ { $arrayElemAt: [ "$orderStats.afterCancelSale", 0 ] }, 0 ] },
-//       afterCancelUnit: { $ifNull: [ { $arrayElemAt: [ "$orderStats.afterCancelUnit", 0 ] }, 0 ] },
-//       cancellationSale: { $ifNull: [ { $arrayElemAt: [ "$orderStats.cancellationSale", 0 ] }, 0 ] },
-//       cancellationUnit: { $ifNull: [ { $arrayElemAt: [ "$orderStats.cancellationUnit", 0 ] }, 0 ] }
-//     }
-//   },
-  {
-    $project: {
-      orderStats: 0 // remove temp array if not needed
-    }
+  const body = await request.json();
+  const page = parseInt(body.page) || 1;
+  const limit = parseInt(body.limit) || 20;
+  const searchText = body.searchText || "";
+  const status = body.status || "";
+  const skip = (page - 1) * limit;
+  
+   const seller = await getLoginSeller();
+  if (!seller) {
+    return responseFun(false, { message: "unauthorized user" }, 403);
   }
-]);
+  const seller_id = seller._id;
 
+  const productQuery = {
+    seller_id: new mongoose.Types.ObjectId(seller_id),
+          save_as_draft: "0", 
+  }
 
-    return  product
-    }catch(error){
-        console.log(error);
-        return []
+  if(searchText){
+    productQuery.product_name = { $regex: searchText, $options: "i" };
+  }
+
+  try {
+
+    const pipeline = [
+      {
+        $match:productQuery
+      },
+      {
+        $lookup: {
+          from: "productvariants",
+          let: { productId: "$_id" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ["$product_id", "$$productId"] },
+                    { $eq: ["$isProcessing", "Approved"] },
+                  ],
+                },
+              },
+            },
+          ],
+          as: "variant",
+        },
+      },
+
+      {
+        $unwind: {
+          path: "$variant",
+          preserveNullAndEmptyArrays: false,
+        },
+      },
+      {
+        $lookup: {
+          from: "orderproducts",
+          let: {
+            productId: "$_id",
+            variantId: "$variant._id",
+            // reportDay: reportDay,
+          },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ["$product_id", "$$productId"] },
+                    { $eq: ["$variant_id", "$$variantId"] },
+                    // { $gte: ["$createdAt", "$$reportDay"] }
+                  ],
+                },
+              },
+            },
+            {
+              $group: {
+                _id: null,
+                grossSale: { $sum: "$price" },
+                grossUnit: { $sum: "$quantity" },
+                afterCancelSale: {
+                  $sum: {
+                    $cond: [
+                      { $not: { $in: ["$order_status", [5, 6]] } },
+                      "$price",
+                      0,
+                    ],
+                  },
+                },
+                afterCancelUnit: {
+                  $sum: {
+                    $cond: [
+                      { $not: { $in: ["$order_status", [5, 6]] } },
+                      "$quantity",
+                      0,
+                    ],
+                  },
+                },
+                cancellationSale: {
+                  $sum: {
+                    $cond: [{ $in: ["$order_status", [5, 6]] }, "$price", 0],
+                  },
+                },
+                cancellationUnit: {
+                  $sum: {
+                    $cond: [{ $in: ["$order_status", [5, 6]] }, "$quantity", 0],
+                  },
+                },
+                netSale: {
+                  $sum: {
+                    $cond: [
+                      { $in: ["$order_status", [1, 2, 3, 4]] },
+                      "$price",
+                      0,
+                    ],
+                  },
+                },
+                netUnit: {
+                  $sum: {
+                    $cond: [
+                      { $in: ["$order_status", [1, 2, 3, 4]] },
+                      "$quantity",
+                      0,
+                    ],
+                  },
+                },
+
+                returnSale: {
+                  $sum: {
+                    $cond: [{ $in: ["$order_status", [8]] }, "$price", 0],
+                  },
+                },
+                returnUnit: {
+                  $sum: {
+                    $cond: [{ $in: ["$order_status", [8]] }, "$quantity", 0],
+                  },
+                },
+              },
+            },
+          ],
+          as: "orderStats",
+        },
+      },
+      {
+        $addFields: {
+          netSale: {
+            $ifNull: [{ $arrayElemAt: ["$orderStats.netSale", 0] }, 0],
+          },
+          netUnit: {
+            $ifNull: [{ $arrayElemAt: ["$orderStats.netUnit", 0] }, 0],
+          },
+
+          returnSale: {
+            $ifNull: [{ $arrayElemAt: ["$orderStats.returnSale", 0] }, 0],
+          },
+          returnUnit: {
+            $ifNull: [{ $arrayElemAt: ["$orderStats.returnUnit", 0] }, 0],
+          },
+
+          grossSale: {
+            $ifNull: [{ $arrayElemAt: ["$orderStats.grossSale", 0] }, 0],
+          },
+          grossUnit: {
+            $ifNull: [{ $arrayElemAt: ["$orderStats.grossUnit", 0] }, 0],
+          },
+          afterCancelSale: {
+            $ifNull: [{ $arrayElemAt: ["$orderStats.afterCancelSale", 0] }, 0],
+          },
+          afterCancelUnit: {
+            $ifNull: [{ $arrayElemAt: ["$orderStats.afterCancelUnit", 0] }, 0],
+          },
+          cancellationSale: {
+            $ifNull: [{ $arrayElemAt: ["$orderStats.cancellationSale", 0] }, 0],
+          },
+          cancellationUnit: {
+            $ifNull: [{ $arrayElemAt: ["$orderStats.cancellationUnit", 0] }, 0],
+          },
+        },
+      },
+    ]
+
+   if (status === "Non") {
+      pipeline.push({
+        $match: {
+          orderStats: { $eq: [] }
+        }
+      });
+    }else if(status == "Top"){
+      pipeline.push({
+        $match: {
+          orderStats: { $not: { $size: 0 } }
+        }
+      });
     }
+
+     if(status == "New"){
+        pipeline.push({
+        $sort:{
+          createdAt:-1
+        }
+      })
+    }else{
+       pipeline.push({
+          $sort:{
+            grossUnit:-1
+          }
+        })
+    }
+    
+
+       pipeline.push({
+        $project: {
+          netUnit: 1,
+          netSale: 1,
+          returnSale: 1,
+          returnUnit: 1,
+          grossSale: 1,
+          grossUnit: 1,
+          afterCancelSale: 1,
+          afterCancelUnit: 1,
+          cancellationSale: 1,
+          cancellationUnit: 1,
+
+          _id: 1,
+          product_name: 1,
+          main_image: 1,
+          variant: {
+            _id: "$variant._id",
+            sku: "$variant.sku",
+            sin: "$variant.sin",
+            msrp: "$variant.msrp",
+            consumerSalePrice: "$variant.consumerSalePrice",
+            businessSalePrice: "$variant.businessSalePrice",
+            currency: "$variant.currency",
+            stock: "$variant.stock",
+            customAttributes: "$variant.customAttributes",
+            withImage: "$variant.withImage",
+            image_1: "$variant.image_1",
+            image_1: "$variant.image_1",
+          },
+        },
+      },
+       {
+        $facet: {
+          data: [
+            { $skip: skip },
+            { $limit: limit },
+          ],
+          totalCount: [
+            { $count: "count" },
+          ],
+        },
+      },
+
+    )
+    const product = await productModel.aggregate(pipeline);
+
+
+    const total = product[0]?.totalCount[0]?.count || 0;
+    const productData = product[0]?.data || [];
+  const pagination = {
+      totalCount:total,
+      page:page,
+      pageSize:limit,
+      totalPages: Math.ceil(total / limit),
+    }
+    return responseFun(
+      true,
+      {
+         product:productData , pagination
+      },
+      200
+    );
+  } catch (error) {
+    console.log(error);
+   return responseFun(
+      false,
+      {
+         message:error.message
+      },
+      500
+    );
+  }
 }
