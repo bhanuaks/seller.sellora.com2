@@ -2,21 +2,25 @@
 import React, { useEffect, useState } from 'react'
 import RightNav from '../component/RightNav'
 import Link from 'next/link'
-import { useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { baseUrl } from '@/Http/helper'
 import SubMenu from './SubMenu'
 import { toast, ToastContainer } from 'react-toastify'
+import TableskeltonLoader from '@/app/skeleton_loader/TableskeltonLoader'
 
 function page() {
 
   //const searchParams = useSearchParams()
   //const token = searchParams.get('token')
-  
+  const router = useRouter();
   const [menuList, setMenuList] = useState([])
   const [userDetail, setUserDetail] = useState([])
   const [token, setToken] = useState()
   const [userPermission, setUserPermission] = useState({})
   const [show, setShow] = useState(false)
+  const [loadingPopup, setLoadingPopup] = useState(false);
+  const [loadingPopupRemUser, setLoadingPopupRemUser] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
   
 
 const fetchUserDetail = (token) => {
@@ -54,6 +58,7 @@ fetch(
   useEffect(() => {
         //console.log(token)
         if(token){
+          setIsLoading(true)
         fetch(
             `${baseUrl}api/get-menu-list?token=${token}`,
             {
@@ -65,6 +70,7 @@ fetch(
               return response.json();
             })
             .then((res) => {
+              setIsLoading(false)
               $(".loaderouter").css("display", "none");
               if (res.status) {
                 
@@ -103,6 +109,7 @@ const popupCancel = () => {
   setUserDetail([])
   fetchUserDetail(token);
   setShow(false)
+  router.push("/seller/profile/user-management-list");
 }
 
 const popupSubmit = (e) => {
@@ -111,12 +118,62 @@ e.preventDefault();
       //setErrors({});
   
       
-      
+      setLoadingPopup(true)
+      setLoadingPopupRemUser(true)
     $(".loaderouter").css("display", "flex");
       fetch(`${baseUrl}api/seller/user-permission`, {
         method: "POST",
         body: JSON.stringify({
           userDetail:userDetail,
+          token:token
+          
+        }),
+      })
+        .then((response) => {
+          if (!response.ok) {
+            setLoadingPopup(false)
+            setLoadingPopupRemUser(false)
+            $(".loaderouter").css("display", "none");
+            throw new Error("Network Error");
+          }
+          return response.json();
+        })
+        .then((res) => {
+          $(".loaderouter").css("display", "none");
+          setLoadingPopup(false)
+          setLoadingPopupRemUser(false)
+          router.push("/seller/profile/user-management-list");
+          if (res.status) {
+            
+            //toast.success("Permission change successfully.");
+            fetchUserDetail(token);
+            setShow(false)
+            //const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('edit-Modal'));
+            //modal.hide();
+
+          } else if (res.data.status_code == 403) {
+            //setErrors(ress.data.errors);
+           // toast.warning("Seller not found.");
+            fetchUserDetail(token);
+            setShow(false)
+            //const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('edit-Modal'));
+            //modal.hide();
+          }
+        });
+        
+
+
+}
+
+const removeUser = (e) => {
+e.preventDefault();
+      //setErrors({});
+  
+    //$(".loaderouter").css("display", "flex");
+      fetch(`${baseUrl}api/seller/user-permission`, {
+        method: "DELETE",
+        body: JSON.stringify({
+          
           token:token
           
         }),
@@ -130,25 +187,25 @@ e.preventDefault();
         })
         .then((res) => {
           $(".loaderouter").css("display", "none");
+          
+          router.push("/seller/profile/user-management-list");
           if (res.status) {
             
-            toast.success("Permission change successfully.");
-            fetchUserDetail(token);
-            setShow(false)
+            //toast.success("Permission change successfully.");
+            //fetchUserDetail(token);
+            //setShow(false)
             //const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('edit-Modal'));
             //modal.hide();
 
           } else if (res.data.status_code == 403) {
             //setErrors(ress.data.errors);
-            toast.warning("Seller not found.");
-            fetchUserDetail(token);
-            setShow(false)
+           // toast.warning("Seller not found.");
+            //fetchUserDetail(token);
+            //setShow(false)
             //const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('edit-Modal'));
             //modal.hide();
           }
         });
-        
-
 
 }
 
@@ -212,7 +269,7 @@ e.preventDefault();
           </div>
           {/* <label><input type="radio" name="choice" checked> Adjust access, add/remove users, delegate admin roles, and oversee all sites from a single hub</label> */}
         </div>
-        <div className="search_outer2">
+       { /* <div className="search_outer2">
           <div className="row">
             <div className="col-lg-9">
               <div className="row">
@@ -239,9 +296,14 @@ e.preventDefault();
             </div>
           </div>
         </div>
+        */ }
         {/* ======================Listing-table==open============================= */}
         
-        {menuList && menuList.map((list, index) => {
+        {isLoading?(
+                        <TableskeltonLoader totalRows={11} totalColumns={4} />
+                    ):
+        
+        menuList && menuList.map((list, index) => {
 
           let subMenuList;
           if(list.submenu.length > 0){
@@ -435,7 +497,9 @@ e.preventDefault();
               <div className="addvertise_ment_10">
                 {" "}
                 <span className="modified">{userDetail?.length} Modified</span>{" "}
-                
+                <a href="#" onClick={removeUser}
+                disabled={loadingPopup}
+                ><span class="remove-user">{loadingPopupRemUser ? 'Please wait...' : 'Remove User'}</span></a>
               </div>
             </div>
             <div className="col-lg-5">
@@ -445,10 +509,13 @@ e.preventDefault();
                   className="orange-btn cancel3"
                   data-bs-dismiss="modal"
                   onClick={popupCancel}
+                  disabled={loadingPopup}
                 >
                   Cancel
                 </button>
-                <button type="button" className="white-btn" onClick={popupSubmit}>
+                <button type="button" className="white-btn" onClick={popupSubmit}
+                disabled={loadingPopup}
+                >
                   Save Changes
                 </button>
               </div>

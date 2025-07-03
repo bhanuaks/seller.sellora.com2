@@ -33,6 +33,7 @@ const { globalData, setGlobalData } = useContext(AppContext);
     const [loadingPopup, setLoadingPopup] = useState(false);
     
     
+    
     useEffect(() => {
         const input = document.querySelector("#mobile_code");
     
