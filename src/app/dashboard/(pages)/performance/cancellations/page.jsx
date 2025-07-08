@@ -13,7 +13,7 @@ function Page() {
   <div className="rts-navigation-area-breadcrumb pb--10">
     <div className="container">
       <div className="row">
-        <div className="col-lg-12 col-md-12">
+        {/* <div className="col-lg-12 col-md-12">
           <div className="navigator-breadcrumb-wrapper seller-central-dash-board-breadcrumb">
             <ul>
               <li>
@@ -31,7 +31,7 @@ function Page() {
               </li>
             </ul>
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   </div>
@@ -89,7 +89,7 @@ function Page() {
                   />
                   <h5>Gross Sales</h5>
                 </div>
-                <h5>214 Units</h5>
+                <h5>0 Units</h5>
               </div>
             </div>
             <div className="col-md-4">
@@ -108,7 +108,7 @@ function Page() {
                   />
                   <h5>Cancellations</h5>
                 </div>
-                <h5>15 Units</h5>
+                <h5>0 Units</h5>
               </div>
             </div>
             <div className="col-md-4">
@@ -127,7 +127,7 @@ function Page() {
                   />
                   <h5>Courier Returns</h5>
                 </div>
-                <h5>16 Units</h5>
+                <h5>0 Units</h5>
               </div>
             </div>
           </div>
@@ -243,7 +243,7 @@ function Page() {
             </tr>
           </thead>
           <tbody>
-            <tr className="winner__table tablenomargin">
+            {/* <tr className="winner__table tablenomargin">
               <td>
               <Image 
                     src={`${baseUrl}front/assets/images/preview01.jpg`}
@@ -332,7 +332,7 @@ function Page() {
                   </a>
                 </div>
               </td>
-            </tr>
+            </tr> */}
           </tbody>
         </table>
       </div>

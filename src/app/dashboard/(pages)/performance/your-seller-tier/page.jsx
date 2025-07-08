@@ -29,24 +29,7 @@ function Page() {
             </ul>
           </div>
         </div>
-        <div className="col-lg-6 col-md-6">
-          <div className="navigator-breadcrumb-wrapper seller-central-dash-board-breadcrumb">
-            <ul>
-              <li>
-                <a href="#"> 
-                  <Image src={`${baseUrl}front/assets/images/hand_shaking.png`}
-                    alt='img'
-                    width={0}
-                    height={0}
-                    sizes='100vw'  
-                    style={{width:"auto", height:"auto"}} 
-                    />  
-                  Help
-                </a>{" "}
-              </li>
-            </ul>
-          </div>
-        </div>
+       
       </div>
     </div>
   </div>

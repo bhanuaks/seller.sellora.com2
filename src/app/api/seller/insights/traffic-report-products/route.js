@@ -164,11 +164,52 @@ await connectDb();
         }
       },
 
+
+      {
+            $lookup: {
+                from: "productviews",
+                let: {
+                productId: "$_id",
+                variantId: "$variant._id"
+                },
+                 let: {
+                productId: "$_id",
+                variantId: "$variant._id", 
+            }, 
+                pipeline: [
+                {
+                    $match: {
+                    $expr: {
+                        $and: [
+                        { $eq: ["$product_id", "$$productId"] },
+                        { $eq: ["$variant_id", "$$variantId"] }
+                        ]
+                    }
+                    }
+                },
+                {
+                    $project: {
+                    keyword: 1
+                    }
+                },
+                {
+                    $group: {
+                    _id: null,
+                     keywords: { $addToSet: "$keyword" }
+                    }
+                }
+                ],
+                as: "keywords"
+            }
+            },
+
+
       {
         $addFields: { 
           carts:{ $size : "$carts"},
           clicks:{ $size : "$clicks"},
-          views:{ $size : "$views"},
+          views:{ $size : "$views"}, 
+        
           grossSale: {
             $ifNull: [{ $arrayElemAt: ["$orderStats.grossSale", 0] }, 0],
           },
@@ -212,17 +253,10 @@ await connectDb();
         $project: {
             carts:1,
             clicks:1,
-            views:1,
-          netUnit: 1,
-          netSale: 1,
-          returnSale: 1,
-          returnUnit: 1,
+            views:1, 
           grossSale: 1,
-          grossUnit: 1,
-          afterCancelSale: 1,
-          afterCancelUnit: 1,
-          cancellationSale: 1,
-          cancellationUnit: 1,
+          grossUnit: 1, 
+            searchingkeywords:{$arrayElemAt : ["$keywords", 0]},
 
           _id: 1,
           product_name: 1,

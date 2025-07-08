@@ -1,4 +1,4 @@
-import { isEmpty, responseFun } from "@/Http/helper";
+import { dynamincOtp, isEmpty, responseFun } from "@/Http/helper";
 import { userModal } from "@/Http/Models/userModel";
 import { NextResponse } from "next/server";
 
@@ -60,7 +60,7 @@ export async function POST(request) {
                     return responseFun(false, {errors, status_code:400}, 200); 
                 }
          
-        const new_otp = 123456  
+        const new_otp = dynamincOtp(111111, 99999) //123456  
         const subject = "Registration OTP";
         const message = `<p>Registration OTP is ${new_otp}. This otp valid for 5 minutes.</p>` 
           

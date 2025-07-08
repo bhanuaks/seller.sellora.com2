@@ -257,6 +257,8 @@ const page = () => {
   // reset filter function
   function resetFilter(e){
     e.preventDefault()
+    const params = new URLSearchParams(); 
+    params.append("type", type);
     setFilterData({
       category:"",
       brand:[],
@@ -266,9 +268,12 @@ const page = () => {
       max_price:"",
       variants:""
     })
-    setTimeout(() => { 
-      searchProduct()
-    }, 200);
+
+     let link = `${baseUrl}dashboard/listing?&${params}`
+    router.push(link); 
+    // setTimeout(() => { 
+    //   searchProduct()
+    // }, 200);
   }
 
 

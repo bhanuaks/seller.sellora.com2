@@ -1,5 +1,6 @@
 "use client";
 import HelpAndVideoTopSection from "@/app/seller/HelpAndVideoTop";
+import TableskeltonLoader from "@/app/skeleton_loader/TableskeltonLoader";
 import { apiRequest } from "@/Http/apiHelper";
 import {
   baseUrl,
@@ -8,9 +9,10 @@ import {
   main_thumb_img_path,
   variant_thumb_img_path1,
 } from "@/Http/helper";
+import { fileBasePath } from "@/Http/urlHelper";
 import Image from "next/image";
 import Link from "next/link";
-import { useParams, useSearchParams } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import useSWR, { mutate } from "swr";
 
@@ -18,56 +20,73 @@ const Page = () => {
   const params = useParams();
   const searchStatus = params.status;
   const searchParams = useSearchParams();
-  const page = searchParams.get("page") || 1;
-  const size = searchParams.get("size") || 20;
+  // const page = searchParams.get("page") || 1;
+  // const size = searchParams.get("size") || 20;
     const [target, setTarget] = useState("")
   const [searchText, setSearchText] = useState("");
   const [searchBy, setSearchBy] = useState("OrderId");
-  const [filterByDay, setFilterByDay] = useState("")
-  const {
-    data: responseData,
-    error,
-    isLoading,
-  } = useSWR(
-    `${baseUrl}api/seller/product/orders/cancel-request?status=${searchStatus}&page=${page}&pageSize=${size}&filterByDay=${filterByDay}&searchText=${searchText}&searchBy=${searchBy}`,
-    fetcher
-  );
+  const [filterByDay, setFilterByDay] = useState(30)
+  const router = useRouter();
+  
+  const [size, setSize] = useState(10)
+  const [page, setPage] = useState(1)
+  const [cancelRequest, setCancelRequest] = useState(null)
+  const [totalCoute, setTotalCoute] = useState(null)
+  const [pagination, setPagination] = useState(null)
+  const [isLoading, setIsLoading] = useState(false)
+  // const {
+  //   data: responseData,
+  //   error,
+  //   isLoading,
+  // } = useSWR(
+  //   `${baseUrl}api/seller/product/orders/cancel-request?status=${searchStatus}&page=${page}&pageSize=${size}&filterByDay=${filterByDay}&searchText=${searchText}&searchBy=${searchBy}`,
+  //   fetcher
+  // );
 
-  const cancelRequest = responseData?.data?.orders;
-  const totalCoute = responseData?.data?.totalCoute;
-  const pagination = responseData?.data?.pagination;
 
+
+  // const cancelRequest = responseData?.data?.orders;
+  // const totalCoute = responseData?.data?.totalCoute;
+  // const pagination = responseData?.data?.pagination;
+
+  function loadProducts() {
+    setIsLoading(true);
+    fetch(`/api/seller/product/orders/cancel-request?status=${searchStatus}&page=${page}&pageSize=${size}&filterByDay=${filterByDay}&searchText=${searchText}&searchBy=${searchBy}`)
+      .then(async (response)=>{
+        const res = await response.json();
+        setIsLoading(false);
+        if(response.ok){
+          setCancelRequest(res.data.orders);
+          setTotalCoute(res.data.totalCoute);
+          setPagination(res.data.pagination);
+        }else{
+          throw new Error("Network Issue");
+        }
+      }).catch((err)=>{
+        console.log(err);
+      })
+  }
+
+  useEffect(()=>{
+         const timeoutId = setTimeout(() => { 
+          loadProducts()
+        }, 300); 
+        return () => clearTimeout(timeoutId);
+  },[page, size, searchText, searchBy, filterByDay])
   
 
   function paginationFun(nextPage, listSize, e) {
     e.preventDefault(); 
-    mutate(
-      `${baseUrl}api/seller/product/orders/cancel-request?status=${searchStatus}&page=${nextPage}&pageSize=${listSize}&filterByDay=${filterByDay}&searchText=${searchText}&searchBy=${searchBy}`
-    );
+    setPage(nextPage)
   }
 
   function changeListSize(e) {
     const { name, value } = e.target;
-    mutate(
-      `${baseUrl}api/seller/product/orders/cancel-request?status=${searchStatus}&page=${1}&pageSize=${value}&filterByDay=${filterByDay}&searchText=${searchText}&searchBy=${searchBy}`
-    );
+    setSize(value)
+    
   }
 
-
-    useEffect(() => {
-        const timeoutId = setTimeout(() => {
-           
-          mutate(
-            `${baseUrl}api/seller/product/orders/cancel-request?status=${searchStatus}&page=${1}&pageSize=${size}&filterByDay=${filterByDay}&searchText=${searchText}&searchBy=${searchBy}`
-          );
-        }, 300);
-    
-        return () => clearTimeout(timeoutId);
-      }, [searchText, searchBy]);
-
-      useEffect(()=>{
-            setTarget("_blank")
-      },[])
+ 
   return (
     <div>
       <div className="rts-navigation-area-breadcrumb pb--10">
@@ -97,7 +116,10 @@ const Page = () => {
                         placeholder="Search your product by Order Id , sku"
                         className="search-int form-control"
                         value={searchText}
-                        onChange={(e)=>setSearchText(e.target.value)}
+                        onChange={(e)=>{
+                          setPage(1);
+                          setSearchText(e.target.value)
+                        }}
                       />
                       <a href="#">
                         <i className="fa fa-search" />
@@ -106,7 +128,10 @@ const Page = () => {
                   </div>
                 </div>
                 <div className="col-lg-3 col-md-3 col-sm-3 col-xs-12">
-                  <select  onChange={(e)=>setSearchBy(e.target.value)} value={searchBy}>
+                  <select  onChange={(e)=>{
+                    setPage(1);
+                    setSearchBy(e.target.value)
+                    }} value={searchBy}>
                     <option value={"sku"}>SKU</option>
                     <option value={"OrderId"}>Order Id</option>
                   </select>
@@ -167,7 +192,8 @@ const Page = () => {
                         <div className="listing22">
                           <select className onChange={(e)=>setFilterByDay(e.target.value)}
                           value={filterByDay} >
-                            <option value={""}>Return Date Range</option>
+                            {/* <option value={""}>Return Date Range</option> */}
+                            <option value={""} disabled>Filter</option>
                             <option value={"0"}>Exact date</option>
                             <option  value={"1"}>Last days</option>
                             <option  value={"3"} >Last 3 days</option>
@@ -184,9 +210,9 @@ const Page = () => {
                   </th>
                 </tr>
                 <tr className="winner__table">
-                  <th width={50}>
+                  {/* <th width={50}>
                     <input type="checkbox" />
-                  </th>
+                  </th> */}
                   <th width={120}>Order Details</th>
                   <th width={150}>Return Quantity</th>
                   <th width={120} />
@@ -203,6 +229,9 @@ const Page = () => {
                 </tr>
               </thead>
               <tbody>
+                {isLoading && (
+                  <TableskeltonLoader totalRows={7} totalColumns={8}/>
+                )}
                 {!isLoading && cancelRequest && cancelRequest.length === 0 && (
                   <tr>
                     <td colSpan="13" style={{ textAlign: "center" }}>
@@ -211,13 +240,13 @@ const Page = () => {
                   </tr>
                 )}
 
-                {cancelRequest &&
+                {!isLoading && cancelRequest &&
                   cancelRequest.length > 0 &&
                   cancelRequest.map((item, index) => (
                     <tr className="winner__table" key={index}>
-                      <td className="text-center">
+                      {/* <td className="text-center">
                         <input type="checkbox" />
-                      </td>
+                      </td> */}
                       <td>
                         <div className="order_id_01">
                           <span>Order Id</span>
@@ -235,24 +264,15 @@ const Page = () => {
                       <td className="text-center">1</td>
                       <td>
                         {item?.variant?.withImage == "Yes" ? (
-                          <Image
-                            src={`${baseUrl}${variant_thumb_img_path1}${item?.variant?.image_1}`}
-                            width={0}
-                            height={0}
-                            sizes="100vw"
-                            alt="product Image"
-                            loading="lazy"
-                            style={{ width: "auto", height: "auto" }}
+                          <img
+                            src={`${fileBasePath}${variant_thumb_img_path1}${item?.variant?.image_1}`}
+                          
+                            alt="product Image" 
                           />
                         ) : (
-                          <Image
-                            src={`${baseUrl}${main_thumb_img_path}${item?.product?.main_image}`}
-                            width={0}
-                            height={0}
-                            sizes="100vw"
-                            alt="product Image"
-                            loading="lazy"
-                            style={{ width: "auto", height: "auto" }}
+                          <img
+                            src={`${fileBasePath}${main_thumb_img_path}${item?.product?.main_image}`} 
+                            alt="product Image" 
                           />
                         )}
                       </td>
@@ -285,13 +305,13 @@ const Page = () => {
                                     fontWeight: "500",
                                   }}
                                 >
-                                  {item.cancelByUser?.remarks}
+                                  {item.cancelByUser?.reason}
                                 </b>
                               </td>
                             </tr>
                             <tr>
                               <td>Buyer Feedback:</td>
-                              <td>Dammy feedback</td>
+                              <td>{item.cancelByUser?.remarks}</td>
                             </tr>
                             <tr>
                               
@@ -302,7 +322,7 @@ const Page = () => {
                               <td>Carrier Name:</td>
                               <td>{item.shippingInfo?.trakingDetails[0].shippingCarrier}</td>
                             </tr>
-                            <tr>
+                            {/* <tr>
                               <td>&nbsp;</td>
                               <td>
                                 <b
@@ -318,7 +338,7 @@ const Page = () => {
                                   />
                                 </b>
                               </td>
-                            </tr>
+                            </tr> */}
                           </tbody>
                         </table>
                       </td>
@@ -326,7 +346,7 @@ const Page = () => {
                         <div className="request_IDud9er">
                           <ul>
                             <li>
-                              Request Date:{" "}
+                              Request Date:{" "}  
                               {dateFormat(item.cancelByUser?.createdAt)}
                             </li>
                             <li>Order Date: {dateFormat(item.createdAt)}</li>
@@ -365,17 +385,18 @@ const Page = () => {
               <div className="col-lg-8"> </div>
               <div className="col-lg-4">
                 <div className="pull-right pagination d-flex">
+                    {pagination && pagination.totalPages > 1 && (
                   <div className="result">
                     <select
                       name="size"
-                      value={pagination ? pagination.pageSize : 10}
+                      value={size || 10}
                       onChange={(e) => changeListSize(e)}
                     >
                       <option value={20}>20 results per page</option>
                       <option value={10}>10 results per page</option>
                     </select>
                   </div>
-
+                      )}
                   {pagination && pagination.totalPages > 1 ? (
                     <ul className="pagination">
                       <li

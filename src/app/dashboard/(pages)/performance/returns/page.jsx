@@ -87,7 +87,7 @@ function Page() {
                     style={{width:"auto", height:"auto"}} 
                     />  
                 <h5>Delivered</h5>
-                <h5>136 Units</h5>
+                <h5>0 Units</h5>
               </div>
             </div>
             <div className="col-md-4">
@@ -104,8 +104,8 @@ function Page() {
                     style={{width:"auto", height:"auto"}} 
                     />  
                 <h5>Return</h5>
-                <h5>8 Units</h5>
-                <h5>Return:5.88%</h5>
+                <h5>0 Units</h5>
+                <h5>Return:0.00%</h5>
               </div>
             </div>
             <div className="col-md-4">
@@ -119,8 +119,8 @@ function Page() {
                     style={{width:"auto", height:"auto"}} 
                     />   
                 <h5>Refunds</h5>
-                <h5>7 Units</h5>
-                <h5>Return:87.5%</h5>
+                <h5>0 Units</h5>
+                <h5>Return:0.00%</h5>
               </div>
             </div>
           </div>
@@ -209,7 +209,7 @@ function Page() {
             </tr>
           </thead>
           <tbody>
-            <tr className="winner__table tablenomargin">
+            {/* <tr className="winner__table tablenomargin">
               <td> 
                 <Image src={`${baseUrl}front/assets/images/preview01.jpg`}
                     alt='img'
@@ -296,7 +296,7 @@ function Page() {
                   </a>
                 </div>
               </td>
-            </tr>
+            </tr> */}
           </tbody>
         </table>
       </div>

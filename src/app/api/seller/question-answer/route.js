@@ -92,6 +92,11 @@ export async function GET(request) {
                 }
             },
             {
+                $sort:{
+                    createdAt: -1
+                }
+            },
+            {
                 $skip:skip
             },
             {

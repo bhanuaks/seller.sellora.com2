@@ -125,9 +125,9 @@ function page() {
         theme="colored"
       />
       {/* loader start */}
-      <div className="loaderouter">
+      {/* <div className="loaderouter">
         <div className="loader"></div>
-      </div>
+      </div> */}
       {/* loader end */}
 
       <div className="container">

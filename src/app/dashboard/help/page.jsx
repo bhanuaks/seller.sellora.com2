@@ -1,9 +1,12 @@
-import React from 'react'
-import HelpPage from './HelpPage'
+import React, { lazy, Suspense } from 'react'
+// import HelpPage from './HelpPage'
 
+const HelpPage = lazy(() => import('./HelpPage'));
 function page() {
   return (
-    <HelpPage />
+    <Suspense fallback={<>Loading..</>}> 
+      <HelpPage />
+    </Suspense>
   )
 }
 

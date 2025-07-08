@@ -17,6 +17,7 @@ function Page() {
   const [isLoading, setIsLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchText, setSearchText] = useState("");
+  const [viewKeyword, setViewKeyword] = useState("");
 
   async function LoadData() {
     fetch(`/api/seller/insights/traffic-report?filter=${filter}`)
@@ -186,7 +187,7 @@ function Page() {
         <div className="row">
           <div className="col-lg-9">
             <div className="">
-              <h4>Hot Products Today</h4>
+              <h4>Sals Products</h4>
             </div>
           </div>
            <div className="col-lg-3 col-md-3 col-sm-3 col-xs-12">
@@ -307,7 +308,7 @@ function Page() {
                   </tr>
                 )}
 
-                {productList &&
+                {!isLoading && productList &&
                   productList.length > 0 &&
                   productList.map((product, index) => (
                     <tr className="winner__table" key={index}>
@@ -404,9 +405,19 @@ function Page() {
                         </div>
                       </td>
                       <td className="text-center">
-                        <div className="view_search_keywords">
-                          <a href="#">View Search Keywords</a>
-                        </div>
+                        {viewKeyword !== product.variant._id && (
+                          <div className="view_search_keywords" onClick={(e)=>{
+                            e.preventDefault();
+                            
+                            setViewKeyword(product.variant._id);
+                            }}>
+                            <a href="#">View Search Keywords</a> 
+                          </div>
+                        )}
+                        
+                        {viewKeyword == product.variant._id &&  product?.searchingkeywords?.keywords && product?.searchingkeywords?.keywords.length > 0 &&
+                             product?.searchingkeywords?.keywords.join(", ")
+                          }
                       </td>
                     </tr>
                   ))}

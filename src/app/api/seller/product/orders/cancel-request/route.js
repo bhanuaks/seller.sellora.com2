@@ -14,7 +14,7 @@ export async function GET(request) {
     const filterByDay = searchParams.get("filterByDay") || "";
 
     const page = parseInt(searchParams.get("page")) || 1;
-    const pageSize = parseInt(searchParams.get("pageSize")) || 10;
+    const pageSize =  parseInt(searchParams.get("pageSize")) || 10;
     const skip = (page - 1) * pageSize;
    
     const seller = await getLoginSeller();
@@ -28,11 +28,45 @@ export async function GET(request) {
 
     try{
 
-        const totalCoute = { 
-                all: await orderProductModel.countDocuments({seller_id: sellerId,  order_status: { $in: [6, 7] } }),
-                pending: await orderProductModel.countDocuments({seller_id: sellerId, order_status:7}),
-                complete: await orderProductModel.countDocuments({seller_id: sellerId, order_status:6}),
-        } 
+        // const totalCoute = { 
+        //         all: await orderProductModel.countDocuments({seller_id: sellerId,  order_status: { $in: [6, 7] } }),
+        //         pending: await orderProductModel.countDocuments({seller_id: sellerId, order_status:7}),
+        //         complete: await orderProductModel.countDocuments({seller_id: sellerId, order_status:6}),
+        // } 
+
+        let days = parseInt(filterByDay);
+        let currentDate = new Date();
+        let startDate = new Date();
+
+        if (filterByDay !== "") { 
+            if (days === 0) {
+                // Exact date (today)
+                startDate.setHours(0, 0, 0, 0);
+            } else {
+                // Days range (last X days)
+                startDate.setDate(currentDate.getDate() - days);
+            }
+        }else{
+            startDate.setDate(currentDate.getDate() - 30);
+        }
+
+        const totalCoute = {
+                          all: await countOrdersWithLookup({
+                            sellerId,
+                            orderStatus: [6, 7],
+                            startDate
+                          }),
+                          pending: await countOrdersWithLookup({
+                            sellerId,
+                            orderStatus: 7,
+                            startDate
+                          }),
+                          complete: await countOrdersWithLookup({
+                            sellerId,
+                            orderStatus: 6,
+                            startDate
+                          })
+                        };
 
 
         const query = { seller_id: sellerId, order_status:7 };
@@ -53,22 +87,9 @@ export async function GET(request) {
             }
         }
 
-        let days = parseInt(filterByDay);
-        let currentDate = new Date();
-        let startDate = new Date();
+        
 
-        if (filterByDay !== "") { 
-            if (days === 0) {
-                // Exact date (today)
-                startDate.setHours(0, 0, 0, 0);
-            } else {
-                // Days range (last X days)
-                startDate.setDate(currentDate.getDate() - days);
-            }
-        }else{
-            startDate.setDate(currentDate.getDate() - 28);
-        }
-
+        console.log({startDate});
         const orders = await orderProductModel.aggregate([
               // Filter by sellerId
               { $match: query }, 
@@ -105,7 +126,7 @@ export async function GET(request) {
                   let: { variantId: "$variant_id" },
                   pipeline: [
                     { $match: { $expr: { $eq: ["$_id", "$$variantId"] } } },
-                    { $project: { _id: 0, withImage: 1, image_1: 1, sku: 1 } },
+                    { $project: { _id: 0, withImage: 1, image_1: 1, sku: 1, sin:1 } },
                   ],
                   as: "variant",
                 },
@@ -120,7 +141,7 @@ export async function GET(request) {
                         { $match: { $expr: {
                             $and: [
                               { $eq: ["$orderItemId", "$$suborderId"] },
-                              { $eq: ["$status", 7] },
+                              { $eq: ["$status", 7] }, 
                               { $gte: ["$createdAt", "$$filterDate"] }
                             ]
                           }
@@ -130,6 +151,7 @@ export async function GET(request) {
                     },
                   },
 
+                  
 
                      // Fetch cancelByUser  details
                 {
@@ -179,6 +201,12 @@ export async function GET(request) {
                   variant: { $arrayElemAt: ["$variant", 0] },
                 },
               },
+              {
+                $match: { cancelByUser: { $ne: null } }
+              },
+              {
+                $sort : {createdAt: -1}
+              },
               { $skip: skip },
               { $limit: pageSize },
             ]);
@@ -198,6 +226,71 @@ export async function GET(request) {
         console.log(error);
         return responseFun(false, error, 500)
     }
+}
+
+
+async function countOrdersWithLookup({
+  sellerId,
+  orderStatus,
+  startDate
+}) {
+  const matchStage = {
+    seller_id: sellerId
+  };
+
+  if (orderStatus !== undefined) {
+    if (Array.isArray(orderStatus)) {
+      matchStage.order_status = { $in: orderStatus };
+    } else {
+      matchStage.order_status = orderStatus;
+    }
+  }
+
+  const pipeline = [
+    { $match: matchStage },
+
+    {
+      $lookup: {
+        from: "orderitemstatushistries",
+        let: {
+          suborderId: "$_id",
+          filterDate: startDate
+        },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $and: [
+                  { $eq: ["$orderItemId", "$$suborderId"] },
+                  { $eq: ["$status", 7] },
+                  ...(startDate
+                    ? [{ $gte: ["$createdAt", "$$filterDate"] }]
+                    : [])
+                ]
+              }
+            }
+          }
+        ],
+        as: "cancelByUser"
+      }
+    },
+
+    // Optional: Filter further if you want only orders that HAVE a matching cancellation
+    // Uncomment below if you only want orders where cancelByUser is NOT empty
+    
+    {
+      $match: {
+        "cancelByUser.0": { $exists: true }
+      }
+    },
+   
+
+    { $count: "total" }
+  ];
+
+  const result = await orderProductModel.aggregate(pipeline);
+
+  return result[0]?.total || 0;
 }
 
 

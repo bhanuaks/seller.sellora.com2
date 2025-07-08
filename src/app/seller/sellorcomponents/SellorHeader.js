@@ -79,7 +79,14 @@ function SellorHeader() {
               </Link>
               <div className="main-wrapper-action-2 d-flex">
                 <div className="accont-wishlist-cart-area-header">
-                  <div className="after_login_seller"> Login </div>
+                  <div className="after_login_seller"> 
+                     <Link
+                  href="/seller/login"
+                  // className="login_seller"
+                >
+                  Login
+                </Link>
+                 </div>
                 </div>
                 <div className="actions-area">
                   {/* <div className="search-btn" id="search"> <svg width="17" height="16" viewBox="0 0 17 16"
@@ -131,16 +138,16 @@ function SellorHeader() {
               <ul className="mainmenu metismenu" id="mobile-menu-active">
                 <li className="parent">
                   
-                  <Link href={`${baseUrl}seller/sell-online`}>Sell Online</Link>
+                  <Link href={`/seller/sell-online`}>Sell Online</Link>
                 </li>
                 <li className="parent">
-                  <Link href={`${baseUrl}seller/fees-n-commission`}>Fees &amp; Commission</Link>
+                  <Link href={`/seller/fees-n-commission`}>Fees &amp; Commission</Link>
                 </li>
                 <li className="parent">
-                  <Link href={`${baseUrl}seller/grow`}>Grow</Link>
+                  <Link href={`/seller/grow`}>Grow</Link>
                 </li>
                 <li className="parent">
-                  <Link href={`${baseUrl}seller/learn`}>Learn</Link>
+                  <Link href={`/seller/learn`}>Learn</Link>
                 </li>
               </ul>
             </nav>

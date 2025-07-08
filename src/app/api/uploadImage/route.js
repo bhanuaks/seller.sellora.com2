@@ -62,3 +62,19 @@ export async function deleteImageOne(uploadingPath) {
         
            
     }
+
+
+    export async function uploadFileFun(image, uploadingPath, filename){
+
+    const buffer = Buffer.from(await image.arrayBuffer());  
+    const outputFilePath = path.join(process.cwd(), uploadingPath, filename); 
+
+    try{
+        
+            await writeFile(outputFilePath, buffer);
+            return true; 
+    }catch(error){
+      console.log(error)
+      return false;
+    }
+}

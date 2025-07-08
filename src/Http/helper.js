@@ -137,7 +137,7 @@ export function getPricingLabel(price) {
 
   export const dynamincOtp =(from, to)=>{
         let otp= Math.floor(from + Math.random() * to);
-        if(to > otp){
+        if(Number(to) <= Number(otp)){
           dynamincOtp(from, to)
         }
         return otp;
@@ -442,69 +442,484 @@ export function impactPriceAndPercentage(currentPrice, views, clicks) {
   };
 }
 
+
+// export function calculateListingQuality(product) {
+//   let score = 0;
+//      const issues = [];
+//   // 1. Title Quality (Max: 10)
+//   if (product.product_name?.length >= 20){
+//     score += 10;
+//   } else if (product.product_name?.length >= 10){
+//      score += 7;
+//     }
+//     else if (product.product_name) {
+//       score += 3;
+//     }
+
+//   // 2. Description Quality (Max: 15)
+//   if (product.product_description?.length > 200) score += 15;
+//   else if (product.product_description?.length > 100) score += 10;
+//   else if (product.product_description?.length > 50) score += 5;
+
+//   // 3. Images (Max: 15)
+//   const baseImages = [
+//     product.main_image,
+//     product.image_1,
+//     product.image_2,
+//     product.image_3,
+//     product.image_4,
+//     product.image_5,
+//     product.image_6,
+//     product.image_7,
+//   ].filter(Boolean).length;
+
+//   const variantImages = product.variant
+//     ? [
+//         product.variant.image_1,
+//         product.variant.image_2,
+//         product.variant.image_3,
+//         product.variant.image_4,
+//         product.variant.image_5,
+//         product.variant.image_6,
+//         product.variant.image_7,
+//       ].filter(Boolean).length
+//     : 0;
+
+//   const totalImages = baseImages + variantImages;
+
+//   if (totalImages >= 7) score += 15;
+//   else if (totalImages >= 4) score += 10;
+//   else if (totalImages >= 2) score += 6;
+//   else if (totalImages === 1) score += 3;
+
+//   // 4. Category & Subcategory (Max: 5)
+//   if (product.category_id) score += 3;
+//   if (product.subcategory_id || product.childcategory_id) score += 2;
+
+//   // 5. Variant & Stock (Max: 10)
+//   if (product.variant) {
+//     score += 5;
+//     if (product.variant.stock && Number(product.variant.stock) > 0) score += 5;
+
+//     // 6. Pricing (Max: 5)
+//     if (product.variant.consumerSalePrice && Number(product.variant.consumerSalePrice) > 0) {
+//       score += 5;
+//     }
+//   }
+
+//   // 7. Compliance fields (Old compliance + new compliance) (Max: 10)
+//   let complianceScore = 0;
+
+//   if (product.safety_warning && product.safety_warning.trim().toLowerCase() !== "n/a" && product.safety_warning.trim().toLowerCase() !== "not applicable") complianceScore++;
+//   if (product.country_of_origin) complianceScore++;
+//   if (product.manufacturer_details) complianceScore++;
+//   if (product.packer_details) complianceScore++;
+//   if (product.importer_details) complianceScore++;
+
+//   if (product.compliance) {
+//     complianceScore += 5;
+//   }
+
+//   if (complianceScore > 10) complianceScore = 10;
+
+//   score += complianceScore;
+
+//   const MAX_POSSIBLE_SCORE = 70; // 10 + 15 + 15 + 5 + 10 + 5 + 10
+
+//   const percentage = Math.round((score / MAX_POSSIBLE_SCORE) * 100);
+
+//   let quality = "Poor";
+//   if (percentage >= 80) quality = "Excellent";
+//   else if (percentage >= 50) quality = "Good";
+//   else if (percentage >= 30) quality = "Average";
+
+//   return {
+//     score: percentage,
+//     quality,
+//   };
+// }
+
+
+// Section	Max Points
+// Title	10
+// Description	15
+// Images	15
+// Category & Subcategory	5
+// Variant & Stock	15
+// Pricing	10
+// Compliance	30
+// TOTAL	100
+
 export function calculateListingQuality(product) {
-  let score = 0;
+  let totalScore = 0;
+  const issues = [];
+  const sectionScores = {
+    Title: 0,
+    Description: 0,
+    Images: 0,
+    Category: 0,
+    VariantAndStock: 0,
+    Pricing: 0,
+    Compliance: 0,
+    search_keywords:0,
+    key_feature:0
+  };
 
-  // Title quality
-  if (product.product_name && product.product_name.length >= 20) {
-    score += 8;
-  } else if (product.product_name && product.product_name.length >= 10) {
-    score += 5;
+  // --------------------------
+  // 1. Title (max 10)
+  // --------------------------
+  if (product.product_name) {
+    const titleLength = product.product_name.length;
+    if (titleLength > 100) {
+      sectionScores.Title = 0;
+      issues.push({
+        section: "Product Name",
+        message: "Product name is too long. It should be 100 characters or fewer.",
+        score: 0,
+        sign: false
+      });
+    } else if (titleLength < 10) {
+      sectionScores.Title = 3;
+      issues.push({
+        section: "Product Name",
+        message: "Product name is too short. It should be at least 10 characters.",
+        score: 3,
+        sign: false
+      });
+    } else if (titleLength < 20) {
+      sectionScores.Title = 7;
+      issues.push({
+        section: "Product Name",
+        message: "Product name is acceptable but could be longer (20+ characters preferred).",
+        score: 7,
+        sign: true
+      });
+    } else {
+      sectionScores.Title = 10;
+      issues.push({
+        section: "Product Name",
+        message: "Product name is optimal length.",
+        score: 10,
+        sign: true
+      });
+    }
   } else {
-    score += 2;
+    sectionScores.Title = 0;
+    issues.push({
+      section: "Product Name",
+      message: "Product name is missing.",
+      score: 0,
+      sign: false
+    });
   }
 
-  // Description
-  if (product.product_description && product.product_description.length > 200) {
-    score += 10;
-  } else if (product.product_description && product.product_description.length > 100) {
-    score += 7;
-  } else if (product.product_description && product.product_description.length > 50) {
-    score += 4;
+  // --------------------------
+  // 2. Description (max 15)
+  // --------------------------
+  if (product.product_description) {
+    const descWordCount = product.product_description
+      .split(/\s+/)
+      .filter(Boolean).length;
+
+    if (descWordCount < 60) {
+      let partialScore = 0;
+      let message = `Description is too short. It should be at least 60 words. Currently: ${descWordCount} words.`;
+
+      if (descWordCount > 30) {
+        partialScore = 10;
+      } else if (descWordCount > 0) {
+        partialScore = 5;
+      }
+      sectionScores.Description = partialScore;
+      issues.push({
+        section: "Description",
+        message,
+        score: partialScore,
+        sign: false
+      });
+    } else {
+      sectionScores.Description = 15;
+      issues.push({
+        section: "Description",
+        message: "Description length is good.",
+        score: 15,
+        sign: true
+      });
+    }
+  } else {
+    sectionScores.Description = 0;
+    issues.push({
+      section: "Description",
+      message: "Description is missing.",
+      score: 0,
+      sign: false
+    });
   }
 
-  // Images
-  const imageCount = [
+  // --------------------------
+  // 3. Images (max 15)
+  // --------------------------
+  const baseImages = [
     product.main_image,
     product.image_1,
     product.image_2,
     product.image_3,
     product.image_4,
+    product.image_5,
     product.image_6,
-    product.image_6,
-    product.image_7,
+    product.image_7
   ].filter(Boolean).length;
 
-  if (imageCount >= 7) score += 15;
-  else if (imageCount >= 4) score += 10;
-  else if (imageCount >= 2) score += 6;
-  else if (imageCount === 1) score += 3;
+  const variantImages = product.variant
+    ? [
+        product.variant.image_1,
+        product.variant.image_2,
+        product.variant.image_3,
+        product.variant.image_4,
+        product.variant.image_5,
+        product.variant.image_6,
+        product.variant.image_7
+      ].filter(Boolean).length
+    : 0;
 
- 
+  const totalImages = baseImages + variantImages;
 
-  // Category
-  if (product.category_id) score += 3;
-  if (product.subcategory_id || product.childcategory_id) score += 2; 
+  let imageScore = 0;
+  let imageMessage = "";
 
-  // Variant Coverage 
+  if (totalImages === 0) {
+    imageScore = 0;
+    imageMessage = "No images provided for the product.";
+  } else if (totalImages === 1) {
+    imageScore = 3;
+    imageMessage = "Only one image provided. Consider adding more.";
+  } else if (totalImages < 4) {
+    imageScore = 6;
+    imageMessage = "Less than 4 images provided. Consider adding more.";
+  } else if (totalImages < 7) {
+    imageScore = 10;
+    imageMessage = "Good number of images, but adding more (7+) would be excellent.";
+  } else {
+    imageScore = 15;
+    imageMessage = "Excellent image count.";
+  }
+
+  sectionScores.Images = imageScore;
+  issues.push({
+    section: "Images",
+    message: imageMessage,
+    score: imageScore,
+    sign: imageScore >= 10
+  });
+
+  // --------------------------
+  // 4. Category & Subcategory (max 5)
+  // --------------------------
+  let catScore = 0;
+  if (product.category_id) {
+    catScore += 3;
+    issues.push({
+      section: "Category",
+      message: "Category is present.",
+      score: 3,
+      sign: true
+    });
+  } else {
+    issues.push({
+      section: "Category",
+      message: "Product category is missing.",
+      score: 0,
+      sign: false
+    });
+  }
+
+  if (product.subcategory_id || product.childcategory_id) {
+    catScore += 2;
+    issues.push({
+      section: "Category",
+      message: "Subcategory or child category is present.",
+      score: 2,
+      sign: true
+    });
+  } else {
+    issues.push({
+      section: "Category",
+      message: "Subcategory or child category is missing.",
+      score: 0,
+      sign: false
+    });
+  }
+  sectionScores.Category = catScore;
+
+  // --------------------------
+  // 5. Variant & Stock (max 15)
+  // --------------------------
   if (product.variant) {
-    score += 5;
-     if (product.variant.stock && Number(product.variant.stock) > 0) score += 5;
+    let variantScore = 7;
+    let message = "Variant data exists.";
+
+    if (product.variant.stock && Number(product.variant.stock) > 0) {
+      variantScore += 8;
+      message = "Variant and stock info is good.";
+    } else {
+      message = "Variant exists but stock is zero or missing.";
+    }
+
+    sectionScores.VariantAndStock = Math.min(variantScore, 15);
+    issues.push({
+      section: "Variant and Stock",
+      message,
+      score: Math.min(variantScore, 15),
+      sign: variantScore >= 15
+    });
+  } else {
+    sectionScores.VariantAndStock = 0;
+    issues.push({
+      section: "Variant and Stock",
+      message: "No variant data found.",
+      score: 0,
+      sign: false
+    });
   }
 
-  // Final result
-  let quality = "Poor";
-  if (score >= 40) {
-    quality = "Good";
-  } else if (score >= 25) {
-    quality = "Average";
+  // --------------------------
+  // 6. Pricing (max 10)
+  // --------------------------
+  if(product.search_keywords){
+     sectionScores.search_keywords = 5;
+       issues.push({
+      section: "Search Keywords",
+      message: "Search Keywords is provided",
+      score: 5,
+      sign: true
+    });
+  }else{
+    sectionScores.search_keywords = 0;
+       issues.push({
+      section: "Search Keywords",
+      message: "Search Keywords is not provided",
+      score: 0,
+      sign: false
+    }); 
   }
+
+  if(product.key_feature && product.key_feature.length > 0){
+     sectionScores.key_feature = 5;
+       issues.push({
+      section: "Key Feature",
+      message: "Key Feature is provided",
+      score: 5,
+      sign: true
+    });
+  }else{
+    sectionScores.key_feature = 0;
+       issues.push({
+      section: "Key Feature",
+      message: "Key Feature is not provided",
+      score: 0,
+      sign: false
+    }); 
+  }
+
+
+  // if (product.variant && product.variant.consumerSalePrice && Number(product.variant.consumerSalePrice) > 0) {
+  //   sectionScores.Pricing = 10;
+  //   issues.push({
+  //     section: "Pricing",
+  //     message: "Pricing is provided.",
+  //     score: 10,
+  //     sign: true
+  //   });
+  // } else {
+  //   sectionScores.Pricing = 0;
+  //   issues.push({
+  //     section: "Pricing",
+  //     message: "Consumer sale price is missing.",
+  //     score: 0,
+  //     sign: false
+  //   });
+  // }
+
+  // --------------------------
+  // 7. Compliance (max 30)
+  // --------------------------
+  let complianceScore = 0;
+
+  const complianceChecks = [
+    { field: product.safety_warning, name: "Safety warning" },
+    { field: product.country_of_origin, name: "Country of origin" },
+    { field: product.manufacturer_details, name: "Manufacturer details" },
+    { field: product.packer_details, name: "Packer details" },
+    { field: product.importer_details, name: "Importer details" }
+  ];
+
+  complianceChecks.forEach(check => {
+    if (check.field && check.field.trim() && check.field.toLowerCase() !== "n/a" && check.field.toLowerCase() !== "not applicable") {
+      complianceScore += 5;
+      issues.push({
+        section: check.name,
+        message: `${check.name} is provided.`,
+        score: 5,
+        sign: true
+      });
+    } else {
+      issues.push({
+        section: check.name,
+        message: `${check.name} is missing.`,
+        score: 0,
+        sign: false
+      });
+    }
+  });
+
+  if (product.compliance) {
+    complianceScore += 5;
+    issues.push({
+      section: "Compliance",
+      message: "Compliance object is provided.",
+      score: 5,
+      sign: true
+    });
+  } else {
+    issues.push({
+      section: "Compliance",
+      message: "Compliance is missing.",
+      score: 0,
+      sign: false
+    });
+  }
+
+  complianceScore = Math.min(complianceScore, 30);
+  sectionScores.Compliance = complianceScore;
+
+  // --------------------------
+  // Total calculation
+  // --------------------------
+  totalScore = Object.values(sectionScores).reduce((a, b) => a + b, 0);
+  const percentage = Math.round((totalScore / 100) * 100);
+
+  let quality = "Poor";
+  if (percentage >= 80) quality = "Excellent";
+  else if (percentage >= 50) quality = "Good";
+  else if (percentage >= 30) quality = "Average";
 
   return {
-    score,
+    score: percentage,
     quality,
+    sectionScores,
+    issues
   };
 }
+
+
+
+
+
+
+
+
+
+
 
 
 export function formatNumber(num) {

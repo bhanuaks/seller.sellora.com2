@@ -3,6 +3,7 @@ import HelpAndVideoTopSection from "@/app/seller/HelpAndVideoTop";
 import { apiRequest } from "@/Http/apiHelper";
 import { formatDateTime } from "@/Http/dateHelper";
 import { baseUrl, getPrecentageAmount, getPricingLabel, main_thumb_img_path, variant_thumb_img_path1 } from "@/Http/helper";
+import { fileBasePath } from "@/Http/urlHelper";
 import Image from "next/image";
 import Link from "next/link";
 import { useParams } from "next/navigation";
@@ -245,7 +246,7 @@ const page = () => {
                     <input type="checkbox" />
                   </th>
                   <th width={120}>Order Date</th>
-                  <th width={150}>Order ID/PO </th>
+                  <th width={150}>Order ID </th>
                   <th width={180} />
                   <th width={400}>Product Detail</th>
                   <th width={180}>Customer Name</th>
@@ -285,21 +286,13 @@ const page = () => {
                   </td>
                   <td>
                     {order?.variant?.withImage == "Yes" ? (
-                      <Image src={`${baseUrl}${variant_thumb_img_path1}${order?.variant?.image_1}`} 
-                      width={0}
-                      height={0}
-                      sizes="100vw"
+                      <img src={`${fileBasePath}${variant_thumb_img_path1}${order?.variant?.image_1}`}  
                       alt="product Image"
                       loading="lazy" 
-                      style={{width:"auto", height:"auto"}}/> 
+                      /> 
                     ):(
-                      <Image src={`${baseUrl}${main_thumb_img_path}${order?.product?.main_image}`} 
-                      width={0}
-                      height={0}
-                      sizes="100vw"
-                      alt="product Image"
-                      loading="lazy"
-                      style={{width:"auto", height:"auto"}}/> 
+                      <img src={`${fileBasePath}${main_thumb_img_path}${order?.product?.main_image}`}  
+                      alt="product Image" /> 
 
                     )}
                   </td>

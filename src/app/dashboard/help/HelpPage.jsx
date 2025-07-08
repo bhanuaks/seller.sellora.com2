@@ -1,8 +1,12 @@
+"use client"
 import { baseUrl } from '@/Http/helper'
 import Link from 'next/link'
-import React from 'react'
+import React, { useState } from 'react'
 
 function HelpPage() {
+  const [formData, setFormData] = useState({
+      helpText:""
+  })
   return (
     <>
   <div className="rts-navigation-area-breadcrumb pb--10">
@@ -24,14 +28,19 @@ function HelpPage() {
             <textarea
               maxLength={200}
               placeholder="What do you need help with?"
-              defaultValue={""}
+               value={formData.helpText}
+               onChange={(e)=>setFormData((preData)=>({
+                ...preData,
+                helpText:e.target.value
+               }))}
+
             />
             <div className="char-counter">0/200</div>
           </div>
         </div>
         <div className="col-lg-2">
           <div className="button-group">
-            <Link href={`${baseUrl}dashboard/help/raise-a-ticket`} className="btn btn-primary">
+            <Link href={`${baseUrl}dashboard/help/raise-a-ticket?txt=${formData?.helpText || "" }`} className="btn btn-primary">
               Raise a Ticket
             </Link>
             <Link href={`${baseUrl}dashboard/help/my-ticket/All`} className="btn btn-secondary">
@@ -48,14 +57,14 @@ function HelpPage() {
         <h2>Select Issue Category</h2>
       </div>
       <div className="col-lg-4">
-        <div className="category_search2">
+        {/* <div className="category_search2">
           <span className="far fa-search form-control-feedback2" />
           <input
             type="text"
             className="form-control"
             placeholder="Search for issue or question"
           />
-        </div>
+        </div> */}
       </div>
       <div className="col-lg-4">
         <div className="card">

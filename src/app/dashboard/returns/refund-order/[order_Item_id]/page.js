@@ -9,6 +9,7 @@ import React, { useEffect, useState } from "react";
 import { apiRequest } from '@/Http/apiHelper';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { fileBasePath } from '@/Http/urlHelper';
 
 function Page() {
     const params = useParams();
@@ -183,24 +184,16 @@ function Page() {
                   <div className="col-lg-5 col-5">
                     <div className="product_view">
                        {singleOrder?.variant?.withImage == "Yes" ? (
-                            <Image
-                              src={`${baseUrl}${variant_thumb_img_path1}${singleOrder?.variant?.image_1}`}
-                              width={0}
-                              height={0}
-                              sizes="100vw"
-                              alt="product Image"
-                              loading="lazy"
-                              style={{ width: "auto", height: "auto" }}
+                            <img
+                              src={`${fileBasePath}${variant_thumb_img_path1}${singleOrder?.variant?.image_1}`}
+                             
+                              alt="product Image" 
                             />
                           ) : (
-                            <Image
-                              src={`${baseUrl}${main_thumb_img_path}${singleOrder?.product?.main_image}`}
-                              width={0}
-                              height={0}
-                              sizes="100vw"
-                              alt="product Image"
-                              loading="lazy"
-                              style={{ width: "auto", height: "auto" }}
+                            <img
+                              src={`${fileBasePath}${main_thumb_img_path}${singleOrder?.product?.main_image}`}
+                             
+                              alt="product Image" 
                             />
                           )}
                        

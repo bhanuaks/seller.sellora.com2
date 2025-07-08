@@ -4,6 +4,8 @@ import Link from 'next/link'
 import React, { useContext, useState } from 'react'
 import HelpAndVideoTopSection from '../seller/HelpAndVideoTop'
 import { AppContext } from '../contaxtData/contextData'
+import TodaySalesSection from './dashboardComp/TodaySalesSection'
+import ViewAllSalesInsights from './dashboardComp/ViewAllSalesInsights'
 
 const page = () => {
     const {globalData} = useContext(AppContext)
@@ -36,97 +38,8 @@ const page = () => {
   <div className="mb--50">
     <div className="container">
       <div className="row">
-        <div className="col-lg-4">
-          <div className="dash-board-boxtop_1">
-            <div className="head_5">Your Dashboard <span>. Today</span></div>
-            <div className="row">
-              <div className="col-lg-4 col-6">
-                <div className="dd_mm_box_dfd">
-                  <div>Unit Sold</div>
-                  <div className="bold">10</div>
-                </div>
-              </div>
-              <div className="col-lg-4 col-6">
-                <div className="dd_mm_box_dfd">
-                  <div>Sales</div>
-                  <div className="bold">2500</div>
-                </div>
-              </div>
-              <div className="col-lg-4 col-6">
-                <div className="dd_mm_box_dfd">
-                  <div>Total Balance </div>
-                  <div className="bold">10</div>
-                </div>
-              </div>
-              <div className="col-lg-4 col-6">
-                <div className="dd_mm_box_dfd">
-                  <div>New Order</div>
-                  <div className="bold">10</div>
-                </div>
-              </div>
-              <div className="col-lg-4 col-6">
-                <div className="dd_mm_box_dfd">
-                  <div>Active Listing</div>
-                  <div className="bold">10</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="col-lg-4">
-          <div className="dash-board-boxtop_1">
-            <div className="row">
-              <div className="col-lg-4">
-                <div className="sales">Sales : <span>₹2500</span></div>
-              </div>
-              <div className="col-lg-6 offset-lg-2">
-                <div className="view_all_text"><Link href={"/dashboard/growth/sellora-insights"}>view all sales insights</Link></div>
-              </div>
-              <div className="col-lg-12">
-                <div id="datasets-example-4">
-                  <table className="charts-css column multiple show-labels data-spacing-5 datasets-spacing-1">
-                    <caption>
-                      Front End Developer Salary
-                    </caption>
-                    <tbody>
-                      <tr>
-                        <th scope="row" className="text_2">1 Oct</th>
-                        <td style={{"--size":"calc( 30 / 100 )"}}><span className="data"> 1000 </span></td>
-                      </tr>
-                      <tr>
-                        <th scope="row" className="text_2">2 Oct</th>
-                        <td style={{"--size":"calc( 60 / 100 )"}}><span className="data"> 2000 </span></td>
-                      </tr><tr>
-                        <th scope="row" className="text_2">3 Oct</th>
-                        <td style={{"--size":"calc( 40 / 100 )"}}><span className="data"> 1300 </span></td>
-                      </tr>
-                      <tr>
-                        <th scope="row" className="text_2"> 4 Oct</th>
-                        <td style={{"--size":"calc( 40 / 100 )"}}><span className="data"> 1300 </span></td>
-                      </tr>
-                      <tr>
-                        <th scope="row" className="text_2"> 5 Oct </th>
-                        <td style={{"--size":"calc( 50 / 100 )"}}><span className="data"> 1800 </span></td>
-                      </tr>
-                      <tr>
-                        <th scope="row" className="text_2"> 6 Oct </th>
-                        <td style={{"--size":"calc( 30 / 100 )"}}><span className="data"> 1000 </span></td>
-                      </tr>
-                      <tr>
-                        <th scope="row" className="text_2"> 7 Oct </th>
-                        <td style={{"--size":"calc( 20 / 100 )"}}><span className="data"> 800 </span></td>
-                      </tr>
-                      <tr>
-                        <th scope="row" className="text_2"> 8 Oct </th>
-                        <td style={{"--size":"calc( 75 / 100 )"}}><span className="data"> 2500 </span></td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <TodaySalesSection />
+        <ViewAllSalesInsights />
       </div>
     </div>
   </div>

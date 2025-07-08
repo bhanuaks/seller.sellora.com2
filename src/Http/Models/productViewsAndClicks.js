@@ -16,7 +16,9 @@ const productViewSchema = new Schema(
       default: 1,
     },
      deviceName:String,
+     keyword:String,
   },
+  
   { timestamps: true }
 );
 

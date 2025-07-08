@@ -21,6 +21,8 @@ export default function SellorRootLayout({ children }) {
 
     useEffect(()=>{
       $('.logoLoader').css('display', 'none')
+      $('#anywhere-home').removeClass('bgshow')
+      $('#side-bar').removeClass('show')
     },[pathname])
 
   // Exclude layout for before_login routes

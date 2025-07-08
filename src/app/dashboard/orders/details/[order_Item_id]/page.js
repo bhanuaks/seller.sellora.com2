@@ -16,6 +16,8 @@ import React, { useEffect, useState } from "react";
 import useSWR, {mutate} from "swr";
 import ShippingDetails from "./ShippingDetails";
 import { ToastContainer, toast } from "react-toastify";
+import { fileBasePath } from "@/Http/urlHelper";
+import SimpleLoader from "@/app/skeleton_loader/SimpleLoader";
 
 
 function Page() {
@@ -106,6 +108,11 @@ function Page() {
       modalInstance.hide();
     }
   }
+if(isLoading){ 
+    return (
+      <SimpleLoader />
+    )
+}
 
   return (
     <>
@@ -260,24 +267,16 @@ function Page() {
                   <tr className="winner__table">
                     <td>
                       {singleOrder?.variant?.withImage == "Yes" ? (
-                        <Image
-                          src={`${baseUrl}${variant_thumb_img_path1}${singleOrder?.variant?.image_1}`}
+                        <img
+                          src={`${fileBasePath}${variant_thumb_img_path1}${singleOrder?.variant?.image_1}`}
                           alt=""
-                          width={0}
-                          height={0}
-                          sizes="100vw"
-                          loading="lazy"
-                          style={{ width: "auto", height: "auto" }}
+                          
                         />
                       ) : (
-                        <Image
-                          src={`${baseUrl}${main_thumb_img_path}${singleOrder?.product?.main_image}`}
+                        <img
+                          src={`${fileBasePath}${main_thumb_img_path}${singleOrder?.product?.main_image}`}
                           alt=""
-                          width={0}
-                          height={0}
-                          sizes="100vw"
-                          loading="lazy"
-                          style={{ width: "auto", height: "auto" }}
+                         
                         />
                       )}
                     </td>

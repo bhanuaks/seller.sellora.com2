@@ -10,6 +10,7 @@ const viewSchema = new Schema({
             type:Number,
             default:1 
         },  
+         keyword:String
 },{timestamps:true});
 
 export const AdsViewsModal = mongoose.models.AdsViews || mongoose.model("AdsViews", viewSchema);

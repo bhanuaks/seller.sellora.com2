@@ -352,7 +352,8 @@ export async function POST(request) {
     }
     
 
-       pipeline.push({
+       pipeline.push(
+        {
         $project: {
           netUnit: 1,
           netSale: 1,

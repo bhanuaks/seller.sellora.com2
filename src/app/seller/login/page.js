@@ -120,13 +120,13 @@ function page() {
                               type="text"
                               className="form-control"
                               name="username" 
-                              placeholder=""
+                              placeholder="Email id or mobile number*"
                               value={loginData.username}
                               onChange={(e)=>updateLoginData(e)}
                             />
-                            <label htmlFor="name">
+                            {/* <label htmlFor="name">
                               Email id or mobile number
-                            </label>
+                            </label> */}
                           </div>
                           
                           {errors.username && errors.username != ""? ( 
@@ -138,12 +138,14 @@ function page() {
                             <input
                               type={`${viewPassword?'text':"password"}`}
                               className="form-control"
-                              placeholder="Password"
+                              placeholder="Password*"
                               name='password' 
                               value={loginData.password}
                               onChange={(e)=>updateLoginData(e)}
                             />
-                              <i className={`toggle-password fa fa-fw fa-eye${!viewPassword?'-slash':""}`} onClick={()=>setViewPassword(!viewPassword)}/>
+                              <i className={`toggle-password fa fa-fw fa-eye${!viewPassword?'-slash':""}`} onClick={()=>setViewPassword(!viewPassword)} 
+                                style={{zIndex:'10000000000000000'}}
+                                />
  
                           </div>
                           {errors.password && errors.password != ""? ( 

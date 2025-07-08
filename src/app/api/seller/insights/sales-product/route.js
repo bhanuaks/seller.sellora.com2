@@ -101,6 +101,23 @@ export async function POST(request) {
         }
     },
 
+     {
+        $lookup: {
+            from: "productotherdetails",
+            localField: "_id",
+            foreignField: "product_id",
+            as: "compliance" 
+        }
+     },
+    {
+        $unwind: {
+            path: "$compliance",
+            preserveNullAndEmptyArrays: true 
+        }
+    },
+
+
+
     {
         $sort:{
             orders:-1
@@ -120,29 +137,29 @@ export async function POST(request) {
    
      
 
-      {
-        $project: {
-          _id: 1,
-          category_id: 1,
-          subcategory_id: 1,
-          childcategory_id: 1,
-          product_name: 1,
-          product_description: 1,
-          slug: 1,
-          main_image: 1,
-          image_1: 1, 
-          image_2: 1, 
-          image_3: 1, 
-          image_4: 1, 
-          image_5: 1, 
-          image_6: 1, 
-          image_7: 1, 
-          currency: 1, 
-          totalSeles:1,
-          totalUnitSele:1,
-          variant: 1,
-        },
-      },
+    //   {
+    //     $project: {
+    //       _id: 1,
+    //       category_id: 1,
+    //       subcategory_id: 1,
+    //       childcategory_id: 1,
+    //       product_name: 1,
+    //       product_description: 1,
+    //       slug: 1,
+    //       main_image: 1,
+    //       image_1: 1, 
+    //       image_2: 1, 
+    //       image_3: 1, 
+    //       image_4: 1, 
+    //       image_5: 1, 
+    //       image_6: 1, 
+    //       image_7: 1, 
+    //       currency: 1, 
+    //       totalSeles:1,
+    //       totalUnitSele:1,
+    //       variant: 1,
+    //     },
+    //   },
 
       {
         $facet: {

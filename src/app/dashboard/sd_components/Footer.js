@@ -23,7 +23,7 @@ const Footer = () => {
      </div>
    </Link>
 
-<a href="#">
+<Link href="/dashboard/help/my-ticket/All">
     <div className="item">
       <img src={`${baseUrl}front/assets/images/flag.png`} />
       <div className="item-content">
@@ -31,7 +31,7 @@ const Footer = () => {
         <p>Track and manage your support tickets.</p>
       </div>
     </div>
-  </a>
+  </Link>
 
 <a href="#">
    <div className="item">
