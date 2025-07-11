@@ -1,17 +1,56 @@
-import { responseFun } from "@/Http/helper";
+import { isEmpty, responseFun } from "@/Http/helper";
 import { getLoginSeller } from "../../getLoginUser/route";
 import { sellerBusinessProfileModel } from "@/Http/Models/sellerModel";
 import mongoose from "mongoose";
+import { connectDb } from "@/Http/dbConnect2";
 
 
 export async function POST(request) {
     
-    const { business_overview, business_profile } = await request.json();
+    await connectDb()
+
+    const { business_overview, 
+
+        TypeOfEnterprise,
+        YearFounded,
+        ProductLine,
+        Headquarters,
+        EmployeeCount,
+        BrandRegistration,
+        QualityCertifications,
+        ProductComplianceCertifications,
+        PatentStatus,
+        RevenueRange, 
+        TargetMarkets,
+        
+
+    SustainabilityPractices,
+     } = await request.json();
 
     const seller = await getLoginSeller();
     if(!seller){
         return responseFun(false, "unauthrized request.", 403);
     }
+
+
+        const errors = {};
+        if(isEmpty(business_overview))errors.business_overview = "Required"
+        if(isEmpty(TypeOfEnterprise))errors.TypeOfEnterprise = "Required"
+        if(isEmpty(YearFounded))errors.YearFounded = "Required"
+        if(isEmpty(ProductLine))errors.ProductLine = "Required"
+        if(isEmpty(Headquarters))errors.Headquarters = "Required"
+        if(isEmpty(EmployeeCount))errors.EmployeeCount = "Required"
+        if(isEmpty(BrandRegistration))errors.BrandRegistration = "Required"
+        if(isEmpty(QualityCertifications))errors.QualityCertifications = "Required"
+        if(isEmpty(ProductComplianceCertifications))errors.ProductComplianceCertifications = "Required"
+        if(isEmpty(RevenueRange))errors.RevenueRange = "Required"
+        if(isEmpty(TargetMarkets))errors.TargetMarkets = "Required"
+        if(isEmpty(SustainabilityPractices))errors.SustainabilityPractices = "Required"
+        if(isEmpty(PatentStatus))errors.PatentStatus = "Required"
+
+        if(Object.keys(errors).length > 0){
+            return responseFun(false, {errors, status_code:402}, 200)
+        }
     try{
 
         const existData = await sellerBusinessProfileModel.findOne({seller_id:new mongoose.Types.ObjectId(seller._id)})
@@ -22,7 +61,19 @@ export async function POST(request) {
                 { 
                     $set: {   
                         business_overview,
-                        business_profile
+                       TypeOfEnterprise,
+                        YearFounded,
+                        ProductLine,
+                        Headquarters,
+                        EmployeeCount,
+                        BrandRegistration,
+                        QualityCertifications,
+                        ProductComplianceCertifications,
+                        PatentStatus,
+                        RevenueRange, 
+                       TargetMarkets,
+                        SustainabilityPractices,
+                        adminApproved:0
                     }
                 }
             )
@@ -31,7 +82,19 @@ export async function POST(request) {
                 {
                     seller_id:seller._id,
                     business_overview,
-                    business_profile
+                    TypeOfEnterprise,
+                    YearFounded,
+                    ProductLine,
+                    Headquarters,
+                    EmployeeCount,
+                    BrandRegistration,
+                    QualityCertifications,
+                    ProductComplianceCertifications,
+                    PatentStatus,
+                    RevenueRange, 
+                    TargetMarkets,
+                    SustainabilityPractices,
+                    adminApproved:0
                 }
             )
         }
@@ -44,6 +107,7 @@ export async function POST(request) {
 
 
 export async function GET(request) { 
+      await connectDb()
     const seller = await getLoginSeller();
     
     if(!seller){

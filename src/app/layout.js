@@ -10,6 +10,7 @@ import { AppProvider } from "./contaxtData/contextData";
 import SellorDashboardCss from "./dashboard/SellorDashboardCss";
 import '../../public/front/assets/css/plugins.css'
 import '../../public/front/assets/css/style.css'
+import '../../public/front/assets/css/rating.css'
 import { Toaster } from 'sonner';
  
 

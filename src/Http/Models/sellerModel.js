@@ -357,9 +357,32 @@ const sellerBusinessDetails = new Schema({
     business_overview:{
         type:String, 
     },
-    business_profile:{
-        type:String,  
-    }, 
+
+    TypeOfEnterprise:String,
+    YearFounded:String,
+    ProductLine:String,
+    Headquarters:String,
+    EmployeeCount:String,
+    BrandRegistration:String,
+    QualityCertifications:String,
+    ProductComplianceCertifications:String,
+    PatentStatus:String,
+    RevenueRange:String,
+
+    TargetMarkets:String,   
+    SustainabilityPractices:String,
+
+    Published:{
+        type:Number,
+        enum:[1,0], // 1=>published, 0=> not published
+        default:0
+    },
+     adminApproved:{
+        type:Number,
+        enum:[1,0], // 1=>published, 0=> not published
+        default:0
+    },
+    profileLogo:String
 
 },{timestamps:true}) 
 

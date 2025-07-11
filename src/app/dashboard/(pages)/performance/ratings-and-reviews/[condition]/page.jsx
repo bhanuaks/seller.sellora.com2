@@ -42,26 +42,7 @@ function Page() {
     <>
   <div className="rts-navigation-area-breadcrumb pb--10">
     <div className="container">
-      <div className="row">
-        <div className="col-lg-12 col-md-12">
-          <div className="navigator-breadcrumb-wrapper seller-central-dash-board-breadcrumb">
-            <ul>
-              <li>
-                <a href="#"> 
-                  <Image src={`${baseUrl}front/assets/images/hand_shaking.png`}
-                alt='influencer-marketing.jpg'
-                width={0}
-                height={0}
-                sizes='100vw' 
-                style={{width:"auto", height:"auto"}} 
-                /> 
-                  Help
-                </a>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
+       
       <div className="row">
         <div className="col-lg-10 offset-lg-1">
           <div className="navigator-breadcrumb-wrapper text-center mb--20">
@@ -195,12 +176,12 @@ function Page() {
                    {item.product?.product_name}
                   </p>
                   <ul>
-                    <li>
+                    {/* <li>
                       <span>SKU:</span> Lora s Choice Purple Toothpaste
                     </li>
                     <li>
                       <span>SIN:</span> B0D8W995465894
-                    </li>
+                    </li> */}
                   </ul>
                 </div>
               </td>

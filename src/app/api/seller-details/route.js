@@ -1,11 +1,17 @@
 import { responseFun } from "@/Http/helper";
 import { sellerModel } from "@/Http/Models/sellerModel";
+import { getLoginSeller } from "../getLoginUser/route";
 
 
 export async function GET(request) {
     const { searchParams } = new URL(request.url)
-    const seller_id = searchParams.get('seller_id')
+    // const seller_id = searchParams.get('seller_id')
 
+    const seller = await getLoginSeller();
+    if(!seller){
+          return responseFun(false, {message:"unauthorized request"}, 403)
+    }
+    const seller_id = seller._id
     try{
         const seller = await sellerModel.findById(seller_id)
         return responseFun(true, {seller}, 200)
