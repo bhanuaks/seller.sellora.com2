@@ -1,4 +1,5 @@
 import { getLoginSeller } from "@/app/api/getLoginUser/route";
+import { connectDb } from "@/Http/dbConnect2";
 import { responseFun } from "@/Http/helper";
 import { AdsProductsModals } from "@/Http/Models/AddModel/saponsoredAdsProducts";
 import { adsKeywordModal, ExcludeKeywordModal, SponsoredAdsModal } from "@/Http/Models/AddModel/SponsoredAdsModal";
@@ -7,6 +8,7 @@ import mongoose from "mongoose";
 
 
 export async function GET(request) {
+    await connectDb();
     const { searchParams } = new URL(request.url);
     const updateId = searchParams.get("updateId") || undefined;
 

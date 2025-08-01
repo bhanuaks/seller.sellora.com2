@@ -6,7 +6,7 @@ import { variant_large_img_path1, main_thumb_img_path} from '@/Http/helper'
 import { apiRequest } from '@/Http/apiHelper'
 import { toast , ToastContainer } from 'react-toastify'
 
-const Listing = ({productList, editVariant, refreshList, setRefreshList, copyVariant}) => {
+const Listing = ({productList, editVariant, refreshList, setRefreshList, copyVariant, chooseProduct, selectedListing}) => {
 
   function toggleMenu(event) {
     const menu = event.target.nextElementSibling;
@@ -55,7 +55,7 @@ const Listing = ({productList, editVariant, refreshList, setRefreshList, copyVar
 
   return (
     <> 
-     <ToastContainer
+     {/* <ToastContainer
             position="top-center"
             autoClose={3000}
             hideProgressBar={false}
@@ -66,7 +66,7 @@ const Listing = ({productList, editVariant, refreshList, setRefreshList, copyVar
             draggable
             pauseOnHover
             theme="colored"
-          />
+          /> */}
 
     <tbody>
  
@@ -77,7 +77,18 @@ const Listing = ({productList, editVariant, refreshList, setRefreshList, copyVar
                   <div className="che">
                     <p>
                      
-                      <input type="checkbox" id={`active${key}`} name="" />
+                      <input type="checkbox" id={`active${key}`} name="" 
+                      onChange={()=>chooseProduct(product._id, product.variants._id)}
+                      checked = {(()=>{
+                         const filterData = selectedListing.filter((item)=>item.product_id == product._id && item.variant_id == product.variants._id )
+                         if(filterData.length > 0){
+                          return true
+                         }else{
+                          return false
+                         }
+
+                      })()}
+                      />
                        {(()=>{
                         if(product.save_as_draft == "1"){
                           return   (
@@ -87,7 +98,7 @@ const Listing = ({productList, editVariant, refreshList, setRefreshList, copyVar
                           )
                         }else if(product.variants && product.variants.isProcessing == "Processing"){
                           return  <label htmlFor={`active${key}`} className="text-warning active222">
-                           Processing
+                           Processing 
                         </label>
 
                         }else if(product.variants && (product.variants?.listingStatus || product.variants?.listingStatus == 0)){
@@ -101,7 +112,7 @@ const Listing = ({productList, editVariant, refreshList, setRefreshList, copyVar
                                 </label>
                               )
                         }else {
-                          return<>sdcsd</>
+                          return<> </>
                         }
 
                        })()}
@@ -231,21 +242,25 @@ const Listing = ({productList, editVariant, refreshList, setRefreshList, copyVar
                             Edit Catalogue
                           </Link>
                         </li>
+                         
                         {product.save_as_draft == "1" && ( 
                           <> 
                              <li onClick={()=>deleteDraftProduct(product?._id)} >Delete Product</li> 
+                           
                           </> 
                         )}
                         {product.variants && product?.save_as_draft !== "1" && (
-                           product.variants && product.variants.customAttributes ?(
+                          //    product.variants.customAttributes ?(
                           <>
-                           <li onClick={(e)=>copyVariant(e,product)}> Copy Listing  </li> 
                               <>
-                                <li onClick={()=>archiveVariant(product.variants._id, "Archive")} >Archive Listing</li>
+                           <li onClick={(e)=>copyVariant(e,product)}> Copy Listing  </li> 
+                            {product.variants.isProcessing == "Approved" && (
+                              <li onClick={()=>archiveVariant(product.variants._id, "Archive")} >Archive Listing</li>
+                            )} 
                                 <li onClick={()=>archiveVariant(product.variants._id, "Delete")} >Delete Listing</li>
                               </>
                           </>
-                           ):""
+                          //  ):""
                         )}
 
                        
@@ -258,7 +273,7 @@ const Listing = ({productList, editVariant, refreshList, setRefreshList, copyVar
             ))
          :<tr>
          <td colSpan={10}>
-          <div style={{ display: 'flex', justifyContent: 'center', width: '100%', fontSize:'20px' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', width: '100%', height:'50vh', fontSize:'20px', alignItems:'center' }}>
             listing Not Found!
           </div>
           </td>

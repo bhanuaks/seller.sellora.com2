@@ -84,8 +84,8 @@ function activeSeller(e){
                 </Link>
               </li>
               <li>
-                <Link href="/seller/al/return-address" className={`${pathname === "/seller/al/return-address" ? 'active_current' : ''}  ${(sellor && sellor.complete_step >= 3)  ? '' : 'disabled'}`}>
-                  Return Address <i className={`fa fa-check ${sellor && sellor.complete_step >= 4 ? 'active_current2' : ''}`} />
+                <Link href="/seller/al/return-setting" className={`${pathname === "/seller/al/return-setting" ? 'active_current' : ''}  ${(sellor && sellor.complete_step >= 3)  ? '' : 'disabled'}`}>
+                  Return Setting <i className={`fa fa-check ${sellor && sellor.complete_step >= 4 ? 'active_current2' : ''}`} />
                 </Link>
               </li>
               <li>
@@ -108,11 +108,11 @@ function activeSeller(e){
                   Bank Account Information <i className={`fa fa-check ${sellor && sellor.complete_step >= 8 ? 'active_current2' : ''}`} />
                 </Link>
               </li>
-              <li>
+              {/* <li>
                 <Link href="/seller/al/payment-information" className={`${pathname === "/seller/al/payment-information" ? 'active_current' : ''}  ${(sellor &&  sellor.complete_step >= 8)  ? '' : 'disabled'}`}>
                   Payment Information <i className={`fa fa-check ${sellor && sellor.complete_step >= 9 ? 'active_current2' : ''}`} />
                 </Link>
-              </li>
+              </li> */}
               <li>
                 <Link href="/seller/al/listing" className={`${pathname === "/seller/al/listing" ? 'active_current' : ''}  ${(sellor && sellor.complete_step >= 9)   ? '' : 'disabled'}`}>
                   Listing <i className={`fa fa-check ${sellor && sellor.complete_step >= 10 ? 'active_current2' : ''}`} />

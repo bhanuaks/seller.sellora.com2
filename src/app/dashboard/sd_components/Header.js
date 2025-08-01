@@ -46,7 +46,7 @@ const Header = () => {
 
   const sellorLogout = (e) => {
     e.preventDefault();
-    fetch(`${baseUrl}api/seller/logout`, {
+    fetch(`/api/seller/logout`, {
       method: "POST",
     })
       .then((response) => {
@@ -219,7 +219,7 @@ const Header = () => {
                             </li>
                             <li>
                               <Link
-                                href={`${baseUrl}dashboard/performance/seller-feedback`}
+                                href={`${baseUrl}dashboard/performance/seller-feedback/All`}
                               >
                                 Seller Feedback
                               </Link>
@@ -312,13 +312,13 @@ const Header = () => {
                                 All service{" "}
                               </Link>
                             </li>
-                            <li>
+                            {/* <li>
                               <Link
                                 href={`${baseUrl}dashboard/partner-services/my-service`}
                               >
                                 My service
                               </Link>
-                            </li>
+                            </li> */}
                             <li>
                               <Link
                                 href={`${baseUrl}dashboard/partner-services/help`}
@@ -400,13 +400,13 @@ const Header = () => {
 
                                 <div className="order-card2">
                                   <div className="order-header2">
-                                    <a
-                                      href="#"
+                                    <button
+                                       
                                       className="title"
                                       onClick={(e) => sellorLogout(e)}
                                     >
                                       Logout
-                                    </a>
+                                    </button>
                                   </div>
                                 </div>
                               </div>
@@ -567,7 +567,7 @@ const Header = () => {
                                     </Link>
                                   </div>
                                 </div>
-                                <div className="order-card2">
+                                {/* <div className="order-card2">
                                   <div
                                     className={`order-header2 ${
                                       pathname ==
@@ -583,7 +583,7 @@ const Header = () => {
                                       Payment Information
                                     </Link>
                                   </div>
-                                </div>
+                                </div> */}
                                 <div className="order-card2">
                                   <div
                                     className={`order-header2 ${
@@ -629,13 +629,13 @@ const Header = () => {
                                 </div>
                                 <div className="order-card2">
                                   <div className="order-header2">
-                                    <a
-                                      href="#"
+                                    <button
+                                     
                                       className="title"
                                       onClick={(e) => sellorLogout(e)}
                                     >
                                       Logout
-                                    </a>
+                                    </button>
                                   </div>
                                 </div>
                               </div>
@@ -709,13 +709,13 @@ const Header = () => {
                                 </div>
                                 <div className="order-card2">
                                   <div className="order-header2">
-                                    <a
-                                      href="#"
+                                    <button
+                                     
                                       className="title"
                                       onClick={(e) => sellorLogout(e)}
                                     >
                                       Logout
-                                    </a>
+                                    </button>
                                   </div>
                                 </div>
                               </div>
@@ -875,7 +875,7 @@ const Header = () => {
                                     </Link>
                                   </div>
                                 </div>
-                                <div className="order-card2">
+                                {/* <div className="order-card2">
                                   <div
                                     className={`order-header2 ${
                                       pathname ==
@@ -891,7 +891,7 @@ const Header = () => {
                                       Payment Information
                                     </Link>
                                   </div>
-                                </div>
+                                </div> */}
                                 <div className="order-card2">
                                   <div
                                     className={`order-header2 ${

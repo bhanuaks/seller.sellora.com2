@@ -10,7 +10,7 @@ import { updateCartWhenLogin } from "../user-login/verify-user-login-otp/route";
 
 export async function POST(request) {
    
-    connectDb();
+    await  connectDb();
 
     const {
 

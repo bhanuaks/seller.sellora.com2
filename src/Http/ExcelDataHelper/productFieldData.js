@@ -1,5 +1,6 @@
 
 export const exportProductField = [ 
+          "Dyanamic Product Id",
           "Category",
           "Sub Category",
           "Child Category",
@@ -47,7 +48,7 @@ export const exportProductField = [
           "Product Weight Unit",
     
           "Package Length",
-          "Package LengthUnit",
+          "Package Length Unit",
     
           "Package Width",
           "Package Width Unit",
@@ -57,6 +58,7 @@ export const exportProductField = [
     
           "Package Weight",
           "Package Weight Unit",
+          "Handling Time",
     
           "Main Image",
           "Image_1",
@@ -72,6 +74,7 @@ export const exportProductField = [
 
 
 export const productFieldDataTypes = [ 
+         "This is system genrated id",   // "Dyanamic Product Id",
          "Select value from dropdown",   // "Category",
          "Select value from dropdown",   // "Sub Category",
          "Select value from dropdown",   // "Child Category",
@@ -129,6 +132,7 @@ export const productFieldDataTypes = [
     
          "Numerical",                    // "Package Weight",
          "Select value from dropdown",   // "Package Weight Unit",
+         "Numerical",                    //"Handling Time",
     
          "image url",                   // "Main Image",
          "image url",                   // "Image_1",
@@ -146,6 +150,7 @@ export const productFieldDataTypes = [
 
 
 export const fillExampleField = [ 
+         "Optional",                   // "Dyanamic Product Id",
          "Mandatory*",                   // "Category",
          "Mandatory*",                   // "Sub Category",
          "Mandatory*",                   // "Child Category",
@@ -206,6 +211,7 @@ export const fillExampleField = [
     
          "Optional",                          // "Package Weight",
          "Optional",                          // "Package Weight Unit",
+         "Mandatory*",                       //"Handling Time",
     
          "Mandatory*",                         // "Main Image",
          "Mandatory*",                         // "Image_1",
@@ -222,6 +228,7 @@ export const fillExampleField = [
 
 
 export const detailsInField = [ 
+          "The computer should automatically generate a unique ID, and the seller should not be able to edit it.", //Dyanamic Product Id
           "Category",
           "SubCategory",
           "ChildCategory",
@@ -279,6 +286,7 @@ export const detailsInField = [
     
           "Weight Of Package",
           "Package Weight Unit",
+          "Enter Handling Time (in Days)",
     
           `Image Details - Front View - A full front view of a t shirt is a photo of the shirt from the front, with the model standing straight. It shows the fit, design details, and style. | Minimum Resolution - 1600x1600 | Please see the Image Guidelines sheet for more details.`,
           `Image Details - Front View - A full front view of a t shirt is a photo of the shirt from the front, with the model standing straight. It shows the fit, design details, and style. | Minimum Resolution - 1600x1600 | Please see the Image Guidelines sheet for more details.`,

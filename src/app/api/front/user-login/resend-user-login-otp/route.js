@@ -8,7 +8,8 @@ import { connectDb } from "../../../../../../lib/dbConnect";
 
 
 export async function POST(request) {
-    await connectDb()
+    await connectDb();
+    
     const {email, mobile} = await request.json(); 
 
     try{ 

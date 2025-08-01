@@ -8,7 +8,7 @@ import { userModal } from "@/Http/Models/userModel";
 
 
 export async function POST(request) {
-    await connectDb()
+    await connectDb();
     const {username, password} = await request.json();
 
     const errors = {}

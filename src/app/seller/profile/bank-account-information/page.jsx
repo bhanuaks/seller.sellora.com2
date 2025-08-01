@@ -14,8 +14,12 @@ function Page() {
 
   const countryRef = useRef();
   const router = useRouter();
+  const [isProccess, setIsProccess] = useState(false);
   const [errors, setErrors] = useState({});
   const [sellor, setSellor] = useState(null);
+   const [editFrom, setEditFrom] = useState(false);
+   const [preveData, setPreveData] = useState({});
+
   const phoneInputRef = useRef(null);
   const [bankDetails, setBankDetails] = useState({
     account_holder_name: "",
@@ -70,7 +74,7 @@ function Page() {
 
   const updateInputData = (e) => {
     const { name, value } = e.target;
-
+    
     if(name=="zipcode"){
       let alphaNumericValue = value.replace(/[^a-zA-Z0-9]/g, '');
       if(alphaNumericValue && alphaNumericValue.length >8){
@@ -85,6 +89,8 @@ function Page() {
 
     if (name == "account_number") {
       const numericValue = value.replace(/[^0-9]/g, "");
+
+      console.log({numericValue, value});
       setBankDetails((preData) => ({
         ...preData,
         [name]: numericValue,
@@ -125,29 +131,50 @@ function Page() {
   function submitUpdateForm(e) {
     e.preventDefault();
     setErrors({});
-
-    $(".loaderouter").css("display", "flex");
-    fetch(`${baseUrl}api/seller/update-profile?update=bankDetails`, {
+    setIsProccess(true)
+    fetch(`/api/seller/update-profile?update=bankDetails`, {
       method: "POST",
       body: JSON.stringify(bankDetails),
     })
       .then((response) => {
-        if (!response.ok) {
-          $(".loaderouter").css("display", "none");
+         setIsProccess(false)
+        if (!response.ok) { 
           throw new Error("Network Error");
         }
         return response.json();
       })
-      .then((res) => {
-        $(".loaderouter").css("display", "none");
+      .then((res) => { 
         if (res.status) {
+          setEditFrom(false)
           toast.success("Success! Account information saved successfully.");
-          router.push("/seller/profile/payment-information");
+          // router.push("/seller/profile/payment-information");
         } else if (res.data.status_code == 403) {
           setErrors(res.data.errors);
         }
       });
   }
+
+   function editDataFun(e){
+            e.preventDefault(); 
+             setEditFrom(true) 
+             setPreveData(bankDetails);
+              setBankDetails((preData)=>({
+                        ...preData, 
+                        account_number:"", 
+                        // country:"",
+                        // account_holder_name:"",
+                        // ifsc_code: "",
+                        // bank_name:"",
+                        // bank_address:"",
+                        // state:"",
+                        // zipcode:"",
+                      }))
+          }
+          function cancelEditFun(e){
+            e.preventDefault(); 
+             setEditFrom(false)  
+             setBankDetails(preveData)
+          }
 
   return (
     <div className="bg33">
@@ -199,9 +226,16 @@ function Page() {
                     <div className="row">
                       <div className="col-lg-12">
                         <h2>Bank Account Information</h2>
-                        {/* <span className="edit_span">
-                          <a href="#">Edit</a>
-                        </span> */}
+                        <span className="edit_span">
+                          {!editFrom && bankDetails?.seller_id && ( 
+                              <a href="#" onClick={(e) =>editDataFun(e)}>Edit</a>
+                          )}
+
+                          {editFrom && bankDetails?.seller_id && ( 
+                             <a href="#" onClick={(e) => cancelEditFun(e)}>Cancel</a>
+                          )}
+                        </span>
+                          
                       </div>
                       <div className="col-lg-10 offset-lg-1">
                         <div className="form_s2">
@@ -218,6 +252,7 @@ function Page() {
                                       name="country"
                                       value={bankDetails.country ?? ""}
                                       onChange={(e) => updateInputData(e)}
+                                      disabled={!editFrom}
                                     >
                                       <option value={""}>select</option>
                                       {citizenshipList.map((country, index) => (
@@ -251,6 +286,7 @@ function Page() {
                                     value={bankDetails.account_holder_name}
                                     onChange={(e) => updateInputData(e)}
                                     placeholder="Account Holder's Name"
+                                     disabled={!editFrom}
                                   />
                                   {errors.account_holder_name &&
                                   errors.account_holder_name != "" ? (
@@ -278,6 +314,7 @@ function Page() {
                                           value={bankDetails.ifsc_code}
                                           onChange={(e) => updateInputData(e)}
                                           placeholder="IFSC Code"
+                                           disabled={!editFrom}
                                         />
                                         {errors.ifsc_code && errors.ifsc_code != "" ? (
                                           <span
@@ -306,6 +343,7 @@ function Page() {
                                           value={bankDetails.sort_code || ""}
                                           onChange={(e) => updateInputData(e)}
                                           placeholder="Sort Code"
+                                           disabled={!editFrom}
                                         />
                                         {errors.sort_code && errors.sort_code != "" ? (
                                           <span
@@ -330,7 +368,18 @@ function Page() {
                                   <input
                                     type="text"
                                     name="account_number"
-                                    value={bankDetails.account_number}
+                                     disabled={!editFrom}
+                                    value={
+                                  !editFrom && bankDetails?.account_number
+                                    ? `xxxxxxxx${
+                                        bankDetails?.account_number &&
+                                        bankDetails?.account_number.length >= 4
+                                          ? bankDetails?.account_number.slice(-4)
+                                          : ""
+                                      }`
+                                    : bankDetails?.account_number || ""
+                                }
+                                    // value={bankDetails.account_number}
                                     onChange={(e) => updateInputData(e)}
                                     placeholder="Account Number"
                                   />
@@ -360,6 +409,7 @@ function Page() {
                                     value={bankDetails.bank_name}
                                     onChange={(e) => updateInputData(e)}
                                     placeholder="Bank Name"
+                                     disabled={!editFrom}
                                   />
                                   {errors.bank_name &&
                                   errors.bank_name != "" ? (
@@ -400,6 +450,7 @@ function Page() {
                                       value={bankDetails.bank_address || ""}
                                       onChange={(e) => updateInputData(e)}
                                       placeholder="address"
+                                       disabled={!editFrom}
                                     />
                                     {errors.bank_address &&
                                       errors.bank_address != "" && (
@@ -422,6 +473,7 @@ function Page() {
                                       value={bankDetails.state || ""}
                                       onChange={(e) => updateInputData(e)}
                                       placeholder="state"
+                                       disabled={!editFrom}
                                     />
                                     {/* {errors.state && errors.state != ""? ( 
                                                             <span id="name_error" className="input-error-tip" style={{display: 'inline-block'}}>{errors.state}</span>
@@ -439,6 +491,8 @@ function Page() {
                                       value={bankDetails.zipcode || ""}
                                       onChange={(e) => updateInputData(e)}
                                       placeholder="zipcode"
+                                       disabled={!editFrom}
+                                       className="disabled-input"
                                     />
                                     {errors.zipcode && errors.zipcode != "" ? (
                                       <span
@@ -456,7 +510,9 @@ function Page() {
                               </div>
                             </div>
                             <div className="col-lg-10 offset-lg-1">
-                              <button className="save">Update</button>
+                              {editFrom && ( 
+                                <button className="save">{isProccess?"Please wait..":"Update"}</button>
+                              )}
                             </div>
                           </div>
                         </div>

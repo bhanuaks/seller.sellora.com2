@@ -5,6 +5,7 @@ import { adsKeywordModal } from "@/Http/Models/AddModel/SponsoredAdsModal";
 
 export async function POST(request) {
 
+    await connectDb();
     const { searchText } = await request.json();
     
     try {

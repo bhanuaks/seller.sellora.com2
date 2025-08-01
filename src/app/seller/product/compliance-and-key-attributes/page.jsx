@@ -34,6 +34,7 @@ const page = ({ params }) => {
     const errorRedirctUtl = `${baseUrl}dashboard/categories`;
     const [errors, setErrors] = useState({});
     const [product, setProduct] = useState(null);
+    const [saveProccess, setSaveProccess] = useState(false);
 
     const [productDetails, setProductDetails] = useState({
       category_id: category_id,
@@ -179,6 +180,7 @@ const page = ({ params }) => {
     function saveProductInforemationData(e, save_as_draft) {
       e.preventDefault();
       // $(".loaderouter").css("display", "flex"); 
+      setSaveProccess(true)
       setErrors({});
       fetch(`${baseUrl}api/seller/product/add-compliance-and-other`, {
         method: "POST",
@@ -189,6 +191,7 @@ const page = ({ params }) => {
         }),
       })
         .then((response) => {
+          setSaveProccess(false)
           if (!response.ok) {
             $(".loaderouter").css("display", "none");
             throw new Error("Network Error");
@@ -885,7 +888,15 @@ const page = ({ params }) => {
                     <div className="row align-items-center">
                       <div className="col-lg-8">
                         <div className="sub_mit_cat">
-                          <ul>
+                          {saveProccess ? ( 
+                          <ul> 
+                            <li className="orange_09">
+                              <button>Please wait..</button>
+                            </li> 
+                          </ul>
+
+                          ):(
+                            <ul>
                             {product?.save_as_draft == "1" && (
                                   <li className="orange_09">
                                   <button  type="button" onClick={(e) => saveProductInforemationData(e, 1)} >Save</button> 
@@ -901,17 +912,11 @@ const page = ({ params }) => {
                               </Link>
                             </li>
                           </ul>
+                          )}
+                           
                         </div>
                       </div>
-                      {/* <div className="col-lg-4">
-                        <Link
-                          href="#"
-                          className="save-as-draft"
-                          onClick={(e) => saveProductInforemationData(e, 1)}
-                        >
-                          Save as Draft
-                        </Link>
-                      </div> */}
+                     
                     </div>
                   </div>
                 </form>

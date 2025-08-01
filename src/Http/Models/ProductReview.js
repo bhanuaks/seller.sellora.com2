@@ -18,6 +18,13 @@ const productReviewScema = new Schema({
         required: false  
         
     },
+      order_id:{
+        type:String,
+    },
+     sub_order_id:{
+        type:String,
+    },
+    
      seller_id:{
             type:mongoose.Types.ObjectId,
             ref:"Seller"

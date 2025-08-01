@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 
 
 export async function POST(request) {
+    await connectDb();
     const {searchParams} = new URL(request.url)
     const resend = searchParams.get('searchParams');
     const {

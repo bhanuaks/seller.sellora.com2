@@ -28,7 +28,7 @@ import '../../../public/front/assets/css/style.css'
           <meta name="description" content="" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0" />
           <meta name="keywords" content="" />
-          <title>My Listing | Sellora</title>
+          <title>Sellora | Seller Penal</title>
           {/* plugins css */}
           <link rel="shortcut icon" href="/front/favicon.ico" type="image/x-icon" />
           {/* <link rel="stylesheet preload" href="/front/assets/css/plugins.css" as="style" />

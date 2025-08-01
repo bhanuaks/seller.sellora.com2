@@ -530,8 +530,10 @@ function DisplayAds() {
                 className="col-lg-4 offset-lg-2"
                onClick={() => {setCampaign((prevData)=>({...prevData, adFormat:"Image", fileUrl:"", fileUrlPath:""}))}}
               >
+                 <h4 className="text-center">Sponsored Image Ads</h4>
                 <div className={`adfor_boxs ${campaign.adFormat== "Image"?"campaign_box2":""}`}>
                   <div className="row g-4">
+                        {/* <h4>Sponsored Image Ads</h4> */}
                     <div className="col-lg-6 col-12">
                       <div className="box1 text-center">
                         <img
@@ -577,7 +579,9 @@ function DisplayAds() {
                 className="col-lg-4 mt-5 pt-2 pt-md-0 mt-md-0"
                 onClick={() => {setCampaign((prevData)=>({...prevData, adFormat:"Video", fileUrl:"", fileUrlPath:""}))}}
               >
+                <h4 className="text-center">Sponsored Video Ads</h4>
                 <div className={`adfor_boxs ${campaign.adFormat== "Video"?"campaign_box2":""}`}>
+                    {/* <h4>Sponsored Video Ads</h4> */}
                   <div className="box1  video">
                     <i className="fa-solid fa-play" />
                   </div>

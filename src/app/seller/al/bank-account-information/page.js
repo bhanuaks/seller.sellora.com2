@@ -22,7 +22,10 @@ const page = () => {
   const router = useRouter();
   const [errors, setErrors] = useState({});
   const [sellor, setSellor] = useState(null);
+   const [editFrom, setEditFrom] = useState(false);
   const phoneInputRef = useRef(null);
+   const [isSubmiting, setIsSubmiting] = useState(false);
+    const [preveData, setPreveData] = useState({});
   const [bankDetails, setBankDetails] = useState({
     account_holder_name: "",
     bank_name: "",
@@ -35,8 +38,7 @@ const page = () => {
   });
 
   useEffect(() => {
-    if (globalData.sellor) {
-      // $(".loaderouter").css("display", "flex");
+    if (globalData.sellor) { 
       fetch(
         `${baseUrl}api/seller/get-profile?user_id=${globalData.sellor._id}&with_data=bankDetails`,
         {
@@ -44,14 +46,12 @@ const page = () => {
         }
       )
         .then((response) => {
-          if (!response.ok) {
-            // $(".loaderouter").css("display", "none");
+          if (!response.ok) { 
             throw new Error("Network Error");
           }
           return response.json();
         })
-        .then((res) => {
-          // $(".loaderouter").css("display", "none");
+        .then((res) => { 
           if (res.status) {
             // check complete step
             if (
@@ -64,6 +64,8 @@ const page = () => {
             setSellor(res.data.data);
             if (res.data.referData) {
               setBankDetails(res.data.referData);
+            }else{
+              setEditFrom(true)
             }
             setBankDetails((preData) => ({
               ...preData,
@@ -130,29 +132,52 @@ const page = () => {
   function submitUpdateForm(e) {
     e.preventDefault();
     setErrors({});
-
-    // $(".loaderouter").css("display", "flex");
+    setIsSubmiting(true)
     fetch(`${baseUrl}api/seller/update-profile?update=bankDetails`, {
       method: "POST",
       body: JSON.stringify(bankDetails),
     })
       .then((response) => {
+        setIsSubmiting(false)
         if (!response.ok) {
-          // $(".loaderouter").css("display", "none");
           throw new Error("Network Error");
         }
         return response.json();
       })
       .then((res) => {
-        // $(".loaderouter").css("display", "none");
+        
         if (res.status) {
           toast.success("Success! Account information saved successfully.");
-          router.push("/seller/al/payment-information");
+          router.push("/seller/al/listing");
         } else if (res.data.status_code == 403) {
           setErrors(res.data.errors);
         }
       });
   }
+
+   function editDataFun(e){
+            e.preventDefault(); 
+             setEditFrom(true) 
+             setPreveData(bankDetails);
+              setBankDetails((preData)=>({
+                        ...preData, 
+                        // country:"",
+                        // account_holder_name:"",
+                        // ifsc_code: "",
+                        account_number:"", 
+                        // bank_name:"",
+                        // bank_address:"",
+                        // state:"",
+                        // zipcode:"",
+                      }))
+          }
+          function cancelEditFun(e){
+            e.preventDefault(); 
+             setEditFrom(false)  
+             setBankDetails(preveData)
+          }
+
+
 
   return (
     <div className="seller_panel_mmmm">
@@ -201,6 +226,22 @@ const page = () => {
             <div className="mm_rts-cart-list-area2">
               <form action="#" onSubmit={(e) => submitUpdateForm(e)}>
                 <div className="row">
+
+                    {!editFrom && ( 
+                   <div>
+                   <div className="edit_button" style={{ float: "right" }} 
+                       onClick={(e) =>editDataFun(e)}>Edit Details</div> 
+                        </div>
+                        )}
+
+                        {editFrom && bankDetails?.seller_id && ( 
+                           <div> 
+                           <div className="edit_button" style={{ float: "right" }} 
+                           onClick={(e) =>cancelEditFun(e)}>Cancel</div> 
+                            </div>
+                        )}
+
+                         
                   <div className="col-lg-8 offset-lg-2">
                     <div className="nnn_dform">
                       <h2>Bank Account Information</h2>
@@ -211,6 +252,7 @@ const page = () => {
                             name="country"
                             value={bankDetails.country ?? ""}
                             onChange={(e) => updateInputData(e)}
+                            disabled={!editFrom}
                           >
                             <option value={""}>select</option>
                             {citizenshipList.map((country, index) => (
@@ -234,6 +276,7 @@ const page = () => {
                           value={bankDetails.account_holder_name}
                           onChange={(e) => updateInputData(e)}
                            placeholder="Account Holder's Name"
+                             disabled={!editFrom}
                         />
                         {errors.account_holder_name &&
                         errors.account_holder_name != "" ? (
@@ -257,9 +300,20 @@ const page = () => {
                         <input
                           type="text"
                           name="account_number"
-                          value={bankDetails.account_number}
+                           value={
+                                  !editFrom && bankDetails?.account_number
+                                    ? `xxxxxxxx${
+                                        bankDetails?.account_number &&
+                                        bankDetails?.account_number.length >= 4
+                                          ? bankDetails?.account_number.slice(-4)
+                                          : ""
+                                      }`
+                                    : bankDetails?.account_number || ""
+                                }
+                          // value={bankDetails.account_number}
                           onChange={(e) => updateInputData(e)}
                            placeholder="Account Number"
+                             disabled={!editFrom}
                         />
                         {errors.account_number &&
                         errors.account_number != "" ? (
@@ -287,6 +341,7 @@ const page = () => {
                               value={bankDetails.ifsc_code}
                               onChange={(e) => updateInputData(e)}
                               placeholder="IFSC Code"
+                                disabled={!editFrom}
                             />
                             {errors.ifsc_code && errors.ifsc_code != "" ? (
                               <span
@@ -315,6 +370,7 @@ const page = () => {
                               value={bankDetails.sort_code || ""}
                               onChange={(e) => updateInputData(e)}
                               placeholder="Sort Code"
+                                disabled={!editFrom}
                             />
                             {errors.sort_code && errors.sort_code != "" ? (
                               <span
@@ -343,6 +399,7 @@ const page = () => {
                           value={bankDetails.bank_name}
                           onChange={(e) => updateInputData(e)}
                            placeholder="Bank Name"
+                             disabled={!editFrom}
                         />
                         {errors.bank_name && errors.bank_name != "" ? (
                           <span
@@ -382,6 +439,7 @@ const page = () => {
                             value={bankDetails.bank_address || ""}
                             onChange={(e) => updateInputData(e)}
                              placeholder="address"
+                               disabled={!editFrom}
                           />
                           {errors.bank_address && errors.bank_address != "" && (
                             <span
@@ -404,6 +462,7 @@ const page = () => {
                             value={bankDetails.state || ""}
                             onChange={(e) => updateInputData(e)}
                             placeholder="state"
+                              disabled={!editFrom}
                           />
                           {/* {errors.state && errors.state != ""? ( 
                             <span id="name_error" className="input-error-tip" style={{display: 'inline-block'}}>{errors.state}</span>
@@ -419,6 +478,7 @@ const page = () => {
                             value={bankDetails.zipcode || ""}
                             onChange={(e) => updateInputData(e)}
                             placeholder="zipcode"
+                              disabled={!editFrom}
 
                           />
                           {errors.zipcode && errors.zipcode != ""? ( 
@@ -426,7 +486,14 @@ const page = () => {
                         ):''}
                         </div>
                       </div>
-                      <button className="save">Save</button>
+                      {editFrom && ( 
+                           <button className="save" disabled={isSubmiting}>{isSubmiting?"Please wait..":"Save"}</button>
+                      )}
+                      {!editFrom && ( 
+                        <Link href={'/seller/al/payment-information'}>
+                           <button className="save" >Next</button>
+                           </Link>
+                      )}
                     </div>
                   </div>
                 </div>

@@ -11,6 +11,8 @@ function page() {
         const [errors, setErrors] =useState({})
         const route = useRouter(); 
         const [loginData, setLoginData] = useState({})
+        const [loginProcess, setLoginProcess] = useState(false)
+        
         const [otpTime, setOtpTime] = useState(0)
         const [otpMinTime, setOtpMinTime] = useState(5)
         
@@ -89,7 +91,7 @@ function page() {
   function submitOtp(e){
     setErrors({});
     e.preventDefault();
-    $('.loaderouter').css('display','flex')
+    setLoginProcess(true)
       fetch(`${baseUrl}api/front/seller-login/verify-otp`,{
         method:"POST",
         headers:{
@@ -97,6 +99,7 @@ function page() {
         },
         body:JSON.stringify(loginData)
       }).then((response)=>{ 
+        setLoginProcess(false)
         if(!response.ok){
         $('.loaderouter').css('display','none') 
           throw new Error("Network Error")
@@ -235,13 +238,13 @@ function page() {
                             />
                           </div>
                           {errors.otp && errors.otp != ""? ( 
-                            <span id="name_error" className="input-error-tip" style={{display: 'inline-block'}}>{errors.otp}</span>
-                        ):''}
+                              <span id="name_error" className="input-error-tip" style={{display: 'inline-block'}}>{errors.otp}</span>
+                          ):''}
                         </div>
                       </div>
                     </div>
-                    <button className="rts-btn btn-primary">
-                      Continue{/* Request OTP */}
+                    <button className="rts-btn btn-primary"  disabled={loginProcess} >
+                     {loginProcess?"Please wait..":"Continue"} 
                     </button>
                     <div className="ter_ms">
                       {" "}

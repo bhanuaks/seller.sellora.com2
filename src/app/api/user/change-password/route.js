@@ -1,3 +1,4 @@
+import { connectDb } from "@/Http/dbConnect2";
 import { encryptText, isEmpty, responseFun } from "@/Http/helper";
 import { userModal } from "@/Http/Models/userModel";
 import bcrypt from 'bcryptjs'
@@ -5,6 +6,7 @@ import { NextResponse } from "next/server";
 
 export async function POST(request) {
     
+    await connectDb();
     const {
     old_password,
     new_password,

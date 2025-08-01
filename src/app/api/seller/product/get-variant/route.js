@@ -1,10 +1,12 @@
 import { responseFun } from "@/Http/helper";
 import { Category } from "../../../../../../lib/categoryModel";
 import { getVariantTemlate } from "../../get-category-and-brand/route";
+import { connectDb } from "@/Http/dbConnect2";
 
 
 export async function POST(request){
 
+    await connectDb()
     const {seller_id, category_id, subcategory_id, childcategory_id, brand_id, seller, product_id,  withData } = await request.json();
 
     try{ 

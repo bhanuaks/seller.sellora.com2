@@ -7,6 +7,7 @@ const ReactDOMServer =  require('react-dom/server');
 
 
 export async function POST(request) { 
+    await connectDb()
     const {mobile, email, mobile_code, name} = await request.json();
     const errors ={}; 
     if(isEmpty(mobile))errors.mobile = "Mobile is required"

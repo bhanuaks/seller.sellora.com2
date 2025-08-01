@@ -3,11 +3,13 @@ import { EventDiscountDataModal, saleEventModal } from "@/Http/Models/Sales-even
 import mongoose from "mongoose";
 import { getLoginSeller } from "../../getLoginUser/route";
 import { appliedEventProductModal } from "@/Http/Models/Sales-events/AppliedEvent";
+import { connectDb } from "@/Http/dbConnect2";
 
 
 
 export async function GET(request) {
     
+    await connectDb();
     const { searchParams } = new URL(request.url) 
     const searchText = searchParams.get("searchText") || "";
     const status = searchParams.get("status") || "";

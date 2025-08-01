@@ -22,9 +22,9 @@ function page() {
     })
   
      const [mobileData, setMobileData] = useState({
-      country_s_name:"us",
-      mobile_code:"1",
-      mobile:""
+       country_s_name:globalData?.sellor?.country_s_name,
+        mobile_code:globalData?.sellor?.mobile_code,
+        mobile:globalData?.sellor?.mobile 
      });
 
 
@@ -241,7 +241,7 @@ setIsProccess(true)
                       
                         <div  style={{height:`${edit == "mobile"?"auto":"0px"}`, overflow:'hidden'}}>
                         <Suspense fallback={<></>}> 
-                          <NumberSection mobileData={mobileData} setMobileData={setMobileData}  />
+                          <NumberSection mobileData={mobileData} setMobileData={setMobileData} edit={edit} />
                         </Suspense>
                          {errors.mobile && (
                         <span className='error_message'>{errors.mobile}</span>

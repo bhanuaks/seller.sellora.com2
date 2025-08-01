@@ -16,6 +16,7 @@ import intlTelInput from "intl-tel-input";
 function page() {
   const { globalData, setGlobalData } = useContext(AppContext);
   const [sellor, setSellor] = useState(null);
+  const [isSubmiting, setIsSubmiting] = useState(false);
   const router = useRouter();
   const phoneInputRef = useRef(null);
 
@@ -90,19 +91,20 @@ function page() {
   function submitUpdateForm(e) {
     e.preventDefault();
     // $(".loaderouter").css("display", "flex");
+    setIsSubmiting(true)
     fetch(`${baseUrl}api/seller/update-profile?update=contact_details`, {
       method: "POST",
       body: JSON.stringify(sellor),
     })
       .then((response) => {
-        if (!response.ok) {
-          $(".loaderouter").css("display", "none");
+        setIsSubmiting(false)
+        if (!response.ok) { 
           throw new Error("Network Error");
         }
         return response.json();
       })
       .then((res) => {
-        $(".loaderouter").css("display", "none");
+       
         if (res.status) {
           toast.success("Success! Contact Details Saved.");
           router.push("/seller/al/display-information");
@@ -206,7 +208,7 @@ function page() {
                           disabled
                         />
                       </div>
-                      <button className="save">Save</button>
+                      <button className="save" disabled={isSubmiting}>{isSubmiting?"Please wait..":"Save"}</button>
                     </div>
                   </div>
                 </div>

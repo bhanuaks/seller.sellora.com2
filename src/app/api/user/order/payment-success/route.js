@@ -7,9 +7,12 @@ import mongoose from "mongoose";
 import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";
 import { productVariantModel } from "@/Http/Models/productModel";
+import { connectDb } from "@/Http/dbConnect2";
 
 export async function POST(request) {
 
+    await connectDb();
+    
     const {temp_order_id} = await request.json(); 
     // const session = await mongoose.startSession();
 //    session.startTransaction()

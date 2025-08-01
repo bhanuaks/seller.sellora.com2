@@ -11,6 +11,7 @@ import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense } from "react";
 import HelpAndVideoTopSection from '@/app/seller/HelpAndVideoTop';
+import TableskeltonLoader from '@/app/skeleton_loader/TableskeltonLoader';
 // import '../../../../public/front/assets/css/plugins.css'
 
 
@@ -21,6 +22,7 @@ const page = ({params}) => {
    
     const {globalData, setGlobalData } = useContext(AppContext)
     const [sellor, setSellor] = useState(null); 
+    const [isLoading, setIsLoading] = useState(false); 
     const [searchText, setSearchText] = useState(""); 
     const [brandList, setBrandList] = useState([]); 
     const router = useRouter();
@@ -37,9 +39,11 @@ const page = ({params}) => {
    
     if(globalData.sellor){
       // $('.loaderouter').css('display','flex') 
+      setIsLoading(true)
       fetch(`${baseUrl}api/seller/get-brand-list?user_id=${globalData.sellor._id}&status=${status?status:''}&search=${search?search:""}`,{
         method:"GET", 
       }).then((response)=>{
+        setIsLoading(false)
           if(!response.ok){
             // $('.loaderouter').css('display','none')
             throw new Error('Network Error')
@@ -165,7 +169,7 @@ const page = ({params}) => {
                 <div className="table_menu">
                   <ul>
                     <li><Link href={`${baseUrl}dashboard/track-approval-requests?status=`} className={`${status=="all" || !status ?"active":''}`} >All Request({total.totalBrand})</Link></li>
-                    <li><Link href="#">Action Required(0)</Link></li>
+                    {/* <li><Link href="#">Action Required(0)</Link></li> */}
                     <li><Link href={`${baseUrl}dashboard/track-approval-requests?status=${2}`} className={`${status==2?"active":''}`} > Pending({total.totalPendingBrand})</Link></li>
                     <li><Link href={`${baseUrl}dashboard/track-approval-requests?status=${1}`} className={`${status==1?"active":''}`} > Approved({total.totalApproveBrand})</Link></li>
                   </ul>
@@ -183,7 +187,32 @@ const page = ({params}) => {
             </tr>
           </thead>
           <tbody>
-            {brandList.length>0 && brandList.map((brand, index)=>(
+            {isLoading && (
+             <TableskeltonLoader totalRows={5} totalColumns={5} />
+            )}
+
+            {!isLoading && brandList.length == 0 && (
+                  <tr>
+                    <td colSpan={8}>
+                      <div
+                        style={{
+                          width: "100%",
+                          height: "200px",
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center",
+                          fontSize: "20px",
+                        }}
+                      >
+                        {" "}
+                        Data Not Found!{" "}
+                      </div>
+                    </td>
+                  </tr>
+                )}
+
+
+            {!isLoading && brandList.length>0 && brandList.map((brand, index)=>(
               <tr className="winner__table" key={index}>
               <td>
                 <div className="request_ID">{(brand.request_id).toString().padStart("8",'0')} </div>
@@ -195,7 +224,10 @@ const page = ({params}) => {
               <td className="small-size">{brand.remarks}</td>
               <td className="text-center small-size">
                 <div className="declined">
-                  <Link href="#" className={`${brand.status==1?"green":""}${brand.status==2?"yellow":""}`}>
+                  <Link href="#" className={`${brand.status==1?"green":""}${brand.status==2?"yellow":""}`} 
+                  style={{cursor:"not-allowed"}}
+                  onClick={(e)=>e.preventDefault()}
+                  >
                     {brand.status==0?"Declined":""}
                     {brand.status==2?"Pending":""}
                     {brand.status==1?"Approved":""}
@@ -209,7 +241,7 @@ const page = ({params}) => {
               )}
                {brand.status==0 && (
                 <>
-                   <div className="reapply"><Link href="#">Reapply</Link></div>
+                   <div className="reapply"><Link href={`/dashboard/brand-aproval-page?update=${brand._id}`}>Reapply</Link></div>
                 </>
               )}
 

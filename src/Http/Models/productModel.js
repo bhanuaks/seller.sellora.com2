@@ -26,7 +26,7 @@ const productSchema = new Schema({
     brand_id:{
         type:mongoose.Types.ObjectId,
         ref:"Brand",
-        required:[true, "Brand is required"]
+        required:[true, "Please enter valid brand "]
     },
     event_id:{
         type:mongoose.Types.ObjectId,
@@ -141,13 +141,15 @@ const productSchema = new Schema({
         enum:["1","0"],
         default:"1" // 1=>save as draft, 0 => submit successfully
     }, 
-    packageBreadth:String,  
+    packageBreadth:String, 
+
     product_length:String,
     product_length_unit : String,
     product_width:String,
     product_width_unit :String,
     product_weight:String,
     product_weight_unit : String,
+    
     packageLength:String,
     packageLengthUnit:String,
     packageWidth:String,
@@ -169,6 +171,7 @@ const productSchema = new Schema({
     productHeightUnit:String,
     numberOfItem:String, 
     groupId:String, 
+    handling_time:Number,
     clicks:Number,
      
 
@@ -227,7 +230,7 @@ const productVariantSchema = new Schema({
     }, 
     isProcessing:{
         type:String,
-         enum:["Processing","Approved"],
+         enum:["Processing","Approved", "Rejected"],
          default:"Processing" 
     }, 
     msrp:Number,

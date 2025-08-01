@@ -14,7 +14,8 @@ import { Suspense } from "react";
 import HelpAndVideoTopSection from '@/app/seller/HelpAndVideoTop';
 import ErrorListing from './ErrorListing';
 import ErrorPagination from './ErrorPagination';
-import TableskeltonLoader from '@/app/skeleton_loader/TableskeltonLoader';
+import TableskeltonLoader from '@/app/skeleton_loader/TableskeltonLoader'; 
+import CategoryModal from './CategoryPopup';
 
 const page = () => { 
 
@@ -34,10 +35,13 @@ const page = () => {
   const [productVariant, setProductVariant] = useState(null)
   const [refreshList, setRefreshList] = useState(1)
   const [totalData, setTotalData] = useState({})
+  const [requestDownload, setRequestDownload] = useState(false)
 
   const [firstLoading, setFirstLoading] = useState(true)
   const [isLoading, setIsLoading] = useState(false)
 
+  const [selectedListing, setSelectedListing] = useState([]);
+  const [downloadProccess, setDownloadProccess] = useState(false);
 
   const [errorProducts, setErrorProducts] = useState([])
 
@@ -59,6 +63,7 @@ const page = () => {
         min_price: sanitize(queryParam.get("min_price")) || 0,
         max_price: sanitize(queryParam.get("max_price")) || "",
         variants: sanitize(queryParam.get("variants")) || "",
+        downloadRequest: sanitize(queryParam.get("downloadRequest")) || "",
       })
 
 
@@ -184,28 +189,21 @@ const page = () => {
       }
   }
 
+  
+
+
 
   function paginationFun(page, size, e){
     e.preventDefault();
-    const params = new URLSearchParams(); 
-    params.append("type", type);
-
-    for (const key in filterData) {
-      const value = filterData[key];
-      
-      if (Array.isArray(value) && value.length > 0) {
-        value.forEach((val) => params.append(key, val));
-      } else if (value !== "" && value !== null && value !== undefined) {
-        params.append(key, value);
-      }
-    }
-    let link = `${baseUrl}dashboard/listing?size=${size}&page=${page}&${params}`
+    const params = new URLSearchParams(queryParam);  
+  params.set("page", page); 
+     let link = `${baseUrl}dashboard/listing?&${params}` 
     router.push(link); 
   }
   function changeListSize(e){
     const { name, value } = e.target
     let link = `${baseUrl}dashboard/listing?size=${value}&page=${1}`
-    router.push(link); 
+    router.push(link);
   }
 
   function editVariant(e, product){
@@ -359,8 +357,45 @@ const page = () => {
   
   function changeListSize(e){
     const { name, value } = e.target
-    let link = `${baseUrl}dashboard/listing?size=${value}&page=${1}`
+     const params = new URLSearchParams(queryParam); 
+    params.set("size", value);
+    params.set("page", 1); 
+     let link = `${baseUrl}dashboard/listing?&${params}` 
     router.push(link); 
+    
+  }
+
+
+  function chooseProduct(productId, variantId){
+  const filterData = selectedListing.filter((item)=>item.product_id == productId && item.variant_id == variantId )
+    if(filterData.length > 0){
+      const removeData = selectedListing.filter((item)=>item.product_id !== productId && item.variant_id !== variantId )
+      setSelectedListing(removeData)
+    }else{
+      setSelectedListing((preData)=>([...preData, {product_id:productId, variant_id:variantId}]))
+    } 
+  }
+
+
+  function downloadProduct(e){
+    e.preventDefault();
+     setDownloadProccess(false)
+     fetch(`/api/seller/product/get-prod-export`,{
+              method:"POST", 
+              body:JSON.stringify({listing:selectedListing})
+          }).then((response)=>{
+              if(!response.ok){ 
+                setDownloadProccess(false)
+                  throw new Error("Network Error")
+              }
+              return response.json();
+          }).then((res)=>{ 
+            setDownloadProccess(false)
+              if(res.status){
+                
+              }  
+          })
+
   }
 
   return (
@@ -499,6 +534,9 @@ const page = () => {
                 submitFilter={submitFilter} 
                 filterData={filterData}
                 setFilterData={setFilterData}
+                downloadProduct={downloadProduct}
+                selectedListing={selectedListing}
+               
                 />
             )}
            
@@ -507,7 +545,7 @@ const page = () => {
               <th width={110}>
                 <div className="che">
                   <p>
-                    <input type="checkbox" id="status" name="" />
+                    {/* <input type="checkbox" id="status" name="" /> */}
                     <label htmlFor="status">Status</label>
                   </p>
                 </div>
@@ -572,6 +610,9 @@ const page = () => {
             ):(
                 <Listing productList={productList} editVariant={editVariant} refreshList={refreshList} setRefreshList={setRefreshList}
                     copyVariant={copyVariant}
+                    chooseProduct = {chooseProduct}
+                    selectedListing={selectedListing}
+                     
                 />
             )}
            
@@ -606,8 +647,9 @@ const page = () => {
                 <select className='nice-select' name="size" 
                 value={pagination?pagination.pageSize:10}
                 onChange={(e)=>changeListSize(e)}>
-                  <option value={20}>20 results per page</option>
                   <option value={10}>10 results per page</option>
+                  <option value={20}>20 results per page</option>
+                  <option value={50}>50 results per page</option>
                 </select>
               </div>
                 )}
@@ -677,6 +719,9 @@ const page = () => {
   thresholdData={thresholdData}
   setThresholdData = {setThresholdData}
   />
+
+  <CategoryModal filterData={filterData} setFilterData={setFilterData} submitFilter={submitFilter} 
+  setRequestDownload={setRequestDownload}/>
 </>
 
   )

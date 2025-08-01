@@ -3,6 +3,7 @@ export const exportVariantField = [
     
           // variant Fields 
         //   "Variant Type",
+          "Dyanamic Variant Id",
           "Group Id",
           "Product Id",
           "Product Id Type",
@@ -29,7 +30,8 @@ export const exportVariantField = [
 export const variantFieldDataTypes = [ 
          
           // variant Fields 
-        //   "Single-Text",
+          // "Single-Text", 
+          "This is system genrated id", //Dyanamic Variant Id
           "Text",                //Group Id
           "Text",                //"Product Id",
           "Text",                //Product Id Type
@@ -55,6 +57,7 @@ export const variantFieldDataTypes = [
 export const variantFillExampleField = [  
           // variant Fields 
         //   "",
+          "",                   // "Dyanamic Variant Id",
           "Mandatory*",                //Group Id
           "Optional",                //"Product Id",
           "Optional",                //Product Id Type
@@ -85,6 +88,7 @@ export const variantDetailsInField = [
           
           // variant Fields 
         //   "Single/Multiple",
+          "The computer should automatically generate a unique variant ID, and the seller should not be able to edit it.", //Dyanamic variant Id
           "This Group Id identify the product group",
           "Product Id",
           "ProductId Type",

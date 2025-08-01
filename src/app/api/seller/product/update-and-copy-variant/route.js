@@ -1,5 +1,5 @@
 import { isEmpty, rand, responseFun, variant_large_img_path5, variant_large_img_path6, variant_large_img_path7, variant_medium_img_path5, variant_medium_img_path6, variant_medium_img_path7, variant_thumb_img_path5, variant_thumb_img_path6, variant_thumb_img_path7 } from "@/Http/helper";
-import { productVariantModel, variantThresholdSchemaModal } from "@/Http/Models/productModel";
+import { productModel, productVariantModel, variantThresholdSchemaModal } from "@/Http/Models/productModel";
 import mongoose from "mongoose";
 const fs = require("fs");
 const path = require("path");
@@ -7,11 +7,14 @@ const path = require("path");
 import { variant_large_img_path1, variant_large_img_path2, variant_large_img_path3, variant_large_img_path4 } from '@/Http/helper'
 import { variant_medium_img_path1, variant_medium_img_path2, variant_medium_img_path3, variant_medium_img_path4 } from '@/Http/helper'
 import { variant_thumb_img_path1, variant_thumb_img_path2, variant_thumb_img_path3, variant_thumb_img_path4 } from '@/Http/helper'
+import { connectDb } from "@/Http/dbConnect2";
 
 
 export async function POST(request) {
     
-    const {
+    await connectDb();
+    
+    let {
         _id, 
         product_id,
         seller_id,
@@ -39,7 +42,8 @@ export async function POST(request) {
         
     } = await request.json();
 
-     const errors = {}; 
+             const errors = {}; 
+
                 if(isEmpty(product_id))errors.product_id = `product_id is required.`;
                 if(isEmpty(sku))errors.sku = `sku is required.`;
                 if(isEmpty(currency))errors.currency = `required.`;
@@ -48,23 +52,23 @@ export async function POST(request) {
                 if(!msrp ||  msrp== "null" )errors.msrp = `msrp is required.`;
                 if(!consumerSalePrice || consumerSalePrice == "null")errors.consumerSalePrice = `this field is required.`;
                 if(!businessSalePrice || businessSalePrice == 'null')errors.businessSalePrice = `this field is required.`;
-                // if(isEmpty(taxCode))errors.taxCode = `taxCode is required.`;
-                // if(!taxRate || taxRate == "null")errors.taxRate = `taxRate is required.`;
+               
                 if(!stock || stock == "null")errors.stock = `stock is required.`;  
                 
+               
                
                 // check SKU
                 let checkSku = null ;
                 if(product_id && sku){
                     if(opration == "copy"){
                          checkSku = await productVariantModel.findOne({
-                            product_id: new mongoose.Types.ObjectId(product_id),
+                            seller_id: new mongoose.Types.ObjectId(seller_id),
                             sku:sku
                         })
 
                     }else{
                          checkSku = await productVariantModel.findOne({
-                            product_id: new mongoose.Types.ObjectId(product_id),
+                            seller_id: new mongoose.Types.ObjectId(seller_id),
                             sku:sku,
                             ...(!!_id && { _id: { $ne: _id } })
                         })
@@ -75,15 +79,36 @@ export async function POST(request) {
                        errors.sku = `This SKU already exists.`;
                     }
                 }
-               
-                
+
+                 
 
                 if(Object.keys(errors).length>0){
                     return responseFun(false, {errors, status_code:400},200)
                 }
+
+
+                 try{
+                     const originalProduct = await productModel.findById(product_id);
+                        if(originalProduct.variant != "Yes" && !customAttributes){
+                            const copiedProductData = originalProduct.toObject(); 
+                            delete copiedProductData._id;
+                            copiedProductData.product_name =   `${copiedProductData.product_name}-copy`
+                            
+                            const newProduct = new productModel(copiedProductData);
+                            await newProduct.save();
+                            product_id = newProduct._id
+                        }
+                }catch(error){
+                    console.log(error);
+                    return responseFun(false, {message: error.message}, 200)
+                }
+
+
     try{
         let variant =null
        
+       
+
         if(opration == "copy"){ 
             const sinId = await newSinNumber();
             const copyFromVarinat = await productVariantModel.findById(_id);

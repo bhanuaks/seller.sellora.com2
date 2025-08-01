@@ -18,9 +18,12 @@ export async function GET(request) {
         const returnWindowMap = Object.fromEntries(
             seller.map(item => [item.category_id.toString(), item.seller_return])
         );
+        const replacementWindowMap = Object.fromEntries(
+            seller.map(item => [item.category_id.toString(), item.replacement])
+        );
 
        // console.log(returnWindowMap)
-        return responseFun(true,{data:returnWindowMap}, 200) 
+        return responseFun(true,{data:returnWindowMap, replacement:replacementWindowMap}, 200) 
     }catch(error){
         console.log(error);
         return responseFun(false,{error}, 200)
@@ -32,8 +35,7 @@ export async function GET(request) {
 export async function POST(request) {
     await connectDb();
     const data = await request.json();
-    //console.log('okkkk',data);
-
+     
     const errors = {};
 
     //if(isEmpty(data.seller_id))errors.data.seller_id = "Seller id is required";

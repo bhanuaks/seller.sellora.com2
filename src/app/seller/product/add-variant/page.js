@@ -17,12 +17,10 @@ import {
 import Image from "next/image";
 import React, { useContext, useEffect, useRef, useState } from "react";
 import $ from "jquery";
-// import '../../../../../public/front/error.css'
 import "../../../../../public/front/loader.css";
 import { ToastContainer, toast } from "react-toastify";
 import { AppContext } from "@/app/contaxtData/contextData";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-// import '../../../../../public/front/assets/css/variant.css'
 import UploadImageSection from "../uploadImageSection";
 import VariantAddedListC from "../VariantAddedListC";
 import Swal from "sweetalert2";
@@ -33,7 +31,7 @@ import AddSingleListingSteper from "../AddSingleListingSteper";
 // import Multiselect from "./Multiselect";
 
 import dynamic from "next/dynamic";
-const Multiselect = dynamic(() => import('./Multiselect'), { ssr: false });
+const Multiselect = dynamic(() => import("./Multiselect"), { ssr: false });
 
 const page = ({ params }) => {
   const AddVariantPage = ({ params }) => {
@@ -48,19 +46,21 @@ const page = ({ params }) => {
     const pathname = usePathname();
     const [sellor, setSellor] = useState(null);
     const [category, setCategory] = useState(null);
-    const [compliance, setCompliance] = useState(null);  
+    const [compliance, setCompliance] = useState(null);
     const [subcategory, setSubcategory] = useState(null);
     const [childcategory, setChildcategory] = useState(null);
     const [brand, setBrand] = useState(null);
     const searchParams = useSearchParams();
     const [selectedVariants, setSelectedVariants] = useState([]);
     const [selectedOptions, setSelectedOptions] = useState([]);
+    const [variantPrevHistoryData, setVariantPrevHistoryData] = useState({});
 
     const category_id = searchParams.get("category");
     const subcategory_id = searchParams.get("subCategory");
     const childcategory_id = searchParams.get("childcategory");
     const product_id = searchParams.get("product_id");
     const brand_id = searchParams.get("brand");
+    const copy_product_id = searchParams.get("copy_product_id") || "";
     const errorRedirctUtl = `${baseUrl}dashboard/categories`;
     const [productDetails, setProductDetails] = useState(null);
     const [showImage, setShowImage] = useState(false);
@@ -72,6 +72,7 @@ const page = ({ params }) => {
     const [currentSection, setCurrentSection] = useState("Variant");
 
     const [variants, setVariants] = useState([]);
+    const [saveProccess, setSaveProccess] = useState(false);
 
     const [variantData, setVariantData] = useState({
       product_id: product_id,
@@ -93,7 +94,7 @@ const page = ({ params }) => {
       manual_product_id: "",
       manual_product_id_type: "",
       conditionType: "New",
-      expireDate:""
+      expireDate: "",
     });
     const [newVariants, setNewVariants] = useState([]);
 
@@ -108,7 +109,7 @@ const page = ({ params }) => {
 
     const handleInputChange = (e, index, key) => {
       const { value, name } = e.target;
- 
+
       if (name == "discount_type") {
         if (
           !confirm(
@@ -150,7 +151,7 @@ const page = ({ params }) => {
 
     const handleInputChangeDynamicValue = (e) => {
       const { value, name } = e.target;
-      console.log({value});
+      console.log({ value });
       setVariantData((prevVariants) => ({
         ...prevVariants,
         customAttributes: {
@@ -165,43 +166,49 @@ const page = ({ params }) => {
       if (action == "next") {
         router.push(
           `${baseUrl}seller/product/compliance-and-key-attributes?${searchParams}`
-        ); 
+        );
         return;
       }
-      const filterVariantData = Object.fromEntries(
-        Object.entries(variantData.customAttributes).filter(([key, value]) => key && value && selectedVariants.includes(key))
-      );
-
-      let variantError = {}
-      if(selectedVariants.length>0){
-          selectedVariants.map((variantItem, index)=>{
-            if(!filterVariantData[variantItem]){
-              if(index ==0){
-                $(`input[name="${variantItem}"]`).focus(); 
-                $(`select[name="${variantItem}"]`).focus();
-              }
-               
-              variantError = {
-                ...variantError,
-                [variantItem]:`${variantItem} is required`
-              }
-             
-            }
-          })
-      }  
-      if(Object.keys(variantError).length > 0){
-        setErrors(variantError)
-        return false
-      }
      
+      let filterVariantData = undefined
+      if(variantData.customAttributes){
+          filterVariantData = Object.fromEntries(
+            Object.entries(variantData.customAttributes).filter(
+              ([key, value]) => key && value && selectedVariants.includes(key)
+            )
+          );
+      } 
+      
+      
+       
+      let variantError = {};
+      if (selectedVariants.length > 0) {
+        selectedVariants.map((variantItem, index) => {
+          if (!filterVariantData[variantItem]) {
+            if (index == 0) {
+              $(`input[name="${variantItem}"]`).focus();
+              $(`select[name="${variantItem}"]`).focus();
+            }
+
+            variantError = {
+              ...variantError,
+              [variantItem]: `${variantItem} is required`,
+            };
+          }
+        });
+      }
+      if (Object.keys(variantError).length > 0) {
+        setErrors(variantError);
+        return false;
+      }
+
       const bodyData = createFormData({
         ...variantData,
         threshold: thresholdData,
         variant: productDetails?.variant,
         seller_id: globalData?.sellor._id,
-        customAttributes:filterVariantData
+        customAttributes: filterVariantData,
       });
-
 
       const dynamicVariant = filterVariantData
         ? Object.keys(filterVariantData)
@@ -241,11 +248,13 @@ const page = ({ params }) => {
       }
       setErrors({});
       // $(".loaderouter").css("display", "flex");
+      setSaveProccess(true)
       fetch(`${baseUrl}api/seller/product/add-variant`, {
         method: "POST",
         body: bodyData,
       })
         .then((response) => {
+          setSaveProccess(false)
           if (!response.ok) {
             $(".loaderouter").css("display", "none");
             throw new Error("Network error");
@@ -254,7 +263,7 @@ const page = ({ params }) => {
         })
         .then((res) => {
           $(".loaderouter").css("display", "none");
-        
+
           if (res.status) {
             setNewVariants(res.data.variantList);
             // empty variant data
@@ -284,11 +293,11 @@ const page = ({ params }) => {
               manual_product_id: "",
               manual_product_id_type: "",
               conditionType: "New",
-              expireDate:""
+              expireDate: "",
             });
             setImagePath([]);
             setImage([]);
-            setShowImage(false); 
+            setShowImage(false);
             if (action == "save_and_next") {
               router.push(
                 `${baseUrl}seller/product/compliance-and-key-attributes?${searchParams}`
@@ -321,7 +330,7 @@ const page = ({ params }) => {
             seller: "yes",
             required_variant: "yes",
             product_id,
-            withData:"Compliance"
+            withData: "Compliance",
           }),
         })
           .then((response) => {
@@ -351,7 +360,7 @@ const page = ({ params }) => {
               // if( !(res.data.category)){
               //     router.push(errorRedirctUtl)
               // }
-              setCompliance(res.data.compliance || null) 
+              setCompliance(res.data.compliance || null);
               setSellor(res.data.seller);
               setCategory(res.data.category);
               setSubcategory(res.data.subcategory);
@@ -366,7 +375,6 @@ const page = ({ params }) => {
                 }));
               }
 
-             
               if (res.data.category.category_variant) {
                 setVariants(Object.entries(res.data.category.category_variant));
 
@@ -380,11 +388,11 @@ const page = ({ params }) => {
                     editVariant(res.data.variantList[0]);
                   }
                 }
-              }else{
+              } else {
                 if (res.data.variantList && res.data.variantList.length > 0) {
-                      editVariant(res.data.variantList[0]);
-                      console.log(res.data.variantList[0]);
-                    }
+                  editVariant(res.data.variantList[0]);
+                  console.log(res.data.variantList[0]);
+                }
               }
             } else {
               // router.push(errorRedirctUtl)
@@ -401,7 +409,7 @@ const page = ({ params }) => {
       })
         .then((response) => {
           if (!response.ok) {
-            $(".loaderouter").css("display", "none");
+            
             throw new Error("Network error");
           }
           return response.json();
@@ -411,7 +419,7 @@ const page = ({ params }) => {
             const filterData = newVariants.filter((item) => item._id !== id);
             setNewVariants(filterData);
           }
-          $(".loaderouter").css("display", "none");
+          
         });
     };
 
@@ -420,16 +428,18 @@ const page = ({ params }) => {
         ...variantParam,
         conditionType: variantParam?.conditionType || "New",
         category_id: category_id,
+        product_id: product_id,
+        currency : variantParam.currency || "USD"
       });
       setThresholdData(variantParam.threshold);
-      if(variantParam.customAttributes){ 
+      if (variantParam.customAttributes) {
         // select already exist variation in product varionat
-        setSelectedVariants(Object.keys(variantParam.customAttributes))
+        setSelectedVariants(Object.keys(variantParam.customAttributes));
         const optionsEdit = [];
-        Object.keys(variantParam.customAttributes).map((item)=>{
-          optionsEdit.push({value:item, label:item})
-        })
-        setSelectedOptions(optionsEdit)
+        Object.keys(variantParam.customAttributes).map((item) => {
+          optionsEdit.push({ value: item, label: item });
+        });
+        setSelectedOptions(optionsEdit);
       }
       const imgPath = [];
       const allImage = [];
@@ -506,13 +516,13 @@ const page = ({ params }) => {
     const handleVariantChange = (e) => {
       const value = e.target.value;
       if (e.target.checked) {
-        if(selectedVariants.length < 2){ 
-          setSelectedVariants(prev => [...prev, value]);
-        }else{
-          setShowWishlistMessage(true)
+        if (selectedVariants.length < 2) {
+          setSelectedVariants((prev) => [...prev, value]);
+        } else {
+          setShowWishlistMessage(true);
         }
       } else {
-        setSelectedVariants(prev => prev.filter(v => v !== value));
+        setSelectedVariants((prev) => prev.filter((v) => v !== value));
 
         setVariantData((prevVariants) => ({
           ...prevVariants,
@@ -521,15 +531,102 @@ const page = ({ params }) => {
             [value]: null,
           },
         }));
-
       }
-      
-      
     };
 
     const closeOverlay = () => {
-      setShowWishlistMessage(false); 
+      setShowWishlistMessage(false);
     };
+
+    useEffect(() => {
+
+      const timeId = setTimeout(() => {
+        const variantSku = variantData.sku;
+        fetch(`/api/seller/fetch-exist-variant`, {
+          method: "POST",
+          body: JSON.stringify({ sku: variantSku, category_id }),
+        })
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error("Internal issue");
+            }
+            return response.json();
+          })
+          .then((res) => {
+            if (res.status && res.data.variant) {
+              
+             
+              setVariantPrevHistoryData({
+                variantData:variantData,
+                thresholdData:thresholdData,
+                selectedVariants: selectedVariants,
+                selectedOptions :selectedOptions
+
+              })
+              editVariant(res.data.variant) 
+
+            }else{
+              if(variantPrevHistoryData?.variantData){
+                setVariantData({...variantPrevHistoryData.variantData, sku:variantSku})
+              }
+
+               if(variantPrevHistoryData?.thresholdData){
+                setThresholdData(variantPrevHistoryData.thresholdData)
+              }
+             
+              if(variantPrevHistoryData?.selectedVariants){
+                setSelectedVariants(variantPrevHistoryData.selectedVariants)
+              }
+
+               if(variantPrevHistoryData?.selectedOptions){
+                setSelectedOptions(variantPrevHistoryData.selectedOptions)
+              }
+              // setVariantData((prevData)=>({
+              //   ...prevData, 
+              //    product_id: product_id,
+              //     category_id: category_id,
+              //     sku: variantSku,
+              // }))
+
+              // setThresholdData({
+              //   unit: 0,
+              //   discount: 0,
+              // })
+              //  setVariantData({
+              //   ...variantData,
+              //     product_id: product_id,
+              //     category_id: category_id,
+              //     sku: variantSku,
+              //     listingStatus: 1,
+              //     msrp: "",
+              //     consumerSalePrice: "",
+              //     businessSalePrice: "",
+              //     currency: "USD",
+              //     taxCode: "",
+              //     taxRate: "",
+              //     fulfillmentBy: "Sellora",
+              //     shippingProvider: "Merchant",
+              //     stock: "",
+              //     withImage: "No",
+              //     // customAttributes: {},
+              //     discount_type: "percentage",
+              //     // manual_product_id: "",
+              //     // manual_product_id_type: "",
+              //     conditionType: "New",
+              //     expireDate: "",
+              //   });
+
+                // setSelectedOptions([]);
+                // setSelectedVariants([]);
+            }
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+
+      }, 300);
+      return () => clearTimeout(timeId);
+    }, [variantData.sku]);
 
     return (
       <>
@@ -552,24 +649,29 @@ const page = ({ params }) => {
           </div>
           {/* loader end */}
 
+          {/* Overlay Background */}
+          {showWishlistMessage && (
+            <div
+              id="anywhere-home"
+              className="anywere bgshow"
+              onClick={closeOverlay}
+            ></div>
+          )}
 
-            {/* Overlay Background */}
-            {(showWishlistMessage) && (
-                    <div
-                      id="anywhere-home"
-                      className="anywere bgshow"
-                      onClick={closeOverlay}
-                    ></div>
-                  )}
-
-                {showWishlistMessage && (
-                    <div className="successfully-addedin-wishlist" style={{display:"flex"}}>
-                      <div className="d-flex" style={{ alignItems: 'center', gap: '15px' }}>
-                        {/* <i className="fa-regular fa-check"></i> */}
-                        <p>You can select a maximum of two variations.</p>
-                      </div>
-                    </div>
-                  )}
+          {showWishlistMessage && (
+            <div
+              className="successfully-addedin-wishlist"
+              style={{ display: "flex" }}
+            >
+              <div
+                className="d-flex"
+                style={{ alignItems: "center", gap: "15px" }}
+              >
+                {/* <i className="fa-regular fa-check"></i> */}
+                <p>You can select a maximum of two variations.</p>
+              </div>
+            </div>
+          )}
           <div className="container">
             <div className="row">
               <div className="col-lg-12">
@@ -580,8 +682,11 @@ const page = ({ params }) => {
         </div>
         <div className="bg33 pt-20">
           <div className="container">
-          <AddSingleListingSteper searchParams={searchParams} productDetails={productDetails} compliance={compliance} />
-            
+            <AddSingleListingSteper
+              searchParams={searchParams}
+              productDetails={productDetails}
+              compliance={compliance}
+            />
           </div>
           <div className="container-fluid">
             <div className="form_outer mt">
@@ -662,7 +767,10 @@ const page = ({ params }) => {
                                   id="appendVariant"
                                 >
                                   <div className="row">
-                                    {productDetails && variants.length > 0 && (
+                                    {productDetails && variants.length > 0 &&  (
+                                      productDetails.save_as_draft == 1 || productDetails?.variant == "No" ?(
+
+                                     
                                       <div className="col-12 col-lg-12 mb-4 text-center">
                                         <br />
                                         <h3 className="mb-1">Variation</h3>
@@ -711,99 +819,109 @@ const page = ({ params }) => {
                                         />{" "}
                                         &nbsp;No
                                       </div>
+
+                                       ):null
                                     )}
 
-
-
-                                          {productDetails &&
-                                            variants.length > 0 &&
-                                            productDetails.variant === "Yes" && (
-                                              <div className="col-3">
-                                                <Multiselect variant= {variants} 
-                                                selectedVariants={selectedVariants} 
-                                                setSelectedVariants={setSelectedVariants}
-                                                selectedOptions={selectedOptions}
-                                                setSelectedOptions={setSelectedOptions}
-                                                />
-                                                
-                                                 
-                                              </div>
-                                          )}
-
+                                    {productDetails &&
+                                      variants.length > 0 &&
+                                      productDetails.variant === "Yes" && (
+                                        <div className="col-3">
+                                          <Multiselect
+                                            variant={variants}
+                                            selectedVariants={selectedVariants}
+                                            setSelectedVariants={
+                                              setSelectedVariants
+                                            }
+                                            selectedOptions={selectedOptions}
+                                            setSelectedOptions={
+                                              setSelectedOptions
+                                            }
+                                          />
+                                        </div>
+                                      )}
 
                                     {productDetails &&
                                     variants.length &&
                                     productDetails.variant == "Yes"
-                                      ? variants.map((variantItem, index) => (
-                                        selectedVariants.includes(variantItem[0]) &&
-                                          <div className="col-3" key={index}>
-                                            <label htmlFor="sku">
-                                              {variantItem[0]}
-                                              <span></span>
-                                            </label>
-                                            {typeof variantItem[1] !==
-                                            "string" ? (
-                                              <select
-                                                name={`${variantItem[0]}`}
-                                                value={
-                                                  variantData
-                                                    .customAttributes?.[
-                                                    variantItem[0]
-                                                  ] || ""
-                                                }
-                                                onChange={(e) =>
-                                                  handleInputChangeDynamicValue(
-                                                    e
-                                                  )
-                                                }
+                                      ? variants.map(
+                                          (variantItem, index) =>
+                                            selectedVariants.includes(
+                                              variantItem[0]
+                                            ) && (
+                                              <div
+                                                className="col-3"
+                                                key={index}
                                               >
-                                                <option value={""}>
-                                                  select
-                                                </option>
-                                                {variantItem.length > 0 &&
-                                                  variantItem[1].map(
-                                                    (
-                                                      variantValue,
-                                                      value_key
-                                                    ) => (
-                                                      <option
-                                                        key={`${value_key}`}
-                                                        value={variantValue}
-                                                      >
-                                                        {variantValue}
-                                                      </option>
-                                                    )
-                                                  )}
-                                              </select>
-                                               
-                                            ) : (
-                                              <input
-                                                type="text"
-                                                name={`${variantItem[0]}`}
-                                                value={
-                                                  variantData
-                                                    .customAttributes?.[
-                                                    variantItem[0]
-                                                  ] || ""
-                                                }
-                                                onChange={(e) =>
-                                                  handleInputChangeDynamicValue(
-                                                    e
-                                                  )
-                                                }
-                                              />
-                                            )}
-                                            {errors[variantItem[0]] && (
-                                                <span className="error_message">
-                                                  {errors[variantItem[0]]}
-                                                </span>
-                                              )}
-                                          </div>
-                                        ))
+                                                <label htmlFor="sku">
+                                                  {variantItem[0]}
+                                                  <span></span>
+                                                </label>
+                                                {typeof variantItem[1] !==
+                                                "string" ? (
+                                                  <select
+                                                    name={`${variantItem[0]}`}
+                                                    value={
+                                                      variantData
+                                                        .customAttributes?.[
+                                                        variantItem[0]
+                                                      ] || ""
+                                                    }
+                                                    onChange={(e) =>
+                                                      handleInputChangeDynamicValue(
+                                                        e
+                                                      )
+                                                    }
+                                                  >
+                                                    <option value={""}>
+                                                      select
+                                                    </option>
+                                                    {variantItem.length > 0 &&
+                                                      variantItem[1].map(
+                                                        (
+                                                          variantValue,
+                                                          value_key
+                                                        ) => (
+                                                          <option
+                                                            key={`${value_key}`}
+                                                            value={variantValue}
+                                                          >
+                                                            {variantValue}
+                                                          </option>
+                                                        )
+                                                      )}
+                                                  </select>
+                                                ) : (
+                                                  <input
+                                                    type="text"
+                                                    name={`${variantItem[0]}`}
+                                                    value={
+                                                      variantData
+                                                        .customAttributes?.[
+                                                        variantItem[0]
+                                                      ] || ""
+                                                    }
+                                                    onChange={(e) =>
+                                                      handleInputChangeDynamicValue(
+                                                        e
+                                                      )
+                                                    }
+                                                  />
+                                                )}
+                                                {errors[variantItem[0]] && (
+                                                  <span className="error_message">
+                                                    {errors[variantItem[0]]}
+                                                  </span>
+                                                )}
+                                              </div>
+                                            )
+                                        )
                                       : ""}
                                     {/*  start fixed filed */}
                                     <div className="col-12 col-lg-12" />
-                                    <h3 className="mb-1 text-center mt-5">Price/Inventory</h3>
+                                    <h3 className="mb-1 text-center mt-5">
+                                      Price/Inventory
+                                    </h3>
                                     <div className="col-3">
                                       <label htmlFor="sku">
                                         Product Id<span></span>
@@ -811,7 +929,9 @@ const page = ({ params }) => {
                                       <input
                                         type="text"
                                         name="manual_product_id"
-                                        value={variantData.manual_product_id || ""}
+                                        value={
+                                          variantData.manual_product_id || ""
+                                        }
                                         onChange={(e) =>
                                           handleInputChange(e, 0)
                                         }
@@ -831,7 +951,8 @@ const page = ({ params }) => {
                                         type="text"
                                         name="manual_product_id_type"
                                         value={
-                                          variantData.manual_product_id_type || ""
+                                          variantData.manual_product_id_type ||
+                                          ""
                                         }
                                         onChange={(e) =>
                                           handleInputChange(e, 0)
@@ -915,7 +1036,9 @@ const page = ({ params }) => {
                                       <input
                                         type="text"
                                         name="consumerSalePrice"
-                                        value={variantData.consumerSalePrice || ""}
+                                        value={
+                                          variantData.consumerSalePrice || ""
+                                        }
                                         onChange={(e) =>
                                           handleInputChange(e, 0)
                                         }
@@ -1004,18 +1127,16 @@ const page = ({ params }) => {
                                     </div>
 
                                     <div className="col-3">
-                                      <label htmlFor="sku">
-                                        Expire Date
-                                      </label>
+                                      <label htmlFor="sku">Expire Date</label>
                                       <input
-                                      className="form-control"
+                                        className="form-control"
                                         type="date"
                                         name="expireDate"
                                         value={variantData.expireDate || ""}
                                         onChange={(e) =>
                                           handleInputChange(e, 0)
                                         }
-                                      /> 
+                                      />
                                       {errors.expireDate && (
                                         <span className="error_message">
                                           {errors.expireDate}
@@ -1116,7 +1237,7 @@ const page = ({ params }) => {
                                         <div className="form-group">
                                           <div className="row align-items-center">
                                             {thresholdData &&
-                                              thresholdData.length &&
+                                              thresholdData.length > 0 &&
                                               thresholdData.map(
                                                 (data, index) => (
                                                   <div
@@ -1175,7 +1296,12 @@ const page = ({ params }) => {
                                                         className="unit_input"
                                                         name="discount"
                                                         value={
-                                                          thresholdData[index].discount == 0? "": thresholdData[index].discount
+                                                          thresholdData[index]
+                                                            .discount == 0
+                                                            ? ""
+                                                            : thresholdData[
+                                                                index
+                                                              ].discount
                                                         }
                                                         onChange={(e) =>
                                                           updateThresholdData(
@@ -1204,20 +1330,26 @@ const page = ({ params }) => {
                                                         value={(() => {
                                                           if (
                                                             variantData.businessSalePrice &&
-                                                            thresholdData[index].discount
+                                                            thresholdData[index]
+                                                              .discount
                                                           ) {
-                                                            const retAmount = discountPrice(
-                                                              variantData.businessSalePrice,
-                                                              thresholdData[
-                                                                index
-                                                              ].discount,
-                                                              variantData.discount_type ==
-                                                                "percentage"
-                                                                ? "percentage"
-                                                                : "fixed"
-                                                            );
-                                                            
-                                                            return retAmount?Math.round(retAmount):""
+                                                            const retAmount =
+                                                              discountPrice(
+                                                                variantData.businessSalePrice,
+                                                                thresholdData[
+                                                                  index
+                                                                ].discount,
+                                                                variantData.discount_type ==
+                                                                  "percentage"
+                                                                  ? "percentage"
+                                                                  : "fixed"
+                                                              );
+
+                                                            return retAmount
+                                                              ? Math.round(
+                                                                  retAmount
+                                                                )
+                                                              : "";
                                                           } else {
                                                             return "";
                                                           }
@@ -1287,13 +1419,11 @@ const page = ({ params }) => {
                                         onClick={() => clickSaveVariant("save")}
                                       >
                                         {" "}
-                                        Save Variation{" "}
+                                        {saveProccess?"Please wait..":"Save Variation"}{" "}
                                       </button>
                                     ) : (
                                       ""
                                     )}
-                                     
-                                   
                                   </div>
                                 </div>
                               </div>
@@ -1310,12 +1440,9 @@ const page = ({ params }) => {
                                 ""
                               )}
                             </div>
-
-                          
                           </div>
                           <div className="button_container">
-
-                          {/* {variants.length > 0 &&
+                            {/* {variants.length > 0 &&
                                     productDetails?.variant == "Yes" ? (
                                       <button
                                         type="button"
@@ -1329,42 +1456,42 @@ const page = ({ params }) => {
                                       ""
                                     )} */}
 
- 
-                        {(variants.length == 0 || productDetails?.variant !== "Yes") && ( 
-                            <button
+                            {(variants.length == 0 ||
+                              productDetails?.variant !== "Yes") && (
+                              <button
                                 href="#"
                                 className=" save_n_next_button ml-2"
                                 onClick={() =>
                                   clickSaveVariant("save_and_next")
                                 }
+                                disabled ={saveProccess}
                               >
-                              Save and next{" "}
-                            </button> 
-                        )}
-                                 
+                               {saveProccess ? "Please wait.." : " Save and next"}
+                              </button>
+                            )}
 
-                       
-                          {newVariants.length != 0 && productDetails?.variant == "Yes" && variants.length !== 0  ? (
-                                      <a
-                                        href="#"
-                                        className=" save_n_next_button ml-2"
-                                        onClick={(e) =>{ 
-                                          e.preventDefault();
-                                          clickSaveVariant("next");
-                                        }}
-                                      > 
-                                        Save and next 
-                                      </a>
-                                    ) : (
-                                      ""
-                                    )}
-                        </div>
+                            {newVariants.length != 0 &&
+                            productDetails?.variant == "Yes" &&
+                            variants.length !== 0 ? (
+                              <a
+                                href="#"
+                                className=" save_n_next_button ml-2"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  clickSaveVariant("next");
+                                }}
+                              >
+                               {saveProccess ? "" : " Save and next"}
+                              </a>
+                            ) : (
+                              ""
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
                 )}
-                 
               </div>
             </div>
           </div>

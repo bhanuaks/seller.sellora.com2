@@ -3,9 +3,11 @@ import { getLoginSeller } from "../../getLoginUser/route";
 import { sellerModel } from "@/Http/Models/sellerModel";
 import bcrypt from 'bcryptjs';
 import { NextResponse } from "next/server";
+import { connectDb } from "@/Http/dbConnect2";
 
 export async function POST(request) {
     
+    await connectDb();
     const { current_password, new_password, confirm_password } = await request.json();
 
     try {

@@ -1,8 +1,10 @@
+import { connectDb } from "@/Http/dbConnect2"
 import { responseFun } from "@/Http/helper"
 import { userAddressModel, userCompanyModal, userModal } from "@/Http/Models/userModel"
 import mongoose from "mongoose"
 
 export async function GET(request) {
+    await connectDb();
     const { searchParams } = new URL(request.url)
     const userId = searchParams.get('user_id')
     const withData = searchParams.get('withData')

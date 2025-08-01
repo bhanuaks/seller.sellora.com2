@@ -63,8 +63,8 @@ const page = ({ params }) => {
   }, [sellor_id]);
 
   useEffect(() => {
-    if (fetchingData?.status) {
-      setData(fetchingData?.data.sellerProfile);
+    if (fetchingData?.status && fetchingData?.data.sellerProfile) {
+      setData(fetchingData?.data.sellerProfile || {});
     }
   }, [fetchingData, isLoading]);
 

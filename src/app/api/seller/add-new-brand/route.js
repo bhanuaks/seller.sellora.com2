@@ -1,9 +1,12 @@
 import { isEmpty, rand, responseFun, slugify } from "@/Http/helper";
 import path from 'path'
-import { uploadImageFun } from "../../uploadImage/route";
+import { deleteImageOne, uploadImageFun } from "../../uploadImage/route";
 import { brandCountModel, brandModel, brandSellerModel } from "@/Http/Models/branModel";
+import { connectDb } from "@/Http/dbConnect2";
+import mongoose from "mongoose";
 
 export async function POST(request) {
+    await connectDb();
     const formData = await request.formData();
 
     const {
@@ -18,7 +21,8 @@ export async function POST(request) {
         tm_status,
         tm_class,
         tm_type,
-        seller_id
+        seller_id,
+        _id
     } = Object.fromEntries(formData);
 
 
@@ -45,6 +49,10 @@ export async function POST(request) {
     }
 
     try{
+        let updateBrand = null;
+        if(_id){
+            updateBrand = await brandSellerModel.findById(_id).lean();
+        }
         let certificate_path = ""; 
         if(certificate && typeof certificate != "string"){
             const extension = path.extname(certificate.name)
@@ -56,19 +64,26 @@ export async function POST(request) {
             const uploadingPath =  "public/uploads/brand/"; 
             await uploadImageFun(certificate, uploadingPath, filename, 1400)
             certificate_path =`uploads/brand/${filename}`
+            if(updateBrand && updateBrand.certificate){
+                await deleteImageOne(updateBrand.certificate);
+            }
         }
-            const existBrand = await brandSellerModel.findOne({name:name});
+           const query = { name };
+
+            if (_id) {
+                 query._id = { $ne: new mongoose.Types.ObjectId(_id) };
+            }
+
+            const existBrand = await brandSellerModel.findOne(query);
             if(existBrand){
                 errors.name = "You have this brand already applied";
             }
-            console.log({existBrand});
+          
             if(Object.keys(errors).length>0){
                 return responseFun(false, {errors, status_code:403}, 200)
             }
-            const requestId = await getRequestId()
-            const addBrandRes = await brandSellerModel.create({
-                request_id:requestId,
-                seller_id,
+            if(_id){
+                await brandSellerModel.findByIdAndUpdate(_id,{  
                 name,
                 slug:slugify(name),
                 certificate_name,
@@ -80,8 +95,30 @@ export async function POST(request) {
                 tm_number,
                 tm_status,
                 tm_class,
-                tm_type
+                tm_type,
+                status:2
             })
+            }else{
+
+             const requestId = await getRequestId()
+                await brandSellerModel.create({
+                    request_id:requestId,
+                    seller_id,
+                    name,
+                    slug:slugify(name),
+                    certificate_name,
+                    certificate:certificate_path,
+                    brand_owner,
+                    are_you_selling_in_other_platform,
+                    platform_name,
+                    platform_link,
+                    tm_number,
+                    tm_status,
+                    tm_class,
+                    tm_type
+                })
+            }
+           
             return responseFun(true, {message:"Brand has been sent for approval"}, 200)
     }catch(error){
          console.log(error);
@@ -89,6 +126,27 @@ export async function POST(request) {
     }
 
 }
+
+
+
+export async function GET(request) {
+    
+    const { searchParams } = new URL(request.url);
+
+    try {
+        const brandId = searchParams.get("brand_id");
+        if(!brandId || !mongoose.Types.ObjectId.isValid(brandId)){
+            return responseFun(false, { message: "missing parameters" }, 200)
+        }
+        const brand = await brandSellerModel.findById(brandId)
+          return responseFun(true, {brand}, 200)
+    } catch (error) {
+        console.log(error);
+        return responseFun(false, {message:error.message}, 500)
+    }
+}
+
+
 
 export async function getRequestId(){
     const lastBrandId = await brandCountModel.findOneAndUpdate(

@@ -6,7 +6,7 @@ import { connectDb } from "../../../../../lib/dbConnect";
 
 
 export async function GET(request) {
-    connectDb();
+   await  connectDb();
     const {searchParams} = new URL(request.url)
     const search = searchParams.get('search') 
 

@@ -3,7 +3,7 @@ import React, { useEffect, useRef } from "react";
 import "intl-tel-input/build/css/intlTelInput.css";
 import intlTelInput from "intl-tel-input";
 
-function NumberSection({ mobileData, setMobileData }) {
+function NumberSection({ mobileData, setMobileData, edit }) {
   const phoneInputRef = useRef(null);
   const itiRef = useRef(null);
   const onCountryChangeRef = useRef(null);
@@ -48,7 +48,7 @@ function NumberSection({ mobileData, setMobileData }) {
         itiRef.current = null;
       }
     };
-  }, []); // run only once
+  }, [edit]); // run only once
 
   return (
     <>

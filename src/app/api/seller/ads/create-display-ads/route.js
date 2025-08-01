@@ -12,10 +12,12 @@ import mongoose from "mongoose";
 import path from 'path';
 import { writeFile } from "fs/promises";
 import { SellerWalletModel } from "@/Http/Models/WalletModal";
+import { connectDb } from "@/Http/dbConnect2";
 
 
 export async function POST(request) { 
 
+    await connectDb();
       
     const seller = await getLoginSeller(); 
     if(!seller){

@@ -1,9 +1,13 @@
+import { connectDb } from "@/Http/dbConnect2";
 import { isEmpty, responseFun } from "@/Http/helper";
 import { userModal } from "@/Http/Models/userModel";
 import mongoose from "mongoose";
 
 
 export async function POST(request) {
+
+    await connectDb();
+
     const {
         _id,
         full_name,

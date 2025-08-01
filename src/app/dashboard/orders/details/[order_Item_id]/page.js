@@ -18,6 +18,7 @@ import ShippingDetails from "./ShippingDetails";
 import { ToastContainer, toast } from "react-toastify";
 import { fileBasePath } from "@/Http/urlHelper";
 import SimpleLoader from "@/app/skeleton_loader/SimpleLoader";
+import ChatWithUserComponents from "./ChatWithUserComponents";
 
 
 function Page() {
@@ -41,11 +42,14 @@ function Page() {
     },
   ]);
 
+  const [sellerNote, setSellerNote] = useState("") 
+
   const [apiLoader, setApiLoader] = useState(false)
 
 
 
   useEffect(()=>{
+    setSellerNote(singleOrder?.seller_note || "")
     if(singleOrder?.shippingInfo){
         setTrakingInfo(singleOrder?.shippingInfo?.trakingDetails)
     }
@@ -108,11 +112,49 @@ function Page() {
       modalInstance.hide();
     }
   }
+
+
+
+  function saveSellerNotes(){
+    
+    fetch(`/api/seller/product/orders/save-seller-notes`,{
+      method:"POST",
+      body:JSON.stringify({seller_note : sellerNote, order_Item_id:order_Item_id })
+    })
+    .then((response)=>{
+      if(!response.ok){
+        throw new Error("Internal Issue");
+      }
+      return response.json();
+    }).then((res)=>{  
+      if(res.status){
+        console.log(res.data);
+      }
+    }).catch((error)=>{
+      console.log(error);
+    })
+  }
+
+  useEffect(()=>{
+    const timeId = setTimeout(() => {
+      if(singleOrder){ 
+        saveSellerNotes()
+      }
+    }, 300);
+    return ()=>clearTimeout(timeId)
+  },[sellerNote])
+
+
+
+
 if(isLoading){ 
     return (
       <SimpleLoader />
     )
 }
+
+
+
 
   return (
     <>
@@ -368,7 +410,7 @@ if(isLoading){
                             data-bs-toggle="modal"
                             data-bs-target="#add-bulk"
                           >
-                            Add Treaking
+                            Add Tracking
                           </a>
                         </div>
                       )}
@@ -394,7 +436,10 @@ if(isLoading){
               </h3>
             </div>
             <div className="notes_input">
-              <input type="text" placeholder="No notes from customer" name="" />
+              <input type="text" placeholder="No notes from customer" 
+              value={sellerNote || ""} 
+              onChange={(e)=>setSellerNote(e.target.value)}
+              />
             </div>
             <div className="right_fsdkj_sub">
               <div className="sale_sub">
@@ -446,7 +491,8 @@ if(isLoading){
                 </span>
               </h3>
             </div>
-            <div className="right_fsdkj_sub"></div>
+            {/* <div className="right_fsdkj_sub"></div> */}
+            <ChatWithUserComponents order_Item_id={order_Item_id} />
           </div>
         </div>
       </div>

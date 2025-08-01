@@ -1,3 +1,4 @@
+import { connectDb } from "@/Http/dbConnect2";
 import { isEmpty, responseFun } from "@/Http/helper";
 import { orderItemStatusHistryModal, orderProductModel } from "@/Http/Models/order";
 import mongoose from "mongoose";
@@ -6,6 +7,7 @@ import mongoose from "mongoose";
 
 export async function POST(request) {
     
+    await connectDb();
     const {
         refund_reason, 
         note, 

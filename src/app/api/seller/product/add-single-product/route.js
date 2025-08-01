@@ -4,11 +4,12 @@ import {product_thumb_img_path5, product_medium_img_path5, product_large_img_pat
 import {product_thumb_img_path6, product_medium_img_path6, product_large_img_path6}  from "@/Http/helper";
 import {product_thumb_img_path7, product_medium_img_path7, product_large_img_path7}  from "@/Http/helper";
 
-import { productModel, productOtherDetailModel } from "@/Http/Models/productModel";
+import { productModel, productOtherDetailModel, productVariantModel, variantThresholdSchemaModal } from "@/Http/Models/productModel";
 import path from 'path'
 import { connectDb } from "../../../../../../lib/dbConnect";
 import mongoose from "mongoose";
 import { checkFilePath, moveFile } from "@/app/api/ckeckFilePath/route";
+import { getLoginSeller } from "@/app/api/getLoginUser/route";
 
 let errors = {};
 const imagePaths = [
@@ -84,7 +85,7 @@ const processImageUpload = async (image, index, existProduct, productName, reque
         }
         return image;
     } else if((!image || image == "null") && (existProduct && existProduct[[`image_${index}`]])) {
-        console.log({image, index}, existProduct[`image_${index}`]);
+        
         await deleteOldImages(index, existProduct, requestImage);
         return null;
     }
@@ -94,7 +95,7 @@ const processImageUpload = async (image, index, existProduct, productName, reque
 
 export async function POST(request) {
     errors = {};
-    connectDb()
+   await  connectDb()
     const formData = await request.formData();
 
     const {
@@ -169,9 +170,15 @@ export async function POST(request) {
         productHeight,
         productHeightUnit,
         numberOfItem,
+        handling_time,
+        copy
 
     } = Object.fromEntries(formData);
 
+    const seller = await getLoginSeller();
+    if(!seller){
+        return responseFun(false, {message:"unauthorized"}, 403)
+    }
 
     let key_feature_array = key_feature ? JSON.parse(key_feature) : [];
 
@@ -183,7 +190,7 @@ export async function POST(request) {
     if (isEmpty(product_name)) errors.product_name = "This field is required";
     if (isEmpty(product_description)) errors.product_description = "This field is required";
     if (isEmpty(search_keywords)) errors.search_keywords = "This field is required";
-    // if (isEmpty(target_gender)) errors.target_gender = "This field is required";
+    if (!handling_time) errors.handling_time = "This field is required";
 
     // if (isEmpty(taxCode)) errors.taxCode = `Tax Code is required.`;
     // if (isEmpty(taxRate)) errors.taxRate = `Tax Rate is required.`;
@@ -250,9 +257,13 @@ export async function POST(request) {
     let existProduct = null;
 
     
-    
+   
     if (_id) { 
         existProduct = await productModel.findById(_id)
+        if (copy != "Yes" && existProduct.seller_id.toString() !== seller._id.toString()) {
+                return responseFun(false, { message: "You cannot change another seller's product." }, 200);
+            }
+            
         // const checkExistProductName = await productModel.countDocuments({
         //     _id: { $ne: new mongoose.Types.ObjectId(_id) },
         //     product_name: product_name
@@ -327,7 +338,8 @@ export async function POST(request) {
 
     try {
         let product = null;
-        if (_id && _id != "null") {
+        if (_id && _id != "null" && copy != "Yes") { 
+
             product = await productModel.findByIdAndUpdate(_id, {
                 seller_id,
                 category_id,
@@ -394,6 +406,7 @@ export async function POST(request) {
                 productHeight,
                 productHeightUnit,
                 numberOfItem,
+                handling_time
                  
             })
 
@@ -461,11 +474,18 @@ export async function POST(request) {
                 productHeight,
                 productHeightUnit,
                 numberOfItem,
+                handling_time
 
 
             })
+            
         }
- 
+
+        console.log({copy});
+            if(copy == "Yes"){
+                await copyVariantAndOtherDetails(existProduct._id, product._id, seller_id);
+            }
+            
         return responseFun(true, { data: product }, 200)
 
     } catch (error) {
@@ -475,3 +495,73 @@ export async function POST(request) {
 }
 
 
+async function copyVariantAndOtherDetails(oldProductId, newProductId, seller_id) {
+     
+    try {
+        const OldProduct = await productModel.findById(oldProductId)
+        if(OldProduct?.dynamicFields){ 
+            const newProduct = await productModel.findById(newProductId) 
+            newProduct.dynamicFields = OldProduct.dynamicFields
+            await newProduct.save()
+        }
+        const oldVariants = await productVariantModel.find({
+            product_id: new mongoose.Types.ObjectId(oldProductId)
+        });
+
+       
+        if (oldVariants.length > 0) {
+            await Promise.all(oldVariants.map(async (variant) => {
+               
+                for(let i = 0; i < imagePaths.length ; i++){
+                    await copy
+                }
+                // Clone variant
+                const newVariant = variant.toObject();
+                delete newVariant._id;
+                newVariant.product_id = newProductId;
+                newVariant.seller_id = seller_id;
+                newVariant.isProcessing = "Processing";
+                
+                // Create new variant
+                const createdVariant = await productVariantModel.create(newVariant);
+                   
+                // Clone related threshold records
+                const thresholds = await variantThresholdSchemaModal.find({ variant_id: variant._id });
+
+                if (thresholds.length > 0) {
+                    const newThresholds = thresholds.map((item) => {
+                        const newItem = item.toObject();
+                        delete newItem._id;
+                        newItem.product_id = newProductId;
+                        newItem.seller_id = seller_id;
+                        newItem.variant_id = createdVariant._id;
+                        return newItem;
+                    });
+
+                    await variantThresholdSchemaModal.insertMany(newThresholds);
+                }
+            }));
+        }
+
+       // Copy compliance details
+        const oldCompliance = await productOtherDetailModel.findOne({
+            product_id: new mongoose.Types.ObjectId(oldProductId)
+        });
+
+        
+        if (oldCompliance) {
+            const newCompliance = oldCompliance.toObject();
+            delete newCompliance._id;
+            delete newCompliance.createdAt;
+            delete newCompliance.updatedAt;
+            newCompliance.product_id = newProductId; 
+
+            await productOtherDetailModel.create(newCompliance);
+        }
+
+        return true;
+    } catch (error) {
+        console.error("Error in copyVariantAndOtherDetails:", error);
+        return false;
+    }
+}

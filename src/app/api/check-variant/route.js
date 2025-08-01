@@ -2,6 +2,7 @@ import { getVariantAttribute, responseFun } from "@/Http/helper";
 import { productVariantModel, variantThresholdSchemaModal } from "@/Http/Models/productModel";
 import mongoose from "mongoose";
 import { fetchVariant } from "../seller/product/add-variant/route";
+import { connectDb } from "@/Http/dbConnect2";
 
 
 // export  async function GET(request) {
@@ -31,7 +32,7 @@ import { fetchVariant } from "../seller/product/add-variant/route";
 
 
 export  async function GET(request) {
-    
+    await connectDb();
     try{ 
         const varArra = []
         let  variants = await productVariantModel.find({product_id:new mongoose.Types.ObjectId("678b9031d7a15c0ddcafafde")})

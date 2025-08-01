@@ -1,4 +1,5 @@
 import { getLoginSeller } from "@/app/api/getLoginUser/route";
+import { connectDb } from "@/Http/dbConnect2";
 import { responseFun } from "@/Http/helper";
 import { orderItemStatusHistryModal, orderProductModel } from "@/Http/Models/order";
 import { orderAddressModel } from "@/Http/Models/orderAddress";
@@ -10,7 +11,7 @@ import mongoose from "mongoose";
 
 
 export async function GET(request) {
-    
+    await connectDb();
     const { searchParams } = new URL(request.url);
     const order_Item_id = searchParams.get("order_Item_id");   
 

@@ -2,8 +2,9 @@
 import { baseUrl } from '@/Http/helper'
 import Link from 'next/link'
 import React, { useEffect, useState } from 'react'
+import DownloadExcelCompnents from '../brand-choose/DownloadExcelCompnents'
 
-const ListingFilter = ({seller, resetFilter, submitFilter, filterData, setFilterData}) => {
+const ListingFilter = ({seller, resetFilter, submitFilter, filterData, setFilterData, downloadProduct, selectedListing}) => {
 
    
 
@@ -369,10 +370,32 @@ const ListingFilter = ({seller, resetFilter, submitFilter, filterData, setFilter
             </td>
             <td>
               <div className="request_download">
-                <div className="download_button">
-                  <Link href="#">Request Download</Link>
+                {/* <div className="download_button">
+                  <Link href="#" 
+                  onClick={(e)=>downloadProduct(e)}
+                  >Download</Link>
+                </div> */}
+                
+                {selectedListing.length > 0 && filterData.category && filterData.downloadRequest == "Yes" && (
+                  <DownloadExcelCompnents 
+                  category={filterData.category}
+                  subCategory={""}
+                  childcategory={""}
+                  selectedListing={selectedListing} 
+                 />
+                )}
+                
+
+                 <div className="download_button">
+                  <Link href="#"
+                  type="button"
+                  // className="btn btn-primary"
+                  data-bs-toggle="modal"
+                  data-bs-target="#categoryModal2"
+                  >Request Download</Link>
                 </div>
-                <i className="fa-solid fa-circle-check" />
+
+                {/* <i className="fa-solid fa-circle-check" /> */}
               </div>
             </td>
           </tr>

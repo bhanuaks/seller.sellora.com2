@@ -23,6 +23,8 @@ function page() {
   const [errors, setErrors] = useState({});
   const [sellor, setSellor] = useState(null);
   const phoneInputRef = useRef(null);
+    const [isSubmiting, setIsSubmiting] = useState(false);
+
   const [businessDetails, setBusinessDetails] = useState({
     country_s_name: "us",
     mobile_code: "1",
@@ -224,19 +226,20 @@ function page() {
     e.preventDefault();
     // $(".loaderouter").css("display", "flex");
     const formData = createFormData(businessDetails);
+    setIsSubmiting(true)
     fetch(`${baseUrl}api/seller/update-profile?update=businessDetails`, {
       method: "POST",
       body: formData,
     })
       .then((response) => {
-        if (!response.ok) {
-          $(".loaderouter").css("display", "none");
+        setIsSubmiting(false)
+        if (!response.ok) { 
           throw new Error("Network Error");
         }
         return response.json();
       })
       .then((res) => {
-        $(".loaderouter").css("display", "none");
+       
         if (res.status) {
           toast.success("Success! Business Details Saved.");
           router.push("/seller/al/tax-information");
@@ -1391,7 +1394,9 @@ function page() {
                         )}
                       </div>
                     </div>
-                    <button className="save">Save</button>
+                    
+                    <button className="save" disabled={isSubmiting}>{isSubmiting?"Please wait..":"Save"}</button>
+                    
                   </div>
                 </div>
               </form>

@@ -1,9 +1,11 @@
+import { connectDb } from "@/Http/dbConnect2";
 import { isEmpty, responseFun } from "@/Http/helper";
 import { brandModel, brandSellerModel } from "@/Http/Models/branModel";
 import mongoose from "mongoose";
 
 
 export async function POST(request) {
+    await connectDb();
     const {seller_id, name } = await request.json();
     
     const errors = {};

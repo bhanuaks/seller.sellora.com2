@@ -3,10 +3,12 @@ import { discountCouponModal } from "@/Http/Models/discountCoupon";
 import mongoose from "mongoose";
 import { getLoginSeller } from "../../getLoginUser/route";
 import { appliedDiscountCouponModal } from "@/Http/Models/AppliedDiscountCoupon";
+import { connectDb } from "@/Http/dbConnect2";
 
 
 export async function POST(request) {
     
+    await connectDb();
     const { offerId } = await request.json()
     if(!offerId){
          return responseFun(false, {message: "offer Id required"}, 200)

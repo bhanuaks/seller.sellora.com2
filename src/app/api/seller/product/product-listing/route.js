@@ -4,10 +4,12 @@ import mongoose from "mongoose";
 import { fetchVariant } from "../add-variant/route";
 import { pipeline } from "nodemailer/lib/xoauth2";
 import { errorProductModal } from "@/Http/Models/ErroreModal/erroreModel";
+import { connectDb } from "@/Http/dbConnect2";
 
 
 export async function GET(request) {
     
+  await connectDb();
     const { searchParams } = new URL(request.url);
     const seller_id = searchParams.get('seller_id')
     const searchText = searchParams.get('searchText')

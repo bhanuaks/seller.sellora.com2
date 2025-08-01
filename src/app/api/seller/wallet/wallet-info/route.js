@@ -1,4 +1,5 @@
 import { getLoginSeller } from "@/app/api/getLoginUser/route";
+import { connectDb } from "@/Http/dbConnect2";
 import { responseFun } from "@/Http/helper";
 import { SellerWalletHistoryModel, SellerWalletModel } from "@/Http/Models/WalletModal";
 import mongoose from "mongoose";
@@ -6,6 +7,7 @@ import mongoose from "mongoose";
 
 
 export async function GET(request) {
+    await connectDb();
     const seller = await getLoginSeller();
     if(!seller || !seller._id){
         return responseFun(false, {message:"unauthrized user"}, 403);

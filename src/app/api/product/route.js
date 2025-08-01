@@ -4,8 +4,10 @@ import { productModel, productVariantModel } from "@/Http/Models/productModel";
 import { Category } from "../../../../lib/categoryModel";
 import { subCategory } from "../../../../lib/subcategoryModel";
 import ChildCategory from "../../../../lib/childcategoryModel";
+import { connectDb } from "@/Http/dbConnect2";
 
 export async function POST(req) {
+    await connectDb()
     try {
        
         const url = new URL(req.url);

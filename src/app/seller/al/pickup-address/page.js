@@ -25,6 +25,8 @@ function page() {
   const [errors, setErrors] = useState({});
   const [sellor, setSellor] = useState(null);
   const phoneInputRef = useRef(null); 
+    const [isSubmiting, setIsSubmiting] = useState(false);
+
   const [addressData, setAddressData] = useState({
     country_s_name:'in',
     mobile_code:'91',
@@ -41,17 +43,17 @@ function page() {
 
   useEffect(()=>{ 
     if(globalData.sellor){
-      $('.loaderouter').css('display','flex') 
+      
       fetch(`${baseUrl}api/seller/get-profile?user_id=${globalData.sellor._id}&with_data=pickupAddress`,{
         method:"GET", 
       }).then((response)=>{
           if(!response.ok){
-            $('.loaderouter').css('display','none')
+            
             throw new Error('Network Error')
           }
           return response.json();
       }).then((res)=>{
-          $('.loaderouter').css('display','none') 
+         
           if(res.status){
              // check complete step
           if(!res.data.data.complete_step ||  res.data.data.complete_step < 2){
@@ -132,7 +134,7 @@ function submitUpdateForm(e){
   e.preventDefault();
   setErrors({});
 
-  $('.loaderouter').css('display','flex');
+  setIsSubmiting(true)
   fetch(`${baseUrl}api/seller/update-profile?update=pickUpAddress`,{
     method:"POST",
     body:JSON.stringify({
@@ -140,17 +142,18 @@ function submitUpdateForm(e){
       address:addressData
     })
   }).then((response)=>{
+    setIsSubmiting(false)
       if(!response.ok){
-        $('.loaderouter').css('display','none')
+       
         throw new Error('Network Error') 
       }
       return response.json();
   }).then((res)=>{
-    $('.loaderouter').css('display','none') 
+   
       if(res.status){
 
         toast.success('Success! Pickup Address Saved.');
-        router.push('/seller/al/return-address')
+        router.push('/seller/al/return-setting')
       }else if(res.data.status_code==403){
         setErrors(res.data.errors)
       }
@@ -460,7 +463,8 @@ function submitUpdateForm(e){
                         ):''}
                   </div>
                 </div>
-                <button className="save">Save</button>
+                <button className="save" disabled={isSubmiting}>{isSubmiting?"Please wait..":"Save"}</button>
+                
               </div>
             </div>
           </div>

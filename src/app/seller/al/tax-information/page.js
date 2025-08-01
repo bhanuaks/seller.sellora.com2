@@ -26,6 +26,7 @@ const page = () => {
   const router = useRouter();
   const [errors, setErrors] = useState({});
   const [sellor, setSellor] = useState(null);
+   const [isSubmiting, setIsSubmiting] = useState(false);
   const [taxInformation, setTaxInformation] = useState({
     tax_classication: 'Individual',
     u_s_resident: "Yes",
@@ -47,17 +48,17 @@ const page = () => {
 
   useEffect(() => {
     if (globalData.sellor) {
-      $('.loaderouter').css('display', 'flex')
+ 
       fetch(`${baseUrl}api/seller/get-profile?user_id=${globalData.sellor._id}&with_data=taxInformation`, {
         method: "GET",
       }).then((response) => {
         if (!response.ok) {
-          $('.loaderouter').css('display', 'none')
+           
           throw new Error('Network Error')
         }
         return response.json();
       }).then((res) => {
-        $('.loaderouter').css('display', 'none')
+        
         if (res.status) {
           // check complete step
           if(!res.data.data.complete_step ||  res.data.data.complete_step < 5){
@@ -172,19 +173,18 @@ const page = () => {
   function submitUpdateForm(e) {
     e.preventDefault();
     setErrors({});
-    $('.loaderouter').css('display', 'flex');
+   setIsSubmiting(true)
     const formData = createFormData(taxInformation)
     fetch(`${baseUrl}api/seller/update-profile?update=taxInformation`, {
       method: "POST",
       body: formData
     }).then((response) => {
-      if (!response.ok) {
-        $('.loaderouter').css('display', 'none')
+      setIsSubmiting(false)
+      if (!response.ok) { 
         throw new Error('Network Error')
       }
       return response.json();
-    }).then((res) => {
-      $('.loaderouter').css('display', 'none')
+    }).then((res) => { 
       if (res.status) {
         toast.success('Success! Business Details Saved.');
         router.push('/seller/al/shipping-setting')
@@ -444,7 +444,7 @@ const page = () => {
                     </>
                     {/* ) : null} */}
                   </div>
-                  <button className="save">Save</button>
+                    <button className="save" disabled={isSubmiting}>{isSubmiting?"Please wait..":"Save"}</button> 
                 </div>
 
               </div>

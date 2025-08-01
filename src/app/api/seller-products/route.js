@@ -2,9 +2,11 @@ import { responseFun } from "@/Http/helper"
 import { productModel, productVariantModel } from "@/Http/Models/productModel"
 import mongoose from "mongoose"
 import { Category } from "../../../../lib/categoryModel"
+import { connectDb } from "@/Http/dbConnect2"
 
 
 export async function GET(request) {
+    await connectDb();
     const {searchParams} = new URL(request.url)  
     const seller_id = searchParams.get('seller_id')
     const category_slug = searchParams.get('category_slug')

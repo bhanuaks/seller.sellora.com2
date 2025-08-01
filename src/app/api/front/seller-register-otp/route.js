@@ -4,10 +4,12 @@ import { sendMailByNodeMailer, sendOtpMail } from "../../sendMail/route";
 import { sendMobileSMS } from "@/Http/smsHelper";
 import SellerLoginEmail from "@/app/EmailTemplates/SellerLoginEmail";
 import React from "react";
+import { connectDb } from "@/Http/dbConnect2";
 const ReactDOMServer =  require('react-dom/server');
 
 
 export async function POST(request) { 
+    await connectDb();
     const {mobile, email, mobile_code, name} = await request.json();
     const errors ={}; 
 

@@ -1,9 +1,11 @@
+import { connectDb } from "@/Http/dbConnect2";
 import { isEmpty, responseFun } from "@/Http/helper";
 import { ProductQuestionModal } from "@/Http/Models/productQuestion";
 
 
 export async function GET(request) {
     
+    await connectDb();
     const { searchParams } = new URL(request.url) 
     const page = searchParams.get("page") || 1;
     const pageSize = searchParams.get("pageSize") || 10;
@@ -124,6 +126,8 @@ export async function GET(request) {
 
 
 export async function POST(request) { 
+
+    await connectDb();
 
     const {_id, answer} = await request.json()
 

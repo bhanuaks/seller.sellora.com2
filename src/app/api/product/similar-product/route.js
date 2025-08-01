@@ -1,9 +1,11 @@
+import { connectDb } from "@/Http/dbConnect2";
 import { responseFun } from "@/Http/helper";
 import { productModel } from "@/Http/Models/productModel";
 
 
 export async function GET(request) {
 
+    await connectDb();
     const { searchParams } = new URL(request.url);
     const product_id = searchParams.get('product_id')
 

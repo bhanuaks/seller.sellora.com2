@@ -1,5 +1,5 @@
 "use client"
-import { baseUrl, fetcher } from '@/Http/helper'
+import { baseUrl, fetcher, roiFun } from '@/Http/helper'
 import Image from 'next/image'
 import Link from 'next/link'
 import React from 'react'
@@ -8,7 +8,7 @@ import useSWR from 'swr'
 
 function Page() {
   const {data, isLoading, error} = useSWR('/api/seller/ads/reports', fetcher);
-  const reportData = data?.data?.report;
+  const reportData = data?.data?.adsReports;
   return (
     <>
   <div className="rts-navigation-area-breadcrumb pb--10">
@@ -56,19 +56,19 @@ function Page() {
                 <div className="col-lg-2 col-md-3 col-12">
                   <div className="manager_boxs">
                     <h5>Ad Spend</h5>
-                    <h6>₹ 0</h6>
+                    <h6>${(reportData?.totalSpendAmount || 0 ).toFixed(2)}</h6>
                   </div>
                 </div>
                 <div className="col-lg-2 col-md-3 col-12">
                   <div className="manager_boxs">
                     <h5>Sales</h5>
-                    <h6>{reportData?.totalSales || 0}</h6>
+                    <h6>${(reportData?.totalSales || 0).toFixed(2)}</h6>
                   </div>
                 </div>
                 <div className="col-lg-2 col-md-3 col-12">
                   <div className="manager_boxs">
                     <h5>ROI</h5>
-                    <h6>-</h6>
+                    <h6>{roiFun(reportData?.totalSpendAmount || 0, reportData?.totalSales || 0)}</h6>
                   </div>
                 </div>
                 <div className="col-lg-2 col-md-3 col-12">
@@ -86,7 +86,7 @@ function Page() {
                 <div className="col-lg-2 col-md-3 col-12">
                   <div className="manager_boxs">
                     <h5>Orders</h5>
-                    <h6>{reportData?.totalOrders || 0}</h6>
+                    <h6>{reportData?.countOrder || 0}</h6>
                   </div>
                 </div>
               </div>

@@ -1,9 +1,11 @@
 import { getLoginSeller } from "@/app/api/getLoginUser/route";
+import { connectDb } from "@/Http/dbConnect2";
 import { SellerWalletHistoryModel } from "@/Http/Models/WalletModal";
 import { NextResponse } from "next/server";
 import puppeteer from "puppeteer";
 
 export async function POST(request) {
+  await connectDb();
   const { _id } = await request.json();
   const seller = await getLoginSeller();
 

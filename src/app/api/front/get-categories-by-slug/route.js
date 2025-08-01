@@ -3,11 +3,13 @@ import mongoose from "mongoose"
 import { Category } from "../../../../../lib/categoryModel";
 import { subCategory } from "../../../../../lib/subcategoryModel";
 import ChildCategory from "../../../../../lib/childcategoryModel";
+import { connectDb } from "@/Http/dbConnect2";
 
 
 
 export async function GET(request) {
     
+    await connectDb();
     const { searchParams } = new URL(request.url) 
     const category_slug = searchParams.get('slug')
     const sub_category_slug = searchParams.get('sub_category_slug')

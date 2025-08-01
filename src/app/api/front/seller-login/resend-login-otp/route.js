@@ -36,7 +36,7 @@ export async function POST(request) {
                 const htmlContent = ReactDOMServer.renderToString(
                     React.createElement(SellerLoginEmail, {name:seller.name, otp: new_otp})
                 )
-                await sendMailByNodeMailer(seller.name, subject, htmlContent)
+                await sendMailByNodeMailer(email, subject, htmlContent)
                 const sender = "sellora";
                 const receiver = `+${seller.mobile_code}${seller.mobile}`;
                 const message = `Dear ${seller.name}. Your one-time password (OTP) for Login is: ${new_otp}`;

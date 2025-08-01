@@ -13,6 +13,7 @@ function page() {
 
       const [viewPassword, setViewPassword] = useState(false) 
       const [errors, setErrors] =useState({})
+      const [loginProcess, setLoginProcess] = useState(false)
       const route = useRouter(); 
       const [loginData, setLoginData] = useState({
         username:'',
@@ -43,8 +44,8 @@ function page() {
       
   function loginSubmit(e){
     setErrors({});
-    e.preventDefault();
-    $('.loaderouter').css('display','flex')
+    e.preventDefault(); 
+    setLoginProcess(true)
       fetch(`${baseUrl}api/front/seller-login`,{
         method:"POST",
         headers:{
@@ -52,6 +53,7 @@ function page() {
         },
         body:JSON.stringify(loginData)
       }).then((response)=>{ 
+         setLoginProcess(false)
         if(!response.ok){
         $('.loaderouter').css('display','none') 
           throw new Error("Network Error")
@@ -67,11 +69,9 @@ function page() {
             route.push(`${baseUrl}seller/login-otp`)
           }, 300);
           
-        }else if(res.data.status_code==403){
-          $('.loaderouter').css('display','none')  
+        }else if(res.data.status_code==403){ 
           setErrors(res.data.errors)
-        }else{
-          $('.loaderouter').css('display','none')  
+        }else{ 
         }
       })
   }
@@ -143,7 +143,8 @@ function page() {
                               value={loginData.password}
                               onChange={(e)=>updateLoginData(e)}
                             />
-                              <i className={`toggle-password fa fa-fw fa-eye${!viewPassword?'-slash':""}`} onClick={()=>setViewPassword(!viewPassword)} 
+                              <i className={`toggle-password fa fa-fw fa-eye${!viewPassword?'-slash':""}`} 
+                              onClick={()=>setViewPassword(!viewPassword)} 
                                 style={{zIndex:'10000000000000000'}}
                                 />
  
@@ -157,8 +158,8 @@ function page() {
                         </div>
                       </div>
                     </div>
-                    <button className="rts-btn btn-primary">
-                      Login{/* Request OTP */}
+                    <button className="rts-btn btn-primary" disabled={loginProcess}>
+                     {loginProcess?"Please wait..":"Login"} {/* Request OTP */}
                     </button>
                     <div className="ter_ms"> Don’t have an account? </div>
                     <Link href="/seller/register">
@@ -172,8 +173,9 @@ function page() {
                         <Link href="#" className="single"> <img src={`${baseUrl}front/assets/images/form/google.svg`} alt="login"> </Link> 
                         <Link href="#" className="single faceboomk_button"> <i className="fa-brands fa-facebook-f"></i> Facebook </Link> </div> */}
                       <div className="new_customer">
-                        By continuing, you agree to Sellora’s 
-                        <Link href="#">Terms of Use</Link> &amp; 
+                        By continuing, you agree to Sellora’s{" "}
+                        <Link href="#">Terms of Use</Link> &amp;
+                        {" "} 
                         <Link href="#">Privacy Policy</Link> 
                       </div>
                     </div>

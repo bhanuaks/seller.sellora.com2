@@ -2,12 +2,15 @@ import { responseFun } from "@/Http/helper";
 import { getLoginSeller } from "../../getLoginUser/route";
 import { sellerBusinessProfileModel } from "@/Http/Models/sellerModel";
 import mongoose from "mongoose";
+import { connectDb } from "@/Http/dbConnect2";
 
 
 export async function POST(request) {
    
     // const {} = await request.json()
 
+    await connectDb();
+    
     const seller = await getLoginSeller();
     if(!seller){
         return responseFun(false, {message:"unauthoried request",}, 403)

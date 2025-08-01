@@ -1,9 +1,13 @@
 import { responseFun } from "@/Http/helper";
 import { sellerModel } from "@/Http/Models/sellerModel";
 import { getLoginSeller } from "../getLoginUser/route";
+import { connectDb } from "@/Http/dbConnect2";
 
 
 export async function GET(request) {
+
+    await connectDb();
+
     const { searchParams } = new URL(request.url)
     // const seller_id = searchParams.get('seller_id')
 

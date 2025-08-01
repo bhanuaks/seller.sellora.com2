@@ -135,13 +135,17 @@ export function getPricingLabel(price) {
     return true
   }
 
-  export const dynamincOtp =(from, to)=>{
-        let otp= Math.floor(from + Math.random() * to);
-        if(Number(to) <= Number(otp)){
-          dynamincOtp(from, to)
-        }
-        return otp;
-    }
+  // export const dynamincOtp =(from, to)=>{
+  //       let otp= Math.floor(from + Math.random() * to);
+  //       if(Number(to) <= Number(otp)){
+  //         dynamincOtp(from, to)
+  //       }
+  //       return otp;
+  //   }
+
+export const dynamincOtp = (from, to) => {
+  return Math.floor(100000 + Math.random() * 900000);
+};
 
     export const responseFun=(status = false, data = null, status_code = 500)=> {
         return NextResponse.json(
@@ -915,6 +919,12 @@ export function calculateListingQuality(product) {
 
 
 
+export function calculatePotentialSale(views, sellingPrice, conversionRate = 0.05) {
+  const estimatedUnitsSold = ((views+1)* 5) * conversionRate;
+  const potentialSale = estimatedUnitsSold * sellingPrice;
+  return Number(potentialSale.toFixed(2));
+}
+
 
 
 
@@ -989,4 +999,25 @@ if(!startDateParam || !closeDateParam || !startTimeParam || !closeTimeParam){
           }
  
 
+  }
+
+
+  export function acosFun(totalSales, totalSpendAmount){
+    let acos = 0;
+    if(totalSales && totalSales > 0){
+      acos = (totalSpendAmount / totalSales) * 100;
+      return `${acos.toFixed(2)}%`;
+    } 
+
+    return "-";
+  }
+
+  export function roiFun(totalSpendAmount, totalSales){
+    let roi = 0;
+    if(totalSales && totalSales > 0){
+      roi = (totalSpendAmount / totalSales);
+      return `${roi.toFixed(2)}`;
+    } 
+
+    return "-";
   }

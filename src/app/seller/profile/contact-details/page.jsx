@@ -18,6 +18,7 @@ function Page() {
   const router = useRouter();
   const phoneInputRef = useRef(null);
   const [errors, setErrors] = useState({});
+  const [isProccess, setIsProccess] = useState(false);
 
 
   useEffect(() => {
@@ -90,23 +91,24 @@ function Page() {
 
   function submitUpdateForm(e) {
     e.preventDefault();
-    // $(".loaderouter").css("display", "flex");
+     setIsProccess(true)
     fetch(`${baseUrl}api/seller/update-profile?update=contact_details`, {
       method: "POST",
       body: JSON.stringify(sellor),
     })
       .then((response) => {
+        setIsProccess(false)
         if (!response.ok) {
-          $(".loaderouter").css("display", "none");
+          
           throw new Error("Network Error");
         }
         return response.json();
       })
       .then((res) => {
-        $(".loaderouter").css("display", "none");
+         
         if (res.status) {
           toast.success("Success! Contact Details Saved.");
-          router.push("/seller/profile/display-information");
+          // router.push("/seller/profile/display-information");
         }else if(res.data.status_code==403){
           setErrors(res.data.errors)
         }
@@ -225,7 +227,7 @@ function Page() {
                                             <span id="name_error" className="input-error-tip" style={{display: 'inline-block'}}>{errors.email}</span>
                                         ):''}
                                 </div>
-                                <button className="save">Update</button>
+                                <button className="save" disabled={isProccess}>{isProccess?"Please Wait..":"Update"}</button>
                               </div>
                             </div>
                           </div>

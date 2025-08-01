@@ -19,7 +19,14 @@ const sellerReturnWindowSchema = new Schema({
   seller_return:{
     type:Number,
     default:null
+  },
+
+  replacement:{
+    type:String,
+    enum:["Yes", "No"],
+    default:"No",
   }
+
 }, {timestamps:true})
 
 

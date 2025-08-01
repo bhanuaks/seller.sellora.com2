@@ -6,7 +6,7 @@ import { connectDb } from "../../../../../../lib/dbConnect";
 
 
 export async function POST(request) {
-    connectDb();
+   await connectDb();
     const { searchParams } = new URL(request.url)
     const address_type = searchParams.get("address_type");
      if(address_type == "Billing"){

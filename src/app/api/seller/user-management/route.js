@@ -13,7 +13,7 @@ const ReactDOMServer =  require('react-dom/server');
 
 
 export async function GET(request) {
-    connectDb(); 
+   await  connectDb(); 
     const { searchParams } = new URL(request.url);
     const seller_id = searchParams.get('seller_id')
     const searchText = searchParams.get('searchText') || '';

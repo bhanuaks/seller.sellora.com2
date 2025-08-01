@@ -6,7 +6,7 @@ import { connectDb } from "../../../../../../lib/dbConnect";
 import { productModel } from "@/Http/Models/productModel";
 
 export async function GET(request) {
-  connectDb();
+  await connectDb();
 
   const { searchParams } = new URL(request.url);
   const reportDay = searchParams.get("filter") || "";
@@ -142,6 +142,8 @@ export async function GET(request) {
 }
 
 export async function POST(request) {
+
+  await connectDb();
 
   const body = await request.json();
   const page = parseInt(body.page) || 1;

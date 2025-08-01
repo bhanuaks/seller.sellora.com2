@@ -18,6 +18,8 @@ function Page() {
   const [errors, setErrors] = useState({});
   const [sellor, setSellor] = useState(null);
   const phoneInputRef = useRef(null);
+  const [isProccess, setIsProccess] = useState(false);
+   
   const [addressData, setAddressData] = useState({
     country_s_name: "in",
     mobile_code: "91",
@@ -129,7 +131,7 @@ function Page() {
     e.preventDefault();
     setErrors({});
 
-    // $(".loaderouter").css("display", "flex");
+    setIsProccess(true)
     fetch(`${baseUrl}api/seller/update-profile?update=pickUpAddress`, {
       method: "POST",
       body: JSON.stringify({
@@ -138,17 +140,18 @@ function Page() {
       }),
     })
       .then((response) => {
+        setIsProccess(false)
         if (!response.ok) {
-          $(".loaderouter").css("display", "none");
+           
           throw new Error("Network Error");
         }
         return response.json();
       })
       .then((res) => {
-        $(".loaderouter").css("display", "none");
+        
         if (res.status) {
           toast.success("Success! Pickup Address Saved.");
-          router.push("/seller/profile/return-address");
+          // router.push("/seller/profile/return-address");
         } else if (res.data.status_code == 403) {
           setErrors(res.data.errors);
         }
@@ -405,7 +408,8 @@ function Page() {
                                     ""
                                   )}
                                 </div>
-                                <button className="save">Update</button>
+                                <button className="save" disabled={isProccess}>{isProccess?"Please Wait..":"Update"}</button>
+                                
                               </div>
                             </div>
                           </div>

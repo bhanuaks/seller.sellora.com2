@@ -4,7 +4,7 @@ import bcrypt from 'bcryptjs';
 import { NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 import { connectDb } from "../../../../../lib/dbConnect";
-import { sendMailByNodeMailer } from "../../sendMail/route";
+import { sendMailByGraphAPI, sendMailByNodeMailer } from "../../sendMail/route";
 import { sendMobileSMS } from "@/Http/smsHelper";
 import React from "react";
 import SellerLoginEmail from "@/app/EmailTemplates/SellerLoginEmail";
@@ -61,8 +61,8 @@ export async function POST(request) {
         const htmlContent = ReactDOMServer.renderToString(
             React.createElement(SellerLoginEmail, {name:seller.name, otp: new_otp})
         )
-        // await sendMailByNodeMailer(seller.email, subject, htmlContent)
         await sendMailByNodeMailer(seller.email, subject, htmlContent)
+        // await sendMailByGraphAPI(seller.email, subject, htmlContent)
         const sender = "sellora";
         const receiver = `+${seller.mobile_code}${seller.mobile}`;
         const message = `Dear ${seller.name}. Your one-time password (OTP) for Login is: ${new_otp}`;

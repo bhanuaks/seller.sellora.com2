@@ -3,8 +3,12 @@ import { responseFun } from "@/Http/helper";
 import { getLoginUser } from "../../getLoginUser/route";
 import { orderModel, orderProductModel } from "@/Http/Models/order";
 import { orderAddressModel } from "@/Http/Models/orderAddress";
+import { connectDb } from "@/Http/dbConnect2";
 
 export async function GET(request) {
+
+    await connectDb();
+
     const { searchParams } = new URL(request.url);
     const order_id = searchParams.get('order_id')
     try{

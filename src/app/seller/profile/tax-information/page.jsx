@@ -18,6 +18,7 @@ function Page() {
   const router = useRouter();
   const [errors, setErrors] = useState({});
   const [sellor, setSellor] = useState(null);
+  const [isProccess, setIsProccess] = useState(false);
   const [taxInformation, setTaxInformation] = useState({
     tax_classication: "Individual",
     u_s_resident: "Yes",
@@ -160,24 +161,23 @@ function Page() {
   function submitUpdateForm(e) {
     e.preventDefault();
     setErrors({});
-    // $(".loaderouter").css("display", "flex");
+    setIsProccess(true)
     const formData = createFormData(taxInformation);
     fetch(`${baseUrl}api/seller/update-profile?update=taxInformation`, {
       method: "POST",
       body: formData,
     })
       .then((response) => {
-        if (!response.ok) {
-          $(".loaderouter").css("display", "none");
+        setIsProccess(false)
+        if (!response.ok) { 
           throw new Error("Network Error");
         }
         return response.json();
       })
-      .then((res) => {
-        $(".loaderouter").css("display", "none");
+      .then((res) => { 
         if (res.status) {
           toast.success("Success! Business Details Saved.");
-          router.push("/seller/profile/shipping-setting");
+          // router.push("/seller/profile/shipping-setting");
         } else if (res.data.status_code == 403) {
           setErrors(res.data.errors);
         }
@@ -573,7 +573,8 @@ function Page() {
                                   </>
                                 {/* ) : null} */}
                               </div>
-                              <button className="save">Update</button>
+                              <button className="save" disabled={isProccess}>{isProccess?"Please Wait..":"Update"}</button>
+                             
                             </div>
                           </div>
                         </div>

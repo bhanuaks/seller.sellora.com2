@@ -6,6 +6,7 @@ import path from 'path'
 
 export async function POST(request) {
     
+    await connectDb();
     const formData = await request.formData();
         
     const issueCategories = formData.get("issueCategories");

@@ -19,22 +19,20 @@ function page() {
   
   const {globalData, setGlobalData} = useContext(AppContext)
     const [errors, setErrors] = useState({});
-  
+    const [isSubmiting, setIsSubmiting] = useState(false);
+
   const [sellor, setSellor] = useState(null)
   const router = useRouter()
   useEffect(()=>{ 
-    if(globalData.sellor){
-      $('.loaderouter').css('display','flex') 
+    if(globalData.sellor){ 
       fetch(`${baseUrl}api/seller/get-profile?user_id=${globalData.sellor._id}`,{
         method:"GET", 
       }).then((response)=>{
-          if(!response.ok){
-            $('.loaderouter').css('display','none') 
+          if(!response.ok){ 
             throw new Error('Network Error') 
           }
           return response.json();
-      }).then((res)=>{
-          $('.loaderouter').css('display','none') 
+      }).then((res)=>{ 
           if(res.status){
              // check complete step
           if(!res.data.data.complete_step || res.data.data.complete_step < 1){
@@ -68,18 +66,17 @@ const updateInputData= (e)=>{
 function submitUpdateForm(e){
   e.preventDefault();
   setErrors({})
-  $('.loaderouter').css('display','flex');
+  setIsSubmiting(true)
   fetch(`${baseUrl}api/seller/update-profile?update=display_information`,{
     method:"POST",
     body:JSON.stringify(sellor)
   }).then((response)=>{
+    setIsSubmiting(false)
       if(!response.ok){
-        $('.loaderouter').css('display','none')
         throw new Error('Network Error') 
       }
       return response.json();
-  }).then((res)=>{
-    $('.loaderouter').css('display','none') 
+  }).then((res)=>{ 
       if(res.status){
         toast.success('Success! Display information saved.');
          window.location.href=`${baseUrl}seller/al/pickup-address`
@@ -173,7 +170,7 @@ function submitUpdateForm(e){
                           <span id="name_error" className="input-error-tip" style={{display: 'inline-block'}}>{errors.business_description}</span>
                       ):''}
                 </div>
-                <button className="save">Save</button>
+                <button className="save" disabled={isSubmiting}>{isSubmiting?"Please wait..":"Save"}</button>
               </div>
             </div>
           </div>

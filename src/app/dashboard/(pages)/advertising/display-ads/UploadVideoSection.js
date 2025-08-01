@@ -24,7 +24,7 @@ function UploadVideoSection({fileRef, hendleInputChangeInput, campaign}) {
     
                     <div>
                       <div className="adfor_boxs1">
-                        <h4>Upload Image</h4>
+                        <h4>Upload Video</h4>
                         <div className="box-img py-5">
                           
 
@@ -58,7 +58,7 @@ function UploadVideoSection({fileRef, hendleInputChangeInput, campaign}) {
     
                     <label htmlFor="fileRef"  style={{ width: "100%" }}  >
                       <div className="adfor_boxs1" htmlFor="fileRef">
-                        <h4>Upload Image</h4>
+                        <h4>Upload Video</h4>
                         <div className="box-img py-5">
                           <i className="fa-solid fa-play vdAd" />
                           <p className="mt-1">Upload</p>

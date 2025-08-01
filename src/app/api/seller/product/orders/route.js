@@ -1,14 +1,27 @@
+import { connectDb } from "@/Http/dbConnect2";
 import { decodeJwt, responseFun } from "@/Http/helper";
 import { orderModel, orderProductModel } from "@/Http/Models/order";
 import mongoose from "mongoose";
 import { cookies } from "next/headers";
 import { pipeline } from "nodemailer/lib/xoauth2";
 
+function isValidDate(val) {
+  return !isNaN(Date.parse(val));
+}
+
+
 export async function GET(request) {
+  await connectDb();
+  
   const { searchParams } = new URL(request.url);
   const status = searchParams.get("status") || "All";
   const searchBy = searchParams.get("searchBy") || null;
   const searchText = searchParams.get("searchText") || null;
+  const from_date = searchParams.get("from_date") || null;
+  const to_date = searchParams.get("to_date") || null;
+
+
+
   const sellerToken = request.cookies.get("sellerAuthToken")?.value;
 
   const page = parseInt(searchParams.get("page")) || 1;
@@ -24,9 +37,11 @@ export async function GET(request) {
     return responseFun(false, "seller id not found!", 404);
   }
   const sellerId = new mongoose.Types.ObjectId(seller._id);
-
+  
+ 
+ 
   const totalDataAggregation = await orderProductModel.aggregate([
-    { $match: { seller_id: sellerId } },
+    { $match: {seller_id: sellerId} },
     {
       $group: {
         _id: null,
@@ -70,6 +85,28 @@ export async function GET(request) {
         query.order_id = { $regex: searchText, $options: "i" };
     }
 }
+
+    if (isValidDate(from_date) && isValidDate(to_date)) {
+      const toDateObj = new Date(to_date);
+      toDateObj.setUTCHours(23, 59, 59, 999);
+
+      query.createdAt = {
+        $gte: new Date(from_date),
+        $lte: toDateObj
+      };
+    } else if (isValidDate(from_date)) {
+      query.createdAt = {
+        $gte: new Date(from_date),
+      };
+    } else if (isValidDate(to_date)) {
+      const toDateObj = new Date(to_date);
+      toDateObj.setUTCHours(23, 59, 59, 999);
+
+      query.createdAt = {
+        $lte: toDateObj,
+      };
+    }
+
 
   try {
     const orders = await orderProductModel.aggregate([

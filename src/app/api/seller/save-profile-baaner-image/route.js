@@ -4,8 +4,11 @@ import mongoose from "mongoose";
 import { getLoginSeller } from "../../getLoginUser/route";
 import { uploadImageFun } from "../../uploadImage/route";
 import path from "path";
+import { connectDb } from "@/Http/dbConnect2";
 
 export async function POST(request) {
+  
+  await connectDb();
     const formData = await request.formData();
     const uploadingFile = formData.get("banner");
 

@@ -4,8 +4,10 @@ import path from "path";
 import { uploadFileFun } from "../../uploadImage/route";
 import { sellerBusinessProfileModel } from "@/Http/Models/sellerModel";
 import mongoose from "mongoose";
+import { connectDb } from "@/Http/dbConnect2";
 export async function POST(request) {
     
+    await connectDb();
      const formData = await request.formData();
     const uploadingFile = formData.get("profileLogo");
 

@@ -1,23 +1,35 @@
 "use client";
 import HelpAndVideoTopSection from "@/app/seller/HelpAndVideoTop";
+import TableskeltonLoader from "@/app/skeleton_loader/TableskeltonLoader";
 import { apiRequest } from "@/Http/apiHelper";
 import { formatDateTime } from "@/Http/dateHelper";
 import { baseUrl, getPrecentageAmount, getPricingLabel, main_thumb_img_path, variant_thumb_img_path1 } from "@/Http/helper";
 import { fileBasePath } from "@/Http/urlHelper";
 import Image from "next/image";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
 
 
 const page = () => {
   const params = useParams();
+  const router = useRouter();
   const searchStatus = params.order_status;
+
+  const SearchParams = useSearchParams();
+
+  const from_date = SearchParams.get("from_date") || "";
+  const to_date = SearchParams.get("to_date") || "";
+ ;
   const [orderList, setOrderList] = useState([]);
   const [searchText, setSearchText] = useState("");
   const [searchBy, setSearchBy] = useState("OrderId");
    const [pagination, setPagination] = useState(null)
+   const [filterData, setFilterData] = useState({
+    from_date:from_date || "",
+    to_date: to_date || ""
+   })
   
   const [totalData, setTotalData] = useState({
     totalAllOrder: 0,
@@ -28,19 +40,18 @@ const page = () => {
   const [loading, setLoading] = useState(false);
   async function getOrders(page=1, size=10) {
     setLoading(true)
-    const data = await apiRequest(`${baseUrl}api/seller/product/orders?status=${searchStatus}&page=${page}&pageSize=${size}&searchText=${searchText}&searchBy=${searchBy}`);
+    const data = await apiRequest(`${baseUrl}api/seller/product/orders?status=${searchStatus}&page=${page}&pageSize=${size}&searchText=${searchText}&searchBy=${searchBy}&from_date=${from_date}&to_date=${to_date}`);
     setLoading(false)
     if (data.status) {
       setOrderList(data.data.orders);
       setTotalData(data.data.totalData);
-      setPagination(data.data.pagination);
-      
+      setPagination(data.data.pagination); 
     }
   }
 
   useEffect(() => {
     getOrders();
-  }, [searchStatus]);
+  }, [searchStatus, from_date, to_date]);
 
 
     function paginationFun(page, size, e){
@@ -60,6 +71,13 @@ const page = () => {
       return () => clearTimeout(timeoutId);
     }, [searchText, searchBy]);
 
+    function inputHendle(e){
+      const { name, value } = e.target;
+      setFilterData((preData)=>({
+        ...preData,
+        [name]:value
+      }))
+    }
     
     function changeOrderStaus(e, _id){
       const { name, value } = e.target
@@ -69,6 +87,25 @@ const page = () => {
         window.open(`${baseUrl}dashboard/returns/refund-order/${_id}`, "_blank");
       }
     }
+
+
+    function applyFiltre(e){
+      e.preventDefault();
+      const link = `/dashboard/orders/${searchStatus}?from_date=${filterData.from_date}&to_date=${filterData.to_date}`
+      router.push(link)
+    }
+
+     function resetFiltre(e){
+      e.preventDefault();
+      setFilterData({
+          from_date:  "",
+          to_date:  ""
+        })
+      const link = `/dashboard/orders/${searchStatus}`
+      router.push(link)
+    }
+    
+
   return (
     <div>
 
@@ -174,13 +211,30 @@ const page = () => {
                       <tbody>
                         <tr>
                           <td style={{ border: "none !important" }}>
-                            <div className="d-flex">
-                              <div className="fillter">
+                            <div className="d-flex" style={{gap:'8px'}}>
+                              <div className="dropdown demo_drop">
+                                <input type="date" 
+                                name="from_date"
+                                value={filterData.from_date}
+                                onChange={(e)=>inputHendle(e)}
+                                />  
+                              </div>
+                               <div className="dropdown demo_drop">
+                                <input type="date"
+                                name="to_date"
+                                value={filterData.to_date}
+                                onChange={(e)=>inputHendle(e)}
+                                min={filterData.from_date || ""}
+                                 />  
+                              </div>
+
+                              {/* <div className="fillter">
                                 <a href="#">
                                   <i className="fa-solid fa-filter" />
                                 </a>
-                              </div>
-                              <div className="dropdown demo_drop">
+                              </div> */}
+                                {/*<div className="dropdown demo_drop">
+                               
                                 <button
                                   className="btn dropdown-toggle menu_button"
                                   type="button"
@@ -188,9 +242,10 @@ const page = () => {
                                   aria-expanded="false"
                                 > 
                                   Status
-                                </button>
-                              </div>
-                              <div className="dropdown demo_drop">
+                                </button>  
+                              </div> */}
+                              
+                              {/* <div className="dropdown demo_drop">
                                 <button
                                   className="btn dropdown-toggle menu_button"
                                   type="button"
@@ -200,8 +255,8 @@ const page = () => {
                                 >
                                   Ship by
                                 </button>
-                              </div>
-                              <div className="dropdown demo_drop">
+                              </div> */}
+                              {/* <div className="dropdown demo_drop">
                                 <button
                                   className="btn dropdown-toggle menu_button"
                                   type="button"
@@ -211,8 +266,8 @@ const page = () => {
                                 > 
                                   Order date
                                 </button>
-                              </div>
-                              <div className="dropdown demo_drop">
+                              </div> */}
+                              {/* <div className="dropdown demo_drop">
                                 <button
                                   className="btn dropdown-toggle menu_button"
                                   type="button"
@@ -222,13 +277,13 @@ const page = () => {
                                 >
                                   Condition
                                 </button>
-                              </div>
+                              </div> */}
                               <div className="menu_tab">
                                 <ul>
-                                  <li className="apply_button">
+                                  <li className="apply_button"  onClick={(e)=>applyFiltre(e)}> 
                                     <a href="#">Apply</a>
                                   </li>
-                                  <li className="apply_button">
+                                  <li className="apply_button"  onClick={(e)=>resetFiltre(e)}>
                                     <a href="#">Reset</a>
                                   </li>
                                 </ul>
@@ -242,16 +297,16 @@ const page = () => {
                   </th>
                 </tr>
                 <tr className="winner__table">
-                  <th width={50}>
+                  {/* <th width={50}>
                     <input type="checkbox" />
-                  </th>
+                  </th> */}
                   <th width={120}>Order Date</th>
                   <th width={150}>Order ID </th>
                   <th width={180} />
                   <th width={400}>Product Detail</th>
                   <th width={180}>Customer Name</th>
                   <th width={180}>Shipping type </th>
-                  <th width={180}>Ship by</th>
+                  {/* <th width={180}>Ship by</th> */}
                   <th width={180}>Fulfilled by</th>
                   <th width={180}>Total order</th>
                   <th width={180}>Qty</th>
@@ -265,23 +320,26 @@ const page = () => {
                     <td colSpan="13" style={{ textAlign: "center" }}>Order Not Found!</td>
                   </tr>
                 )}
-                {orderList && orderList.length > 0 && 
+                {loading && (
+                  <TableskeltonLoader totalRows={7} totalColumns={11} />
+                )}
+                {!loading && orderList && orderList.length > 0 && 
                 orderList.map((order, index)=>(
                   <tr className="winner__table" key={index}>
-                  <td className="text-center">
+                  {/* <td className="text-center">
                     <input type="checkbox" />
-                  </td>
+                  </td> */}
                   <td>
                   {formatDateTime(order.createdAt)} 
                   </td>
                   <td>
                     <div className="order_id_01">
                       <span>Order Id</span>
-                      {order.order_id}
+                    <a target="_blank" href={`/dashboard/orders/details/${order._id}`}>{order.order_id}</a>
                     </div>
                     <div className="order_id_01">
                       <span>Purchase Order</span>
-                      {order.sub_order_id}
+                       <a target="_blank" href={`/dashboard/orders/details/${order._id}`}> {order.sub_order_id}</a>
                     </div>
                   </td>
                   <td>
@@ -320,9 +378,8 @@ const page = () => {
                   <td className="text-center">
                     {/* Standard */}
                     </td>
-                  <td className="text-center">
-                    {/* 12/04/2024 */}
-                    </td>
+                  {/* <td className="text-center"> 
+                    </td> */}
                   <td className="text-center">Seller</td>
                   <td className="text-center">{getPricingLabel(order.price*order.quantity)}</td>
                   <td className="text-center">{order.quantity}</td>

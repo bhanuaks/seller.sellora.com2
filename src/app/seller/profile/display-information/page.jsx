@@ -18,7 +18,7 @@ function Page() {
 
   const {globalData, setGlobalData} = useContext(AppContext)
       const [errors, setErrors] = useState({});
-    
+     const [isProccess, setIsProccess] = useState(false);
     const [sellor, setSellor] = useState(null)
     const router = useRouter()
     useEffect(()=>{ 
@@ -67,21 +67,22 @@ function Page() {
   function submitUpdateForm(e){
     e.preventDefault();
     setErrors({})
-    $('.loaderouter').css('display','flex');
+   setIsProccess(true)
     fetch(`${baseUrl}api/seller/update-profile?update=display_information`,{
       method:"POST",
       body:JSON.stringify(sellor)
     }).then((response)=>{
+      setIsProccess(false)
         if(!response.ok){
           $('.loaderouter').css('display','none')
           throw new Error('Network Error') 
         }
         return response.json();
-    }).then((res)=>{
-      $('.loaderouter').css('display','none') 
+    }).then((res)=>{ 
         if(res.status){
           toast.success('Success! Display information saved.');
-          window.location.href=`${baseUrl}seller/profile/pickup-address`
+          window.location.reload();
+          // window.location.href=`${baseUrl}seller/profile/pickup-address`
           // router.push('/seller/profile/pickup-address')
         }else if(res.data.status_code==403){
           setErrors(res.data.errors)
@@ -173,7 +174,8 @@ function Page() {
                                       <span id="name_error" className="input-error-tip" style={{display: 'inline-block'}}>{errors.business_description}</span>
                                   ):''}
                           </div>
-                          <button type='submit' className="save">Update</button>
+                          
+                          <button  type='submit' className="save" disabled={isProccess}>{isProccess?"Please Wait..":"Update"}</button>
                         </div>
                       </div>
                     </div>

@@ -1,3 +1,4 @@
+import { connectDb } from "@/Http/dbConnect2";
 import { responseFun } from "@/Http/helper";
 import { sellorShippingTempleteModel } from "@/Http/Models/sellerModel";
 import mongoose from "mongoose";
@@ -5,6 +6,7 @@ import mongoose from "mongoose";
 
 export async function POST(request) {
 
+    await connectDb();
     const {
         _id,
         seller_id,

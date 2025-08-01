@@ -16,6 +16,8 @@ function Page() {
   const router = useRouter();
   const [errors, setErrors] = useState({});
   const [sellor, setSellor] = useState(null);
+  const [isProccess, setIsProccess] = useState(false);
+
   const phoneInputRef = useRef(null);
   const [shippingTemplete, setShippingTemplete] = useState({
     seller_id: "",
@@ -95,12 +97,13 @@ function Page() {
     e.preventDefault();
     setErrors({});
 
-    // $(".loaderouter").css("display", "flex");
+    setIsProccess(true)
     fetch(`${baseUrl}api/seller/create-shipping-templete`, {
       method: "POST",
       body: JSON.stringify(shippingTemplete),
     })
       .then((response) => {
+        setIsProccess(false)
         if (!response.ok) {
           $(".loaderouter").css("display", "none");
           throw new Error("Network Error");
@@ -354,7 +357,8 @@ function Page() {
                                       <td colSpan={5}>
                                         <div className="send_request_for_call text-center">
                                           {/* <a href="#">Add Shipping Rule</a> */}
-                                          <button href="#">Submit</button>
+                                           
+                                          <button   disabled={isProccess}>{isProccess?"Please Wait..":"Submit"}</button>
                                         </div>
                                       </td>
                                     </tr>

@@ -14,6 +14,7 @@ import { productModel, productOtherDetailModel, productVariantModel, variantThre
 import { newSinNumber } from '../product/add-variant/route';
 import { errorProductModal } from '@/Http/Models/ErroreModal/erroreModel';
 import mongoose from 'mongoose';
+import { fileBasePath } from '@/Http/urlHelper';
 
 
 const imageFields = ["Image_1", "Image_2", "Image_3", "Image_4", "Image_5", "Image_6", "Image_7"];
@@ -110,7 +111,7 @@ export async function POST(request) {
 
     const formData = await request.formData();
     const file = formData.get('file');
-
+    
     if (!file) {
       return NextResponse.json(
         { success: false, error: 'No file uploaded' },
@@ -145,14 +146,17 @@ export async function POST(request) {
     const insertDataArray = [];
      
     const seller = await getLoginSeller();
-    const groups = {}
+  
    
     await errorProductModal.deleteMany({seller_id: new mongoose.Types.ObjectId(seller._id)})
-const allPromises = data.map(async (rowData)=>{
+    let groups = {}
+// const allPromises = data.map(async (rowData, itemIndex)=>{
+  for (let itemIndex = 0; itemIndex < data.length; itemIndex++) {
+  const rowData = data[itemIndex];
       let category_id = undefined;
       let subcategory_id = undefined;
       let childcategory_id = undefined;
-      let brand_id = "6805d10fd5966a70d5d7efa0";
+      let brand_id = undefined;
 
  
       
@@ -164,6 +168,12 @@ const allPromises = data.map(async (rowData)=>{
       if(!rowData["Category"]){
         errors.Category = `Category is required`; 
       }
+
+       if(!rowData["Handling Time"]){
+          errors.handling_time = `Handling Time is required`; 
+        }
+
+
       // check brand 
       if(!rowData["Brand Name"]){
           errors.brand = `Brand is required.`; 
@@ -202,11 +212,15 @@ const allPromises = data.map(async (rowData)=>{
 
      
 
-      
-      
+       
 
       if(rowData["Brand Name"]){
-        const sellerBrand = await brandSellerModel.findOne({name:rowData["Brand Name"]}).lean();
+        const sellerBrand = await brandSellerModel.findOne({
+          name:rowData["Brand Name"],
+          seller_id : new mongoose.Types.ObjectId(seller._id),
+          // status:1
+        }).lean();
+         console.log({sellerBrand});
          if(!sellerBrand){
           errors.brandName = `Invalid brand name.`; 
         }else{
@@ -360,7 +374,7 @@ const allPromises = data.map(async (rowData)=>{
           }
 
           if(rowData[`Listing Status`] && !['Active', "Draft"].includes(rowData[`Listing Status`])){
-            errors.ListingStatus = `Listing Status enter correct value.`; 
+            errors.ListingStatus = `Listing Status enter correct value (Active, Draft).`; 
           }
 
          if (!rowData[`MSRP`] || isNaN(rowData[`MSRP`])) {
@@ -451,11 +465,14 @@ const allPromises = data.map(async (rowData)=>{
 
         
 
-           if (rowData[`Product Is Or Contains This Battery Type`] == "Yes" &&  !["Yes", "No"].includes(rowData[`Are batteries included`]) ) {
-            errors.Arebatteriesincluded = `Select valid Are batteries included value`; 
+         if (
+            rowData["Product Is Or Contains This Battery Type"] === "Yes" &&
+            !["Yes", "No"].includes(rowData["Are Batteries Included"])
+          ) {
+            errors.Arebatteriesincluded = "Please select a valid value for 'Are Batteries Included' (Yes or No).";
           }
 
-           if (rowData[`Are batteries included`] == "Yes" && ! rowData[`Battery Cell Composition`]) {
+           if (rowData[`Are Batteries Included`] == "Yes" && ! rowData[`Battery Cell Composition`]) {
             errors.BatteryCellComposition = `Select valid Battery Cell Composition value`; 
           }
 
@@ -466,12 +483,37 @@ const allPromises = data.map(async (rowData)=>{
 
 
        let global = [];
+
+        const productDbId = await rowData["Dyanamic Product Id"];
+          let existingProduct = null;
+
+          if(productDbId && mongoose.Types.ObjectId.isValid(productDbId)){  
+            existingProduct = await productModel.findOne({
+              _id:new mongoose.Types.ObjectId(productDbId),
+              seller_id: new mongoose.Types.ObjectId(seller._id)
+            });
+          }
+
+          
+
+
        if(Object.keys(errors).length <= 0){ 
         // upload image when error not found.
           for (let i = 0; i < imageFields.length; i++) {
               const field = imageFields[i];
               if (rowData[field]) {
-                const imageUrl = rowData[field];
+                const imageUrl = rowData[field]; 
+
+                  if (existingProduct) {
+                        const existingImageName = existingProduct[`image_${i + 1}`];
+                        const newUrlPath = `${fileBasePath}/${product_large_img_path1}/${existingImageName}`;
+                        if (newUrlPath === imageUrl) {
+                           global[`image_${i + 1}_name`] = existingImageName; 
+                          continue;
+                        }
+                      }
+
+
                 const { thumb, medium, large } = outputPaths[i]; 
 
                 const sizesAndFolders = [
@@ -489,8 +531,15 @@ const allPromises = data.map(async (rowData)=>{
 
       
         if(Object.keys(errors).length <= 0 && rowData["Main Image"]){
-             const imageUrl = rowData["Main Image"];
-             const thumb = main_thumb_img_path;
+             const imageUrl = rowData["Main Image"]; 
+              const existingImageName = existingProduct?.main_image || "";
+              const newUrlPath = `${fileBasePath}/${main_large_img_path}/${existingImageName}`;
+             if (existingProduct && imageUrl == newUrlPath) {
+                 mainImage = existingImageName;
+
+             }else{
+
+              const thumb = main_thumb_img_path;
              const medium = main_medium_img_path;
              const large = main_large_img_path;
               const sizesAndFolders = [
@@ -498,8 +547,8 @@ const allPromises = data.map(async (rowData)=>{
               { width: 1100, height: 1100, outputFolder: medium, outputFileName: 'image_medium.jpg' },
               { width: 1600, height: 1600, outputFolder: large, outputFileName: 'image_large.jpg' },
             ];
-            mainImage = await downloadAndResizeMultiple(imageUrl, sizesAndFolders);
-
+            mainImage = await downloadAndResizeMultiple(imageUrl, sizesAndFolders); 
+             } 
         }
 
  
@@ -547,7 +596,7 @@ const allPromises = data.map(async (rowData)=>{
         material : rowData["Material"],
         model_name : rowData["Model Name"],
         model_number : rowData["Model Number"],
-        manufacture_part_number : rowData["ManufacturePart Number"],
+        manufacture_part_number : rowData["Manufacture Part Number"],
         safety_warning : rowData["Safety Warning"],
         country_of_origin : rowData["Country Of Origin"],
         manufacturer_details : rowData["Manufacturer"],
@@ -600,25 +649,50 @@ const allPromises = data.map(async (rowData)=>{
         productHeight : rowData["Product Height"],
         productHeightUnit : rowData["Product Height Unit"],
         numberOfItem : rowData["Number Of Item"], 
-        variant: rowData["Variant"]
+        variant : rowData["Variant"],
+        handling_time : rowData["Handling Time"]
       }
 
       const groupId = rowData["Group Id"] ? formatString(rowData["Group Id"]): "";
       let productId = "";
+ 
+     
+      
+        if(Object.keys(errors).length <= 0){ 
+          // insert product when no error
+        
 
-      if(Object.keys(errors).length <= 0){ 
-        // insert product when no error
-          if(rowData["Group Id"] && Object.keys(groups).length > 0 && Object.keys(groups).includes(groupId) ){
-              productId = groups[groupId]; 
-            }else{
-                // const existProductGroup = new productModel.findOne({groupId:rowData["Group Id"]});
+            if(rowData["Group Id"] && Object.keys(groups).length > 0 && Object.keys(groups).includes(groupId) ){
+                productId = groups[groupId];
+                
+              }else{
+                  
+                let product = null;
+               
+                  if(existingProduct){
+                      //if exits product then update
+                    product = await productModel.findOneAndUpdate(
+                          { _id: new mongoose.Types.ObjectId(existingProduct._id) },
+                          { $set: singleRowData },
+                          { new: true, upsert: true }
+                        ); 
+                  }else{
+                      // else create new product
+                      product = new productModel(singleRowData); 
+                    const responseData = await product.save();
+                    
+                  }
+                  
                  
-                const product = new productModel(singleRowData); 
-                const responseData = await product.save();
-                productId = product._id;
-                groups[groupId] = product._id;
-            }
-      }
+                  
+                  productId = product?._id;
+                  groups[groupId] = product?._id.toString();
+              }
+        }
+
+      
+
+        
       
  
 
@@ -642,12 +716,36 @@ const allPromises = data.map(async (rowData)=>{
 
       if(Object.keys(errors).length <= 0){ 
         // save compliance data if not error found
-      const complianceDataObj = new productOtherDetailModel(complianceData); 
-      complianceDataObj.save();
+      const complanceExist = await productOtherDetailModel.countDocuments({
+        product_id : new mongoose.Types.ObjectId(productId)
+      });
+
+       let complianceDataObj= null;
+      if(complanceExist == 0){
+        complianceDataObj = new productOtherDetailModel(complianceData); 
+        complianceDataObj.save();
+      }else{
+       complianceDataObj = await productOtherDetailModel.updateOne(
+          { product_id: new mongoose.Types.ObjectId(productId) },
+          { $set: complianceData },
+          { upsert: true }  
+        );
+      }
+      
       }
 
    
+          const VarinatId = await rowData["Dyanamic Variant Id"];
+          let existingVarinat = null;
 
+          if(VarinatId && mongoose.Types.ObjectId.isValid(VarinatId)){  
+            existingVarinat = await productVariantModel.findById({
+              _id : new mongoose.Types.ObjectId(VarinatId),
+              seller_id: new mongoose.Types.ObjectId(seller._id)
+            });
+          }
+
+         
           let variantImg = [];
           if(Object.keys(errors).length <= 0){ 
             // upload image when error note found
@@ -655,6 +753,15 @@ const allPromises = data.map(async (rowData)=>{
                   const field = variantImageFields[i];
                   if (rowData[field]) {
                     const imageUrl = rowData[field];
+                     // Skip image download if image already exists and matches
+                      if (existingVarinat) {
+                        const existingImageName = existingVarinat[`image_${i + 1}`];
+                        const newUrlPath = `${fileBasePath}/${variant_large_img_path1}/${existingImageName}`;
+                        if (newUrlPath === imageUrl) {
+                          variantImg[`image_${i + 1}_name`] = existingImageName; 
+                          continue;
+                        }
+                      }
                     const { thumb, medium, large } = variantOutputPaths[i];
 
                     const sizesAndFolders = [
@@ -669,7 +776,7 @@ const allPromises = data.map(async (rowData)=>{
                 }
           }
 
-            const sinNumber = await newSinNumber();
+            const sinNumber = existingVarinat ? existingVarinat.sin : await newSinNumber();
             const variantMultipleData = {
             seller_id                     : seller._id,
             product_id                    : productId,
@@ -702,11 +809,25 @@ const allPromises = data.map(async (rowData)=>{
         let variandId = null;
          if(Object.keys(errors).length <= 0){ 
           // insert variant when error not found
-          const variantObj = new productVariantModel(variantMultipleData); 
-          const variantresponse = await variantObj.save();
+        let variantObj = null;
+           if(existingVarinat){
+                    //if exits variant then update
+                 variantObj = await productVariantModel.findOneAndUpdate(
+                        { _id: new mongoose.Types.ObjectId(existingVarinat._id) },
+                        { $set: variantMultipleData },
+                        { new: true, upsert: true }
+                      );
+
+                 }
+                 else{
+                   variantObj = new productVariantModel(variantMultipleData); 
+                  const variantresponse = await variantObj.save();
+                 }
+
           variandId = variantObj._id
          }
  
+         await variantThresholdSchemaModal.deleteMany({ variant_id : new mongoose.Types.ObjectId(variandId) });
           const thresholds = [1, 2, 3, 4, 5]; 
           const thresholdData = thresholds.map(level => {
           const unit = rowData[`Threshold Level ${level} Unit`];
@@ -773,8 +894,9 @@ const allPromises = data.map(async (rowData)=>{
 
       
           
-    });
-    const results = await Promise.all(allPromises);
+        }
+    // });
+    // const results = await Promise.all(allPromises);
     return responseFun(true, {message: 'Products imported successfully',},200);
  
      

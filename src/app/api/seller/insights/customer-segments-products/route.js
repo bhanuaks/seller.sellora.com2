@@ -5,7 +5,7 @@ import { connectDb } from "../../../../../../lib/dbConnect";
 import { productModel } from "@/Http/Models/productModel";
 
 export async function POST(request) {
-  connectDb();
+  await connectDb();
 
   
   const body = await request.json();

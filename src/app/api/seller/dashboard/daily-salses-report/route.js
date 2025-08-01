@@ -1,10 +1,12 @@
 import { getLoginSeller } from "@/app/api/getLoginUser/route";
+import { connectDb } from "@/Http/dbConnect2";
 import { responseFun } from "@/Http/helper";
 import { orderProductModel } from "@/Http/Models/order";
 import { productModel } from "@/Http/Models/productModel";
 import mongoose from "mongoose";
 
 export async function GET(request) {
+  await connectDb();
   try {
     const seller = await getLoginSeller();
     if (!seller) {

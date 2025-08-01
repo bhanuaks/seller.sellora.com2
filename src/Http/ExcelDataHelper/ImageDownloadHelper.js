@@ -57,7 +57,7 @@ const downloadAndResizeMultiple = async (imgUrl, sizesAndFolders) => {
         await safelyRemoveTempFile(tempImagePath); 
       // console.log('Temp image removed.');
     } catch (e) {
-      console.error('Failed to remove temp image:', e);
+      console.error('Failed to remove temp image:');
     }
   }
 
@@ -75,7 +75,7 @@ async function safelyRemoveTempFile(filePath, retries = 5, delayMs = 300) {
       return;
     } catch (e) {
       if (attempt === retries) {
-        console.error('Failed to remove temp image after retries:', e);
+        console.error('Failed to remove temp image after retries:');
         return;
       }
       console.warn(`Retry ${attempt} to remove temp image...`);

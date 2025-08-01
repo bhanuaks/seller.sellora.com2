@@ -59,7 +59,8 @@ const brandCountSchema = new Schema({
   const sellerBrandSchema = new Schema({
     seller_id:{
         type:mongoose.Types.ObjectId,
-        ref:"Seller"
+        ref:"Seller",
+        required:true
     }, 
     name:String,
     slug:String,

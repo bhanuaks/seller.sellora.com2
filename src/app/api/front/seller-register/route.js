@@ -5,6 +5,8 @@ import { connectDb } from "../../../../../lib/dbConnect";
 import { NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 import { sellerNotificationSetting } from "@/Http/Models/sellerNotificationModal";
+import { Category } from "../../../../../lib/categoryModel";
+import SellerReturnWindow from "@/Http/Models/sellerReturnWindow";
 
 export async function POST(request) {
   await connectDb();
@@ -58,6 +60,7 @@ export async function POST(request) {
       });
 
       await sellerNotificationSetting.create({
+        seller_id:seller._id,
         ListingCreationEmail:email,
         ComplianceRequirementsEmail:email,
         ListingRecommendationsEmail:email,
@@ -72,10 +75,24 @@ export async function POST(request) {
         ReportStatusEmail:email,
 
         EmergencyNotificationEmail:email,
-        EmergencyNotificationNumber:email,
+        EmergencyNotificationNumber:mobile,
         country_s_name,
         mobile_code
       });
+
+      const category = await Category.find().select("min_return").lean();
+      if(category.length){
+        const returnAndReplacementSetting = category.map((cat)=>{
+              return {
+                category_id:cat._id,
+                seller_return:cat.min_return || 30,
+                replacement:"No",
+                seller_id:seller._id,
+              }
+            }) 
+            await SellerReturnWindow.insertMany(returnAndReplacementSetting)
+      }
+    
       
       const token = jwt.sign(
         {

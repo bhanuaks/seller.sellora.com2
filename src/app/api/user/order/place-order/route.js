@@ -1,4 +1,5 @@
 import { getLoginUser } from "@/app/api/getLoginUser/route";
+import { connectDb } from "@/Http/dbConnect2";
 import { decodeJwt, isEmpty, rand, responseFun } from "@/Http/helper";
 import { productVariantModel } from "@/Http/Models/productModel";
 import { tempOrderModel } from "@/Http/Models/tempOrder";
@@ -8,6 +9,7 @@ import mongoose from "mongoose";
 
 export async function POST(request) {
 
+    await connectDb();
      
     let user = getLoginUser() ;
      if(!user){

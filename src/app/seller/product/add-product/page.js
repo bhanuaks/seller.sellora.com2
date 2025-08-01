@@ -15,6 +15,7 @@ import { Suspense } from "react";
 import KeyAttributeSection from './keyAttributeSection'
 import { colorList, countriesList, materialType } from '@/Http/citizenList'
 import AddSingleListingSteper from '../AddSingleListingSteper'
+import Swal from 'sweetalert2'
 
  
 
@@ -31,6 +32,7 @@ const page = ({params}) => {
      const [subcategory, setSubcategory] = useState(null); 
      const [childcategory, setChildcategory] = useState(null); 
      const [brand, setBrand] = useState(null); 
+     const [issaveProccess, setIssaveProccess] = useState(false); 
      const [compliance, setCompliance] = useState(null); 
      const [dynamicField, setDynamicField] = useState([]); 
      const [keyAttributes, setKeyAttributes] = useState([])
@@ -42,6 +44,7 @@ const page = ({params}) => {
     const childcategory_id = searchParams.get('childcategory')
     const brand_id = searchParams.get('brand')
     const product_id = searchParams.get('product_id') || ""
+    const copy = searchParams.get('copy') || ""
      const errorRedirctUtl = `${baseUrl}dashboard/categories`
     const [errors, setErrors] = useState({})
 
@@ -109,6 +112,7 @@ const page = ({params}) => {
         productHeight:"",
         productHeightUnit:"",
         numberOfItem:"",
+        handling_time:"",
         
      })
  
@@ -149,7 +153,7 @@ const page = ({params}) => {
         }
 
         if(globalData.sellor){
-          $('.loaderouter').css('display','flex') 
+        //   $('.loaderouter').css('display','flex') 
           fetch(`${baseUrl}api/seller/get-category-and-brand`,{
             method:"POST", 
             body:JSON.stringify({
@@ -164,12 +168,12 @@ const page = ({params}) => {
             })
           }).then((response)=>{
               if(!response.ok){
-                $('.loaderouter').css('display','none')
+                // $('.loaderouter').css('display','none')
                 throw new Error('Network Error')
               }
               return response.json();
           }).then((res)=>{
-              $('.loaderouter').css('display','none') 
+            //   $('.loaderouter').css('display','none') 
               if(res.status){ 
                
                 if(res.data.brand.status != 1){
@@ -314,27 +318,36 @@ const page = ({params}) => {
 
     function saveProductInforemationData(e){
         e.preventDefault();
-        $('.loaderouter').css('display',"flex") 
+        
         const formData = createFormData({
             ...productDetails, 
             dynamicField:JSON.stringify(dynamicField),
             keyAttributes:JSON.stringify(keyAttributes),
-            key_feature:keyFeature
+            key_feature:keyFeature,
+            copy:copy || ""
         });
-        
-        fetch(`${baseUrl}api/seller/product/add-single-product`,{
+             setIssaveProccess(true)
+        fetch(`/api/seller/product/add-single-product`,{
             method:"POST",
             body:formData
-        }).then((response)=>{
+        }).then((response)=>{ 
+            setIssaveProccess(false)
             if(!response.ok){
-                $('.loaderouter').css('display',"none") 
                 throw new Error("Network Error")
             }
             return response.json();
         }).then((res)=>{
            
             if(res.status){
-                router.push(`${baseUrl}seller/product/add-variant?${searchParams}&product_id=${res.data.data._id}`)
+                 const params = new URLSearchParams(searchParams.toString());
+                params.set("product_id", res.data.data._id);
+             router.push(`${baseUrl}seller/product/add-variant?${params.toString()}`);
+                // if(copy == "Yes"){
+                //     router.push(`${baseUrl}seller/product/add-variant?${searchParams}&copy_product_id=${res.data.data._id}`)
+
+                // }else{ 
+                //     router.push(`${baseUrl}seller/product/add-variant?${searchParams}&product_id=${res.data.data._id}`)
+                // }
             }else if(res.data.status_code == 400){ 
                 setErrors(res.data.errors)
                 if (Object.keys(res.data.errors)[0].includes('key_feature')) {
@@ -344,7 +357,13 @@ const page = ({params}) => {
                 $(`input[name="${Object.keys(res.data.errors)[0]}"]`).focus();
                 $(`select[name="${Object.keys(res.data.errors)[0]}"]`).focus();
                 $(`textarea[name="${Object.keys(res.data.errors)[0]}"]`).focus();
-                $('.loaderouter').css('display',"none") 
+               
+            }else{
+                Swal.fire({
+                    title:"Error",
+                    icon:"error",
+                    text:res.data?.message
+                })
             }
         })
     }
@@ -1791,69 +1810,36 @@ const page = ({params}) => {
                                                 </div>
                                             </div>
 
+
+                                            {/* ===================---============== */}
+                                              <div className="form-group">
+                                                <div className="row align-items-center">
+                                                    <div className="col-lg-4">
+                                                        <label htmlFor="listing-status">
+                                                        Handling time (In Days) <span>*</span>
+                                                        </label>
+                                                    </div>
+                                                    <div className="col-lg-8">
+                                                    <input 
+                                                    type='number'
+                                                    name='handling_time'
+                                                         value={productDetails.handling_time || ""}
+                                                         onChange={(e)=>changeProductInfoInput(e)}
+                                                          />
+                                                        
+                                                           {errors.handling_time && ( 
+                                                            <span className='error_message'>{errors.handling_time}</span>
+                                                         )}
+                                                    </div>
+                                                </div>
+                                            </div>
+
                                             
                                            
                                             {/* =========================================================== */}
                                         </div>
                                     </div>
-                                    {/* ========================form-2-end===================== */}
-                                    {/* ==================form3=open=============== */}
-                                    {/* <div className="head_dfd">
-                                    {dynamicField.length>0 ?(
-                                        <h3>Compliance and Other Attributes</h3>
-                                    ):""}
-                                    </div>
-                                    {dynamicField.length>0 ?(
-                                    <div className="preview_box">
-                                        <div className="form-container">
-                                             
-
-                                            {dynamicField.length>0 ?
-                                            dynamicField.map((fieldData, index)=>(
-                                                <div className="form-group" key={index}>
-                                                <div className="row align-items-center">
-                                                    <div className="col-lg-4">
-                                                        <label htmlFor="listing-status">
-                                                           {fieldData.field_name}{fieldData.required=="Yes"?(<span>*</span>):""}
-                                                            <i
-                                                                className="fa fa-info color_bg"
-                                                                aria-hidden="true"
-                                                                data-tooltip="I’m the tooltip text."
-                                                            />
-                                                        </label>
-                                                    </div>
-                                                    <div className="col-lg-8">
-                                                        {fieldData.field_type == "select" ?(
-                                                             <select
-                                                             name="field_value" 
-                                                             value={fieldData.field_value || ''}
-                                                             onChange={(e)=>changeDynamicFieldValue(index, e)}
-                                                         >
-                                                             <option value="">Select</option>
-                                                             {fieldData.select_value.length ? fieldData.select_value.map((selectValue, selectKey)=>(
-                                                                 <option value={selectValue} key={selectKey}>{selectValue}</option>
-                                                             )):""}
-                                                         </select>
-                                                        ):(
-                                                            <input type="text" 
-                                                            name="field_value"
-                                                            // placeholder={`Enter ${fieldData.field_name}`}
-                                                            value={fieldData.field_value || ''}
-                                                            onChange={(e)=>changeDynamicFieldValue(index, e)}
-                                                            />
-                                                        )}
-                                                   
-                                                        {errors[`${fieldData.field_name.toLowerCase().replace(/ /g, '_')}_error`] && ( 
-                                                            <span className='error_message'>{errors[`${fieldData.field_name.toLowerCase().replace(/ /g, '_')}_error`]}</span>
-                                                         )}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            )):""}
-
-                                        </div>
-                                    </div>
-                                         ):""} */}
+                                     
                                     {/* ========================form-3-end===================== */}
                                 </div>
                                 <div className="col-lg-4">
@@ -1870,7 +1856,7 @@ const page = ({params}) => {
                                                 </li>
                                                 <li>Product image should not have any text</li>
                                                 <li>Please add solo product image without any props.</li>
-                                                <li>Images with minimum resolution of 1600x16000 px</li>
+                                                <li>Images with minimum resolution of 1600x1600 px</li>
                                             </ul>
                                         </div>
                                     </div>
@@ -1895,8 +1881,8 @@ const page = ({params}) => {
                                         <div className="sub_mit_cat">
                                             <ul>
                                                 <li className="orange_09">
-                                                    <button >
-                                                        Save And Next
+                                                    <button disabled={issaveProccess}>
+                                                        {issaveProccess?"Please wait..":"Save And Next"}
                                                     </button>
                                                 </li>
                                                 <li>

@@ -1,4 +1,5 @@
 import { getLoginSeller } from "@/app/api/getLoginUser/route";
+import { connectDb } from "@/Http/dbConnect2";
 import { responseFun } from "@/Http/helper";
 import { orderItemStatusHistryModal, orderProductModel } from "@/Http/Models/order";
 import mongoose from "mongoose";
@@ -6,6 +7,7 @@ import mongoose from "mongoose";
 
 export async function POST(request) {
     
+    await connectDb();
     const { trakingInfo, order_Item_id } = await request.json();
 
     if (!trakingInfo || trakingInfo.length === 0) {

@@ -539,7 +539,7 @@ function Page() {
             </li>
             <li>
               Special Capital Rates &amp; Terms - Access exclusive financing
-              offers with extended repayment periods through Capital by Walmart.
+              offers with extended repayment periods through Capital by Sellora.
             </li>
             <li>
               Review Accelerator Credit - Receive a $50 monthly credit to boost

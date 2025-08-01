@@ -13,7 +13,7 @@ import { getPreviouseUrl } from "@/app/api/getPreviouseUrl/route";
  
 
 export async function POST(request) {
-    await connectDb()
+    await connectDb();
     const {email, mobile, otp, cartData} = await request.json();
      
     const errors = {}

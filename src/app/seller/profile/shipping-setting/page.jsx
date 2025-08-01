@@ -15,6 +15,7 @@ function Page() {
   const router = useRouter();
   const [errors, setErrors] = useState({});
   const [sellor, setSellor] = useState(null);
+  const [isProceess, setIsProceess] = useState(false);
   const [shippingSetting, setShippingSetting] = useState({
     shipping_setting: 1,
     shipping_rate: 0,
@@ -71,12 +72,13 @@ function Page() {
   function submitUpdateForm(e) {
     e.preventDefault();
     setErrors({});
-    // $(".loaderouter").css("display", "flex");
+   setIsProceess(true)
     fetch(`${baseUrl}api/seller/update-profile?update=shippingSetting`, {
       method: "POST",
       body: JSON.stringify(shippingSetting),
     })
       .then((response) => {
+         setIsProceess(false)
         if (!response.ok) {
           $(".loaderouter").css("display", "none");
           throw new Error("Network Error");
@@ -88,7 +90,7 @@ function Page() {
         if (res.status) {
           toast.success("Success! Business Details Saved.");
           if (shippingSetting.shipping_setting == 1) {
-            router.push("/seller/profile/bank-account-information");
+            // router.push("/seller/profile/bank-account-information");
           } else {
             router.push(
               "/seller/profile/shipping-setting/creating-shipping-template"

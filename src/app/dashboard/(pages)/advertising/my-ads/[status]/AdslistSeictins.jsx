@@ -1,13 +1,13 @@
 "use client"
 import TableskeltonLoader from '@/app/skeleton_loader/TableskeltonLoader'
-import { baseUrl, fetcher } from '@/Http/helper'
+import { acosFun, baseUrl, fetcher, roiFun } from '@/Http/helper'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import useSWR, { mutate } from 'swr'
-import { elements } from '../../../../../../../public/assets-admin/assets/libs/chart.js/chart.umd'
+// import { elements } from '../../../../../../../public/assets-admin/assets/libs/chart.js/chart.umd'
 
 function AdslistSeictins() {
     const router = useRouter()
@@ -196,16 +196,18 @@ if(!["Active", "Inactive"].includes(value)){
                                 { adItem.spendAmount || 0 } 
                             </td> */}
                             <td className="text-center small-size">$ 
-                                { adItem.dailyBudget || 0 } 
+                                { (adItem.dailyBudget || 0).toFixed(2) } 
                             </td>
-                            <td className="text-center small-size">${adItem.totalDeductedAmount || 0}</td>
+                            <td className="text-center small-size">${(adItem.totalDeductedAmount || 0).toFixed(2)}</td>
 
                             <td className="text-center small-size">{adItem.repoonse?.views}</td>
                             <td className="text-center small-size">{adItem.repoonse?.clicks}</td>
-                            <td className="text-center small-size">{adItem.repoonse?.orders}</td>
-                            <td className="text-center small-size">{adItem.repoonse?.sales}</td> 
-                            <td className="text-center small-size">-</td>
-                            <td className="text-center small-size">-</td>
+                            <td className="text-center small-size">{adItem.orders?.countOrder || 0 }</td>
+                            <td className="text-center small-size">${(adItem.orders?.totalSales || 0).toFixed(2) }</td> 
+                            <td className="text-center small-size">{acosFun((adItem.orders?.totalSales|| 0), (adItem.totalDeductedAmount || 0)) }</td>
+                            
+                            <td className="text-center small-size">{roiFun((adItem.orders?.totalSales|| 0), (adItem.totalDeductedAmount || 0))}</td>
+
                             <td className="text-center small-size">{adItem.Status}</td>
                             <td className="text-center small-size">
                             <div className="selected">

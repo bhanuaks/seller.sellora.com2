@@ -3,10 +3,12 @@ import { responseFun } from "@/Http/helper";
 import { orderProductModel } from "@/Http/Models/order";
 import mongoose from "mongoose"; 
 import { getLoginSeller } from "@/app/api/getLoginUser/route"; 
+import { connectDb } from "@/Http/dbConnect2";
 
 
 export async function GET(request) {
      
+    await connectDb();
 
     const seller = await getLoginSeller();
     if(!seller){

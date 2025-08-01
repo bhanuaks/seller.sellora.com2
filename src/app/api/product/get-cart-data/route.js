@@ -1,9 +1,11 @@
+import { connectDb } from "@/Http/dbConnect2";
 import { responseFun } from "@/Http/helper";
 import { orderProductModel } from "@/Http/Models/order";
 import { productModel, productVariantModel, variantThresholdSchemaModal } from "@/Http/Models/productModel";
 import mongoose from "mongoose";
 
 export async function POST(request) {
+    await connectDb();
     const { cartItems } = await request.json();
 
     try {

@@ -17,6 +17,7 @@ const VariantEditModel = ({ openModel, closeVariantModal, productVariant, refres
     const [errors, setErrors] = useState({})
     const [selectedVariants, setSelectedVariants] = useState([]);
     const [selectedOptions, setSelectedOptions] = useState([]);
+    const [saveProccess, setSaveProccess] = useState(false);
    
     const [variants, setVariants] = useState(
         {
@@ -145,13 +146,16 @@ useEffect(()=>{
         setErrors({})
 
         // const dynamicVariant = variantData.customAttributes ? Object.keys(variantData.customAttributes) :[]
-
-         const filterVariantData = Object.fromEntries(
+         let filterVariantData = undefined
+         if(variantData.customAttributes){
+            filterVariantData = Object.fromEntries(
                 Object.entries(variantData.customAttributes).filter(([key, value]) => key && value && selectedVariants.includes(key))
               );
+         }
+         
         
               let variantError = {}
-              if(selectedVariants.length>0){
+              if(selectedVariants.length > 0){
                   selectedVariants.map((variantItem, index)=>{
                     if(!filterVariantData[variantItem]){
                      
@@ -207,6 +211,7 @@ useEffect(()=>{
         setErrors({})
 
         // $('.loaderouter').css('display', 'flex')
+        setSaveProccess(true)
         fetch(`${baseUrl}api/seller/product/update-and-copy-variant`, {
             method: "POST",
             body: JSON.stringify({
@@ -216,6 +221,7 @@ useEffect(()=>{
                 opration:productVariant.opration
             })
         }).then((response) => {
+            setSaveProccess(false)
             if (!response.ok) {
                 // $('.loaderouter').css('display', 'none')
                 throw new Error("Network Error")
@@ -482,7 +488,7 @@ useEffect(()=>{
                                       </div>
                                     )} */}
                                     {/* <h2>Variation</h2>  */}
-                                    { variants.length > 0 &&
+                                    {/* { variants.length > 0 &&
                                            (
                                               <div className="col-6 col-lg-6 edit-variant">
                                                 <Multiselect variant= {variants} 
@@ -493,7 +499,7 @@ useEffect(()=>{
                                                 /> 
                                                 <br ></br>
                                               </div>
-                                          )}
+                                          )} */}
 
                                 <div className="row">
                                     {variants.length > 0 ? variants.map((variantItem, index) => (
@@ -861,7 +867,12 @@ useEffect(()=>{
                                     
                                     <div className="save_all">
                                         <span type='button' href="#" onClick={() => closeVariantModal()} className='mr-3 cencel_button'>cancel </span>{" "}
-                                        <a href="#" onClick={(e) => saveVariantEditData(e)}>{productVariant && productVariant.opration =="copy"?"Copy":"Save All"}</a>
+                                        {saveProccess ? (
+                                        <a href="#" onClick={(e) =>e.preventDefault()}>Please wait..</a> 
+                                        ): (
+                                        <a href="#" onClick={(e) => saveVariantEditData(e)}>{productVariant && productVariant.opration =="copy"?"Copy":"Save All"}</a> 
+                                        )}
+                                        
                                     </div>
                                 </div>
                             </form>

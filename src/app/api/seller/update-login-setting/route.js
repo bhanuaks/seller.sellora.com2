@@ -2,10 +2,12 @@ import { isEmpty, responseFun } from "@/Http/helper";
 import { getLoginSeller } from "../../getLoginUser/route";
 import { sellerModel } from "@/Http/Models/sellerModel";
 import mongoose from "mongoose";
+import { connectDb } from "@/Http/dbConnect2";
 
 
 export async function POST(request) {
     
+    await connectDb();
     const { edit, data, country_s_name, mobile_code, mobile } =  await request.json();
 
     const seller = await getLoginSeller();

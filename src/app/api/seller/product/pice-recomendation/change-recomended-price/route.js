@@ -1,9 +1,11 @@
+import { connectDb } from "@/Http/dbConnect2";
 import { responseFun } from "@/Http/helper";
 import { productVariantModel } from "@/Http/Models/productModel";
 
 
 export async function POST(request) {
     
+    await connectDb();
     const { product_id, variant_id, impactPrice } = await request.json();
 
     try{

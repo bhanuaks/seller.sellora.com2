@@ -98,7 +98,7 @@ import { singleExampleRowData } from './ExcelDataHelper/oneRowExampleExcelHelper
  
  
 
- export const exportExcelSheet = async (dynamicVariant, dynamicField, categoryValue, fileName) => {
+ export const exportExcelSheet = async (dynamicVariant, dynamicField, categoryValue, fileName, listOfProduct=[]) => {
 
   // Fetch the existing Excel file
   const response = await fetch(`${baseUrl}example_excel/example-excel.xlsx`);
@@ -197,7 +197,7 @@ import { singleExampleRowData } from './ExcelDataHelper/oneRowExampleExcelHelper
   worksheet.views = [
     {
       state: "frozen",
-      xSplit: 0, // Freeze columns A-D
+      xSplit: 1, // Freeze columns A-D
       ySplit: 5, // Freeze rows 1-2 (header)
     },
   ];
@@ -433,17 +433,35 @@ addSectionTitle("Add Threshold Levels", thresholdDataFieldRow.length, "FFFFC000"
 
       // ========================start add one row for example  ============================================
    const rowDataExample = [];
-  fullHeader.forEach((heading)=>{
-      rowDataExample.push(newsingleExampleRowData[heading] || "")
-  })
+    const dataRows = [];
 
-  const dataRows = [
-   rowDataExample
-  ];
+    // add first Example row
+     fullHeader.forEach((heading)=>{
+        rowDataExample.push(newsingleExampleRowData[heading] || "")
+    })
+     dataRows.push(rowDataExample)
 
+
+    //  add product Data in excel
+   if(listOfProduct.length > 0){
+     listOfProduct.forEach((exportProduct)=>{ 
+      const rowDataExample2 = []; 
+       fullHeader.forEach((heading)=>{
+          rowDataExample2.push(exportProduct[heading] || "")
+      })
+      dataRows.push(rowDataExample2)
+    })
+   } 
+  
+
+  // const dataRows = [
+  //  rowDataExample
+  // ];
+ 
   dataRows.forEach((data, index) => {
+   
     const row = worksheet.addRow(data);
-    row.height = calculateRowHeight(data); // Auto height based on content
+    // row.height = calculateRowHeight(data); // Auto height based on content
     row.eachCell((cell) => {
       cell.fill = {
         type: "pattern",
@@ -453,7 +471,7 @@ addSectionTitle("Add Threshold Levels", thresholdDataFieldRow.length, "FFFFC000"
         },
       };
         cell.alignment = {
-        wrapText: true,
+        // wrapText: true,
         horizontal: "center", 
         vertical: "middle",  
       };

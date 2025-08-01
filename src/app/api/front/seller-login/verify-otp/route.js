@@ -7,7 +7,7 @@ import { connectDb } from "../../../../../../lib/dbConnect";
  
 
 export async function POST(request) {
-    await connectDb()
+    await connectDb();
     const {email, mobile, otp} = await request.json();
     const errors = {}
       if(isEmpty(otp))errors.otp = "otp is required"

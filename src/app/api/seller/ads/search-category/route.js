@@ -1,9 +1,11 @@
 import { responseFun } from "@/Http/helper";
 import { Category } from "../../../../../../lib/categoryModel";
+import { connectDb } from "@/Http/dbConnect2";
 
 
 export async function POST(request) {
     
+    await connectDb();
      const { searchText } = await request.json();
 
      try{

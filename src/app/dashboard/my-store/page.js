@@ -50,7 +50,7 @@ const page = ({ params }) => {
   }, [sellor_id]);
 
   useEffect(() => {
-    if (fetchingData?.status) {
+    if (fetchingData?.status && fetchingData?.data.sellerProfile) {
       setData(fetchingData?.data.sellerProfile);
     }
   }, [fetchingData, isLoading]);
@@ -235,7 +235,7 @@ const page = ({ params }) => {
         <div className="row">
           <div className="col-lg-12">
             <div className="store_logo"  >
-              {data.profileLogo && (
+              {data?.profileLogo && (
 
               <img src={`/${data.profileLogo}`} /> 
               )}
@@ -292,7 +292,7 @@ const page = ({ params }) => {
                       >
                         Edit Profile
                       </button>
-                        {data.Published != 1 && (
+                        {data && data?.Published != 1 && (
 
                           <button
                             className="view_all mt--20"

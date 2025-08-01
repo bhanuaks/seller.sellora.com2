@@ -5,6 +5,7 @@ import { connectDb } from "../../../../../lib/dbConnect"
 import mongoose from "mongoose";
 import { uploadImageFun } from "../../uploadImage/route";
 import { sellerTaxInformationModel } from "@/Http/Models/sellerTaxInformation";
+import { getLoginSeller } from "../../getLoginUser/route";
 
 
 
@@ -206,8 +207,8 @@ async function updatereturnAddress(request) {
     if(isEmpty(address.name))errors.name = "name is required";
     if(isEmpty(address.address_line_1))errors.address_line_1 = "address_line_1 is required";
     if(isEmpty(address.city))errors.city = "city is required";
-    if(isEmpty(address.country))errors.country = "country is required";
-    if(isEmpty(address.mobile))errors.mobile = "mobile is required"; 
+    // if(isEmpty(address.country))errors.country = "country is required";
+    // if(isEmpty(address.mobile))errors.mobile = "mobile is required"; 
     if(isEmpty(address.zip_code))errors.zip_code = "zip code is required"; 
 
     if(Object.keys(errors).length>0){
@@ -216,9 +217,14 @@ async function updatereturnAddress(request) {
 
 
     try{
+        const LoginSeller = await getLoginSeller();
+        if(!LoginSeller){
+              return responseFun(false, {message:"unauthorized request"}, 403)
+        }
+        const seller_id = LoginSeller._id;
         const exists =  await sellerReturnAddressModel.findById(address._id)
         // update sellor complete status
-        const seller = await sellerModel.findById(_id).select('complete_step'); 
+        const seller = await sellerModel.findById(seller_id).select('complete_step').lean(); 
         const complete_step = seller?.complete_step;
         const sellerUpdate = await sellerModel.findByIdAndUpdate(_id,{ 
             complete_step: !complete_step || complete_step < 4?4:complete_step
@@ -716,7 +722,7 @@ async function updateTaxInformation(request) {
                     const seller = await sellerModel.findById(seller_id).select('complete_step'); 
                     const complete_step = seller?.complete_step;
                     const sellerUpdate = await sellerModel.findByIdAndUpdate(seller_id,{ 
-                        complete_step: !complete_step || complete_step < 8?8:complete_step
+                        complete_step: !complete_step || complete_step < 9?9:complete_step
                     })
 
         if(exists){  

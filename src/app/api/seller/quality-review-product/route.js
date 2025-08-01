@@ -2,10 +2,12 @@ import { responseFun } from "@/Http/helper";
 import { getLoginSeller } from "../../getLoginUser/route";
 import { productModel } from "@/Http/Models/productModel";
 import mongoose from "mongoose";
+import { connectDb } from "@/Http/dbConnect2";
 
 
 export async function POST(request) {
     
+    await connectDb();
     const {product_id, variant_id} = await request.json();
 
     if(!product_id || !variant_id)

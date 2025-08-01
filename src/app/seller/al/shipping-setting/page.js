@@ -23,6 +23,7 @@ const page = () => {
   const router = useRouter();
   const [errors, setErrors] = useState({});
   const [sellor, setSellor] = useState(null);
+   const [isSubmiting, setIsSubmiting] = useState(false);
   const [shippingSetting, setShippingSetting] = useState({
     shipping_setting:1,
     shipping_rate:0
@@ -31,17 +32,17 @@ const page = () => {
 
   useEffect(() => {
     if (globalData.sellor) {
-      $('.loaderouter').css('display', 'flex')
+      
       fetch(`${baseUrl}api/seller/get-profile?user_id=${globalData.sellor._id}&with_data=shippingSetting`, {
         method: "GET",
       }).then((response) => {
         if (!response.ok) {
-          $('.loaderouter').css('display', 'none')
+          
           throw new Error('Network Error')
         }
         return response.json();
       }).then((res) => {
-        $('.loaderouter').css('display', 'none')
+        
         if (res.status) {
              // check complete step
              if(!res.data.data.complete_step || res.data.data.complete_step < 6){
@@ -80,18 +81,18 @@ const updateInputData= (e)=>{
   function submitUpdateForm(e) {
     e.preventDefault();
     setErrors({});
-    $('.loaderouter').css('display', 'flex'); 
+   setIsSubmiting(true)
     fetch(`${baseUrl}api/seller/update-profile?update=shippingSetting`, {
       method: "POST",
       body: JSON.stringify(shippingSetting)
     }).then((response) => {
+      setIsSubmiting(false)
       if (!response.ok) {
-        $('.loaderouter').css('display', 'none')
+        
         throw new Error('Network Error')
       }
       return response.json();
-    }).then((res) => {
-      $('.loaderouter').css('display', 'none')
+    }).then((res) => { 
       if (res.status) {
         toast.success('Success! Business Details Saved.');
         if(shippingSetting.shipping_setting==1){ 

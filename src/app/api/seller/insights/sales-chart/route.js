@@ -77,6 +77,9 @@ export async function GET(request) {
 }
 
 export async function POST(request) {
+
+  await connectDb();
+  
   const { searchParams } = new URL(request.url);
   const reportDay = searchParams.get("filter") || "";
   const filterDays = new Date();

@@ -1,4 +1,5 @@
 import { getLoginSeller } from "@/app/api/getLoginUser/route";
+import { connectDb } from "@/Http/dbConnect2";
 import { responseFun } from "@/Http/helper";
 import { sellerNotificationSetting } from "@/Http/Models/sellerNotificationModal";
 import mongoose from "mongoose";
@@ -6,6 +7,7 @@ import mongoose from "mongoose";
 
 export async function POST(request) {
     
+    await connectDb();
     const {  data } =  await request.json();
 
     try{
@@ -55,6 +57,7 @@ export async function PUT(request) {
 
 export async function GET(request) {
      
+    await connectDb();
     try{
         const seller = await getLoginSeller()
         if(!seller){

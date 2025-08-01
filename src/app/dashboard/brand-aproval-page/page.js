@@ -20,7 +20,9 @@ const page = () => {
 
   
   const params =  useSearchParams();
-  const brandName = params.get('brandName')
+  const brandName = params.get('brandName');
+  const update = params.get('update') || null;
+
   const {globalData, setGlobalData } = useContext(AppContext)
   const certificateRef = useRef(null); 
   const tmStatusRef = useRef(null); 
@@ -112,7 +114,7 @@ const page = () => {
       certificateNiceSelect?.destroy();
       
     };
-  }, []);
+  }, [brandDetails]);
 
 
     const handelChangeInput =(e)=>{
@@ -217,6 +219,30 @@ const page = () => {
       })
     }
 
+    useEffect(()=>{
+      if(update){
+
+         fetch(`/api/seller/add-new-brand?brand_id=${update}`)
+          .then((response)=>{
+            if(!response.ok){
+              throw new Error("Internal Error")
+            }
+            return response.json();
+          })
+          .then((res)=>{
+            if(res.status && res.data.brand){
+              setBrandDetails(res.data.brand)
+            }
+          })
+          .then((error)=>{
+            console.log(error);
+          })
+
+
+      }
+     
+    },[]);
+
   return (
     <div className="bg33">
 
@@ -314,9 +340,9 @@ const page = () => {
                          value={brandDetails.certificate_name}
                          onChange={(e)=>handelChangeInput(e)}
                          >
-                          <option>Brand Authorization Letter</option>
-                          <option >Trademark Certificate</option>
-                          <option>Invoice</option>
+                          <option value={"Brand Authorization Letter"} >Brand Authorization Letter</option>
+                          <option value={"Trademark Certificate"} >Trademark Certificate</option>
+                          <option value={"Invoice"} >Invoice</option>
                         </select>
                         {errors.certificate_name && errors.certificate_name != ""? ( 
                           <span id="name_error" className="input-error-tip" style={{display: 'inline-block'}}>{errors.certificate_name}</span>
@@ -351,8 +377,14 @@ const page = () => {
 
 
                               {/* <!-- image gallery  --> */}
+                              {brandDetails.certificate && typeof brandDetails.certificate === "string" && (
+                                    <a href={`/${brandDetails.certificate}`} target="_blank" rel="noopener noreferrer">
+                                      View file
+                                    </a>
+                                  )}
+
                               <ul id="gallery" className="flex flex-1 flex-wrap -m-1">
-                              <span className="text-danger"><strong>Note:</strong> Allowed file types: .jpg, .png, .pdf. Maximum file size: 10MB.</span>
+                              <span className=""><strong>Note:</strong> Allowed file types: .jpg, .png, .pdf. Maximum file size: 10MB.</span>
                                 {/* <li id="empty" 
                                   className="h-full w-full text-center flex flex-col justify-center">
                                       {imagePath && (

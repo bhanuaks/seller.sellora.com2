@@ -17,7 +17,7 @@ export async function PUT(request) {
         if(!sellerDbData){ 
             return responseFun(false, {message:"profile not found!", status_code:403}, 200);
         }
-        if(Number(sellerDbData.complete_step) < 9){
+        if(!sellerDbData.complete_step || Number(sellerDbData.complete_step) < 9){
             return responseFun(false, {message:"Please complete profile first.", status_code:403}, 200);
         }
          

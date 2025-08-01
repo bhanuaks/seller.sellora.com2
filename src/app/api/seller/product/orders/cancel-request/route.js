@@ -1,4 +1,5 @@
 import { getLoginSeller, getLoginUser } from "@/app/api/getLoginUser/route";
+import { connectDb } from "@/Http/dbConnect2";
 import { responseFun } from "@/Http/helper";
 import { orderProductModel } from "@/Http/Models/order";
 import mongoose from "mongoose";
@@ -6,6 +7,8 @@ import mongoose from "mongoose";
 
 
 export async function GET(request) {
+    
+    await connectDb();
     
     const { searchParams } = new URL(request.url);
     const status = searchParams.get("status") || "All";

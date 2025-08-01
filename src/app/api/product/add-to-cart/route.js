@@ -1,3 +1,4 @@
+import { connectDb } from "@/Http/dbConnect2";
 import { responseFun } from "@/Http/helper";
 import { cartModel } from "@/Http/Models/cartModel";
 import { productModel, productVariantModel } from "@/Http/Models/productModel";
@@ -6,6 +7,8 @@ import mongoose from "mongoose";
 
 
 export async function POST(request) { 
+
+    await connectDb();
 
     const {product_id, variant_id, user_id } = await request.json();
 

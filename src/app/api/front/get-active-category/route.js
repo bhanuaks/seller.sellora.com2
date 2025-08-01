@@ -7,7 +7,7 @@ import { subCategory } from "../../../../../lib/subcategoryModel";
 
 
 export async function GET(request) {
-    connectDb(); 
+   await connectDb(); 
 
     try{
         const query = {status:"Active"}; 

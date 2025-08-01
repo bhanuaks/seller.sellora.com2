@@ -6,7 +6,7 @@ import { productModel, productVariantModel } from "@/Http/Models/productModel";
 
 export async function GET(request) {
 
-  connectDb(); 
+  await connectDb(); 
   const { searchParams } = new URL(request.url);
   const reportDay = searchParams.get("filter") || "";
 

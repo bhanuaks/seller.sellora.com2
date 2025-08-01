@@ -1,4 +1,5 @@
 "use client"
+import TableskeltonLoader from '@/app/skeleton_loader/TableskeltonLoader'
 import { apiRequest } from '@/Http/apiHelper'
 import { formatDate } from '@/Http/dateHelper'
 import { baseUrl, fetcher, main_thumb_img_path } from '@/Http/helper'
@@ -14,8 +15,11 @@ function Page() {
   const filter = params.condition;
   const [searchText, setSearchText] = useState("");
     const [searchBy, setSearchBy] = useState("name");
+     const [pagination, setPagination] = useState(null)
+        const [currentPage, setCurrentPage] = useState(1)
+
   const { data, error, isLoading } = useSWR(
-    `${baseUrl}api/seller/review-and-rating?filter=${filter}&searchText=${searchText}&searchBy=${searchBy}`,
+    `/api/seller/review-and-rating?filter=${filter}&searchText=${searchText}&searchBy=${searchBy}&page=${currentPage}`,
     fetcher
   );
 
@@ -27,16 +31,25 @@ function Page() {
   useEffect(()=>{ 
     if(data && data.status){ 
       setReviewList(data.data.reviews)
+      setPagination(data.data.pagination)
     }
   },[data])
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
-      mutate( `${baseUrl}api/seller/review-and-rating?filter=${filter}&searchText=${searchText}&searchBy=${searchBy}`)
+      mutate( `/api/seller/review-and-rating?filter=${filter}&searchText=${searchText}&searchBy=${searchBy}&page=${1}`)
     }, 300);
 
     return () => clearTimeout(timeoutId);
   }, [searchText, searchBy]);
+
+
+    function paginationFun(newPage, e){
+       e.preventDefault();
+       setCurrentPage(newPage) 
+        mutate( `/api/seller/review-and-rating?filter=${filter}&searchText=${searchText}&searchBy=${searchBy}&page=${newPage}`)
+      }
+
 
   return (
     <>
@@ -65,7 +78,7 @@ function Page() {
               <div className="list_634">
                 <ul>
                   <li>Product reviews</li>
-                  <li className="text-right">Brand reviews</li>
+                  {/* <li className="text-right">Brand reviews</li> */}
                 </ul>
               </div>
             </div>
@@ -85,12 +98,12 @@ function Page() {
                 </form>
               </div>
             </div>
-            <div className="col-lg-2 col-md-2 col-sm-2 col-xs-12">
+            {/* <div className="col-lg-2 col-md-2 col-sm-2 col-xs-12">
               <select className="" value={searchBy} onChange={(e)=>setSearchBy(e.target.value)}>
                 <option value={"sku"}>SKU</option>
                 <option value={"name"}>Product Name</option>
               </select>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>
@@ -125,21 +138,21 @@ function Page() {
               </th>
             </tr>
             <tr className="winner__table">
-              <th width={150} className="text-left">
+              {/* <th width={150} className="text-left">
                 Order Id
-              </th>
-              <th style={{ minWidth: 100 }} className="text-left">
-                &nbsp;
+              </th> */}
+              <th style={{ minWidth: '100px' }} className="text-left">
+                
               </th>
               <th width={300} className="text-left">
                 Product name
               </th>
-              <th width={180} className="text-left">
+              {/* <th width={180} className="text-left">
                 Posting Date
               </th>
               <th width={380} className="text-left">
                 Review on Product
-              </th>
+              </th> */}
               <th width={150} className="text-left">
                 Product Rating
               </th>
@@ -148,6 +161,9 @@ function Page() {
           </thead>
           <tbody>
 
+            {isLoading && (
+            <TableskeltonLoader totalRows={7}  totalColumns={4} />
+          ) }
           {!isLoading && reviewList.length === 0 && (
                   <tr>
                     <td colSpan="8" style={{ textAlign: "center" }}>Order Not Found!</td>
@@ -155,25 +171,22 @@ function Page() {
                 )}
 
 
-            {reviewList && reviewList.length > 0 && 
+            {!isLoading && reviewList && reviewList.length > 0 && 
             reviewList.map((item, index)=>(
               <tr className="winner__table" key={index}>
-              <td>
+              {/* <td>
                 <div className="order_id_01"></div>
-              </td>
+              </td> */}
               <td> 
-                <img src={`${fileBasePath}${main_thumb_img_path}${item.product?.main_image}`}
-                alt='influencer-marketing.jpg'
-                width={0}
-                height={0}
-                sizes='100vw' 
-                style={{width:"auto", height:"auto", maxWidth:"70%"}} 
+                <img src={`${fileBasePath}${main_thumb_img_path}${item?.main_image}`}
+                alt={item.product_name}
+                style={{ maxWidth:"100px"}} 
                 /> 
               </td>
               <td>
                 <div className="product_details_content">
                   <p>
-                   {item.product?.product_name}
+                  {item.product_name}
                   </p>
                   <ul>
                     {/* <li>
@@ -185,23 +198,23 @@ function Page() {
                   </ul>
                 </div>
               </td>
-              <td>{formatDate(item.createdAt)}</td>
-              <td>
+              {/* <td>{formatDate(item.createdAt)}</td> */}
+              {/* <td>
                 <div className="review-on-product-user">{item.user?.full_name}</div>
                 <div>
                   
                 {item.message}
                 </div>
-              </td>
+              </td> */}
               <td>
-                {item.star} out of 5{/* ffae00 */}
+                {(item.starAvg || 0).toFixed(0)} out of 5{/* ffae00 */}
                 <div className="product-rating">
                   
-                <i className={`fa-star${item.star >0 && item.star < 1?"-half-alt fa-solid selected":""}  ${item.star >=1?"fa-solid selected":"fa-light"}`} />
-                <i className={`fa-star${item.star >1 && item.star < 2?"-half-alt fa-solid selected":""} ${item.star >=2?"fa-solid selected":"fa-light"}`} />
-                <i className={`fa-star${item.star >2 && item.star < 3?"-half-alt fa-solid selected":""} ${item.star >=3?"fa-solid selected":"fa-light"}`} />
-                <i className={`fa-star${item.star >3 && item.star < 4?"-half-alt fa-solid selected":""} ${item.star >=4?"fa-solid selected":"fa-light"}`} /> 
-                <i className={`fa-star${item.star >4 && item.star < 5?"-half-alt fa-solid selected":""} ${item.star >=5?"fa-solid selected":"fa-light"}`} />  
+                <i className={`fa-star${item.starAvg >0 && item.starAvg < 1?"-half-alt fa-solid selected":""}  ${item.starAvg >=1?"fa-solid selected":"fa-light"}`} />
+                <i className={`fa-star${item.starAvg >1 && item.starAvg < 2?"-half-alt fa-solid selected":""} ${item.starAvg >=2?"fa-solid selected":"fa-light"}`} />
+                <i className={`fa-star${item.starAvg >2 && item.starAvg < 3?"-half-alt fa-solid selected":""} ${item.starAvg >=3?"fa-solid selected":"fa-light"}`} />
+                <i className={`fa-star${item.starAvg >3 && item.starAvg < 4?"-half-alt fa-solid selected":""} ${item.starAvg >=4?"fa-solid selected":"fa-light"}`} /> 
+                <i className={`fa-star${item.starAvg >4 && item.starAvg < 5?"-half-alt fa-solid selected":""} ${item.starAvg >=5?"fa-solid selected":"fa-light"}`} />  
               
 
                  
@@ -209,7 +222,7 @@ function Page() {
               </td>
               <td className="text-center">
                 <div className="view-all-reviews">
-                  <a href="#">View all reviews</a>
+                  <Link href={`/dashboard/performance/ratings-and-reviews/product/${item._id}`}>View all reviews</Link>
                 </div>
               </td>
             </tr>
@@ -219,6 +232,59 @@ function Page() {
         </table>
       </div>
        
+       
+               {/* pagination start */}
+                                         { pagination && pagination.totalPages>1 ?(
+                                                    <ul className="pagination" style={{float:'right'}}>
+                                                    <li className={`page-pre ${pagination.page <= 1? "pointer-events-none opacity-50 deactive_btn":""}`}>
+                                                      <Link href="#" onClick={(e)=>{
+                                                        if(pagination.page > 1){ 
+                                                          paginationFun((pagination.page-1), e)
+                                                        }else{
+                                                          e.preventDefault();
+                                                        }
+                                                      }
+                                                        }>
+                                                        <i className="fa-solid fa-arrow-left" />
+                                                      </Link>
+                                                    </li>
+                                                     
+                                  
+                                              {Array.from({length:pagination.totalPages}, (_, i)=>{
+                                                  if (Math.abs(pagination.page - (i + 1)) <= 3) {
+                                                    return ( 
+                                                      <li className={`page-number current  ${i} ${pagination.page== (i+1)?'active':''}`} key={i} >
+                                                          <a   href="#"  onClick={(e)=>paginationFun((i+1), e)}>
+                                                            {i + 1} 
+                                                          </a>
+                                                      </li> 
+                                                    );
+                                                  } 
+                                                  return null; 
+                                                 })} 
+                                                    
+                                                    <li
+                                                        className={`page-next ${pagination.page == pagination.totalPages ? "pointer-events-none opacity-10 deactive_btn" : ""}`}
+                                                      >
+                                                        <Link
+                                                          href="#"
+                                                          onClick={(e) => {
+                                                            if (pagination.page < pagination.totalPages) {
+                                                              paginationFun(parseInt(pagination.page) + 1, e);
+                                                            } else {
+                                                              e.preventDefault();
+                                                            }
+                                                          }}
+                                                        >
+                                                          <i className="fa-solid fa-arrow-right" />
+                                                        </Link>
+                                                      </li>
+                                                    </ul>
+                                                ):null}
+                                  
+                                                {/* pagination end */}
+
+
     </div>
   </div>
 </>

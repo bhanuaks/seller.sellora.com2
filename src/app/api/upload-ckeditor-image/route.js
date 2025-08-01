@@ -6,10 +6,14 @@ import path from "path";
 import { writeFile } from "fs/promises"; 
 import { baseUrl, responseFun } from "@/Http/helper";
 import { uploadImageFun } from "../uploadImage/route";
+import { connectDb } from "@/Http/dbConnect2";
  
 
 
 export async function POST(request) {
+
+  await connectDb();
+
   const formData = await request.formData();
 
   const uploadingFile = formData.get("upload");

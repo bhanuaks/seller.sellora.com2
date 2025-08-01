@@ -2,9 +2,11 @@ import { responseFun } from "@/Http/helper";
 import { productModel, productOtherDetailModel, productVariantModel, variantThresholdSchemaModal } from "@/Http/Models/productModel";
 import mongoose from "mongoose";
 import { fetchVariant } from "../add-variant/route";
+import { connectDb } from "@/Http/dbConnect2";
 
 export async function GET(request) {
     
+    await connectDb();
     const { searchParams } = new URL(request.url)
 
     const product_id = searchParams.get('product_id')

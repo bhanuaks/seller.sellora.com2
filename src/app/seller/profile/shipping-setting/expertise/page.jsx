@@ -16,6 +16,7 @@ function Page() {
 
   const countryRef = useRef();
   const router = useRouter();
+  const [isProceess, setIsProceess] = useState(false);
   const [errors, setErrors] = useState({});
   const [sellor, setSellor] = useState(null);
   const phoneInputRef = useRef(null);
@@ -104,12 +105,13 @@ function Page() {
     e.preventDefault();
     setErrors({});
 
-    // $(".loaderouter").css("display", "flex");
+    setIsProceess(true)
     fetch(`${baseUrl}api/seller/create-shipping-templete`, {
       method: "POST",
       body: JSON.stringify(shippingTemplete),
     })
       .then((response) => {
+        setIsProceess(false)
         if (!response.ok) {
           $(".loaderouter").css("display", "none");
           throw new Error("Network Error");
@@ -120,7 +122,7 @@ function Page() {
         $(".loaderouter").css("display", "none");
         if (res.status) {
           toast.success("Success! Pickup Address Saved.");
-          router.push("/seller/profile/bank-account-information");
+          router.push("/seller/profile/shipping-setting");
         } else if (res.data.status_code == 403) {
           setErrors(res.data.errors);
         }
@@ -367,7 +369,7 @@ function Page() {
                                           {/* <a href="seller-expertise2.html">
                                             Add Shipping Rule
                                           </a> */}
-                                           <button href="#">Submit</button>
+                                           <button disabled={isProceess} > {isProceess?"Please wait..":"Submit" } </button>
                                         </div>
                                       </td>
                                     </tr>

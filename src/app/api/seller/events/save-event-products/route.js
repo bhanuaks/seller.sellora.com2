@@ -1,4 +1,5 @@
 import { getLoginSeller } from "@/app/api/getLoginUser/route";
+import { connectDb } from "@/Http/dbConnect2";
 import { responseFun } from "@/Http/helper";
 import { productModel } from "@/Http/Models/productModel";
 import { appliedEventModal, appliedEventProductModal } from "@/Http/Models/Sales-events/AppliedEvent";
@@ -7,6 +8,7 @@ import mongoose from "mongoose";
 
 export async function POST(request) {
     
+    await connectDb();
     const { selectedProduct, _id, event_id, discount } = await request.json()
 
     const seller = await getLoginSeller();

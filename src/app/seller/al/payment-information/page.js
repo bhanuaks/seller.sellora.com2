@@ -25,6 +25,8 @@ const page = () => {
           const [sellor, setSellor] = useState(null);
           const [editFrom, setEditFrom] = useState(false);
           const phoneInputRef = useRef(null); 
+           const [isSubmiting, setIsSubmiting] = useState(false);
+           const [preveData, setPreveData] = useState({});
           const [bankDetails, setBankDetails] = useState({
             card_holder_name:'',
             name_of_card:'',
@@ -38,17 +40,15 @@ const page = () => {
 
           useEffect(()=>{ 
             if(globalData.sellor){
-              $('.loaderouter').css('display','flex') 
+              
               fetch(`${baseUrl}api/seller/get-profile?user_id=${globalData.sellor._id}&with_data=cardDetails`,{
                 method:"GET", 
               }).then((response)=>{
-                  if(!response.ok){
-                    $('.loaderouter').css('display','none')
+                  if(!response.ok){ 
                     throw new Error('Network Error')
                   }
                   return response.json();
-              }).then((res)=>{
-                  $('.loaderouter').css('display','none') 
+              }).then((res)=>{ 
                   if(res.status){
                        // check complete step
                       if(!res.data.data.complete_step || res.data.data.complete_step < 8){
@@ -70,6 +70,8 @@ const page = () => {
                         security_code: decryptText({data:dbData.security_code, iv:dbData.security_code_iv}),
                         billing_address:dbData.billing_address,
                       }))
+                    }else{
+                      setEditFrom(true)
                     }
                     setBankDetails((preData) => ({
                       ...preData,
@@ -151,19 +153,18 @@ const page = () => {
 
         function submitUpdateForm(e){
           e.preventDefault();
-          setErrors({}); 
-          $('.loaderouter').css('display','flex');
+          setErrors({});  
+          setIsSubmiting(true)
           fetch(`${baseUrl}api/seller/update-profile?update=cardDetails`,{
             method:"POST",
             body:JSON.stringify(bankDetails)
           }).then((response)=>{
-              if(!response.ok){
-                $('.loaderouter').css('display','none')
+            setIsSubmiting(false)
+              if(!response.ok){ 
                 throw new Error('Network Error') 
               }
               return response.json();
-          }).then((res)=>{
-            $('.loaderouter').css('display','none') 
+          }).then((res)=>{ 
               if(res.status){
                 toast.success('Success! Payment Information saved successfully.');
                 router.push('/seller/al/listing')
@@ -173,6 +174,27 @@ const page = () => {
           }) 
         }
 
+         function editDataFun(e){
+            e.preventDefault(); 
+             setEditFrom(true)
+              setPreveData(bankDetails)
+              setBankDetails((preData)=>({
+                        ...preData, 
+                        card_number: "",
+                        security_code:"",
+                        // card_holder_name:"",
+                        // name_of_card:"",
+                        // expire_month:"", 
+                        // expire_year:"",
+                        // billing_address:"",
+                      }))
+          }
+
+           function cancelEditFun(e){
+            e.preventDefault(); 
+             setEditFrom(false)  
+             setBankDetails(preveData)
+          }
 
   return (
     <div className="seller_panel_mmmm">
@@ -225,12 +247,24 @@ const page = () => {
         <div className="mm_rts-cart-list-area2">
         <form action="#" onSubmit={(e)=>submitUpdateForm(e)}>  
           <div className="row">
-            {!editFrom && (
-              <div>
-                <div className="edit_button" style={{ float: "right" }} 
-                onClick={()=>setEditFrom(true)}>Edit Details</div>
-              </div>
-            )}
+           
+             
+                 {!editFrom && ( 
+                   <div>
+                   <div className="edit_button" style={{ float: "right" }} 
+                       onClick={(e) =>editDataFun(e)}>Edit Details</div> 
+                        </div>
+                        )}
+
+                        {editFrom && bankDetails?.seller_id && ( 
+                           <div> 
+                           <div className="edit_button" style={{ float: "right" }} 
+                           onClick={(e) =>cancelEditFun(e)}>Cancel</div> 
+                            </div>
+                        )}
+             
+             
+           
             
             <div className="col-lg-8 offset-lg-2">
               <div className="nnn_dform">
@@ -359,8 +393,15 @@ const page = () => {
                         ):''}
                 </div>
                 {editFrom && ( 
-                    <button className="save">Save</button>
+                    <button className="save" disabled={isSubmiting}>{isSubmiting?"Please wait..":"Save"}</button>
+                    
                 )}
+
+                {!editFrom && ( 
+                            <Link href={'/seller/al/listing'}>
+                                <button className="save" >Next</button>
+                                </Link>
+                          )}
               </div>
             </div>
           </div>

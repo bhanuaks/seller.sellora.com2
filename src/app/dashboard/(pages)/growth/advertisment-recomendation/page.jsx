@@ -1,6 +1,6 @@
 "use client"
 import TableskeltonLoader from '@/app/skeleton_loader/TableskeltonLoader';
-import { baseUrl, calculateListingQuality, currencyCode, main_medium_img_path, variant_medium_img_path1, variant_medium_img_path2 } from '@/Http/helper'
+import { baseUrl, calculateListingQuality, calculatePotentialSale, currencyCode, main_medium_img_path, variant_medium_img_path1, variant_medium_img_path2 } from '@/Http/helper'
 import { fileBasePath } from '@/Http/urlHelper';
 import Image from 'next/image'
 import Link from 'next/link';
@@ -182,7 +182,7 @@ const Page = () => {
               <td className="text-center font-weight">{product?.totalClick}</td>
               <td className="text-center">
                 <div className="potential-sale">Potential Sale</div>
-                <div className="potential-sale-price">$18.55</div>
+                <div className="potential-sale-price">${calculatePotentialSale(product?.totalViews, product?.variant?.consumerSalePrice, 0.5)}</div>
               </td>
               <td className="text-center">
                 <div className="good">

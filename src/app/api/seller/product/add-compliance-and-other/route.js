@@ -14,7 +14,7 @@ import { checkFilePath, moveFile } from "@/app/api/ckeckFilePath/route";
 
 export async function POST(request) {
     let errors = {}; 
-    connectDb() 
+   await connectDb() 
     const {
         _id,
         category_id,
@@ -182,7 +182,7 @@ export async function POST(request) {
 
     } catch (error) {
         console.log(error);
-        return responseFun(false, { data: error }, 200)
+        return responseFun(false, { message : error.message }, 200)
     }
 }
 
