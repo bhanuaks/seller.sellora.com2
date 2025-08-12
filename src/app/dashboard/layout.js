@@ -13,6 +13,8 @@ import SellerDashboardFooter from "./sd_components/SellerDashboardFooter";
 import '../../../public/front/assets/css/charts.min.css'
 import '../../../public/front/assets/css/plugins.css'
 import '../../../public/front/assets/css/style.css'
+import '../../../public/front/assets/css/guides.css'
+import '../../../public/front/assets/css/brand-approval.css'
  
   
   export default function SellorDashboardRootLayout({ children }) {
