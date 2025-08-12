@@ -1,6 +1,6 @@
 import { isEmpty, responseFun } from "@/Http/helper";
 import { getLoginSeller } from "../../getLoginUser/route";
-import { sellerBusinessProfileModel } from "@/Http/Models/sellerModel";
+import { sellerBusinessProfileModel, sellerModel } from "@/Http/Models/sellerModel";
 import mongoose from "mongoose";
 import { connectDb } from "@/Http/dbConnect2";
 
@@ -125,10 +125,11 @@ export async function GET(request) {
         return responseFun(false, "unauthrized request.", 403);
     }
     try{ 
-        const sellerProfile = await sellerBusinessProfileModel.findOne({seller_id:new mongoose.Types.ObjectId(seller._id)}) 
-        return responseFun(true, {sellerProfile}, 200);
+        const sellerProfile = await sellerBusinessProfileModel.findOne({seller_id:new mongoose.Types.ObjectId(seller._id)}).lean()
+        const sellerData = await sellerModel.findById(seller._id).select("createdAt").lean()
+        return responseFun(true, {sellerProfile:{...sellerProfile, joiningDate:sellerData.createdAt}}, 200);
     }catch(error){
         console.log(error);
-        return responseFun(false, "error", 500);
+        return responseFun(false, {message:error.message}, 500);
     }
 }
