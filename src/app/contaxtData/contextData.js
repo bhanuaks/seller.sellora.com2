@@ -10,7 +10,9 @@ export const AppProvider = ({ children }) => {
     const [globalData, setGlobalData] = useState({
         user: null,
         sellor: null,
-        admin:null,
+        subSeller:null,
+        sellerMenu:[], 
+        userPermission:[], 
     });
 
     useEffect(() => {
@@ -25,9 +27,11 @@ export const AppProvider = ({ children }) => {
             try {
                 // Decode the JWT and set sellor data
                 const sellorData = decodeJwt(sellorToken);
+                 
                 setGlobalData((previousData) => ({
                     ...previousData,
                     sellor: sellorData.seller,
+                    subSeller: sellorData.seller?.role == "Employee"?sellorData.seller : null
                 }));
             } catch (error) {
                 console.error("Error decoding JWT:", error);

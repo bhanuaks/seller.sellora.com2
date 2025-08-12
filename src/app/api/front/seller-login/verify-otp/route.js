@@ -31,7 +31,11 @@ export async function POST(request) {
 
                     seller.lastloginTimeDate = new Date();
                     await seller.save();
-
+                    if(seller.role == "Employee"){
+                        seller.sub_seller_id  = seller._id
+                        seller._id  = seller.owner_id
+                    }
+                    
                     const token = jwt.sign({
                         seller:seller
                     },process.env.JWT_SECRET) 

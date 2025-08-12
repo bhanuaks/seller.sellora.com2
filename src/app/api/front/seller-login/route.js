@@ -34,6 +34,14 @@ export async function POST(request) {
                 errors.username = "invalid username"
                 return responseFun(false,{errors, status_code:403},200)
         }
+        if(seller.status == "Deactive"){
+              errors.username = "Your account has deactived by admin."
+                return responseFun(false,{errors, status_code:403},200)
+        }
+        if(seller.status == "Pending"){
+               errors.username = "Your account is pending."
+                return responseFun(false,{errors, status_code:403},200)
+        }
          
         const matchPassword = bcrypt.compareSync(password, seller.password);
         if(!matchPassword){

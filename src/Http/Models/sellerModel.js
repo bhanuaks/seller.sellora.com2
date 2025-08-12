@@ -86,6 +86,7 @@ const sellerSchema = new Schema({
         enum: ['Owner', 'Employee'],
         default: 'Owner',
     },
+    sub_seller_id:String,
     owner_id: {
         type: mongoose.Types.ObjectId,
         ref: "Seller",
@@ -382,7 +383,10 @@ const sellerBusinessDetails = new Schema({
         enum:[1,0], // 1=>published, 0=> not published
         default:0
     },
-    profileLogo:String
+    profileLogo:String,
+    country:String,
+    state:String,
+    storeName:String
 
 },{timestamps:true}) 
 

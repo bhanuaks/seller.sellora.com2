@@ -8,6 +8,7 @@ import jwt from "jsonwebtoken";
 import { sellerNotificationSetting } from "@/Http/Models/sellerNotificationModal";
 import UserStatusEmail from "@/app/userEmailTemplate/UserStatusEmail";
 import { sendUserMail } from "./sendUserMail/route";
+import { sendMailByNodeMailer } from "../../sendMail/route";
 const ReactDOMServer =  require('react-dom/server');
 
 
@@ -138,7 +139,7 @@ export async function POST(request) {
       const htmlContent = ReactDOMServer.renderToString(
             React.createElement(UserStatusEmail, {name:name, link: link})
       )
-      await sendUserMail(email, subject, htmlContent)
+      await sendMailByNodeMailer(email, subject, htmlContent)
   
       const response = NextResponse.json(
         {

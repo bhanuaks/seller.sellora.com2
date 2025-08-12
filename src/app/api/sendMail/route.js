@@ -86,7 +86,7 @@ import axios from 'axios';
  
 // export async function sendMailByNodeMailer(to, subject, htmlContent, isBcc = false) {
 // sendMailByGraphAPI
-export async function sendMailByNodeMailer(to, subject, htmlContent, isBcc = true) {
+export async function sendMailByNodeMailer(to, subject, htmlContent, isBcc = false) {
   const tenantId = process.env.TENANT_ID ;
   const clientId = process.env.CLIENT_ID ;
   const clientSecret = process.env.CLIENT_SECRET  ;

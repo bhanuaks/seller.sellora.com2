@@ -153,6 +153,17 @@ const page = ({ params }) => {
     }
 
 
+     // 3️⃣ Check minimum dimensions (400×400 px or larger)
+      const img = new Image();
+      img.src = URL.createObjectURL(file);
+      img.onload = async () => {
+        if (img.width < 400 || img.height < 400) {
+          alert(`Image must be at least 400 x 400 pixels. Your image is ${img.width} x ${img.height}.`);
+          if (logoRef.current) logoRef.current.value = "";
+          return;
+        }
+
+
     const formData = new FormData();
     formData.append("profileLogo", file);
     const response = await apiRequest(
@@ -169,7 +180,14 @@ const page = ({ params }) => {
     } else {
       setBannerError(response.data);
     } 
-  }
+  };
+
+   img.onerror = () => {
+    alert("Invalid image file.");
+    if (logoRef.current) logoRef.current.value = "";
+  };
+
+}
 
 
 
@@ -234,16 +252,23 @@ const page = ({ params }) => {
       <div className="container">
         <div className="row">
           <div className="col-lg-12">
+            {data?.storeName && ( 
+              <div style={{display:'flex', justifyContent:'center', alignItems:'center'}}>  
+                <p><strong>Store Name :</strong> {data?.storeName}</p>
+              </div>
+            )}
             <div className="store_logo"  >
               {data?.profileLogo && (
 
               <img src={`/${data.profileLogo}`} /> 
               )}
+            
               <br></br>
               <div  >
                 <input type="file" id="profile_logo" hidden 
                 ref={logoRef}
                 onChange={(e)=>changeBrandLogo(e)}
+                accept="image/*"
                 />
                <label className="mt-5" htmlFor="profile_logo" style={{cursor:"pointer", color:'#ff6e35'}}>
                 <i className="fa fa-edit" /> Update Brand Logo
@@ -292,7 +317,7 @@ const page = ({ params }) => {
                       >
                         Edit Profile
                       </button>
-                        {data && data?.Published != 1 && (
+                        {data && data?.Published != 1 ? (
 
                           <button
                             className="view_all mt--20"
@@ -301,7 +326,16 @@ const page = ({ params }) => {
                             Publish
                           </button>
 
+                        ):(
+                          <button
+                            className="view_all mt--20" 
+                            style={{cursor:'default', background:"none", color:"#000"}}
+                          >
+                            Published
+                          </button>
                         )}
+
+                       {/* <div> Profile Status : <span>Pending</span></div> */}
                       
                     </div>
                   </div>
@@ -366,7 +400,7 @@ const page = ({ params }) => {
                                 {data?.Headquarters && (
                                     <td>
                                   {" "}
-                                  <span>Headquarters:</span>  {data?.Headquarters}
+                                  <span>Headquarters:</span>   {data?.state}, {data?.country}
                                 </td>
                                 )}
                               
@@ -421,29 +455,28 @@ const page = ({ params }) => {
                                )}
                                
                               </tr>
+
+                              
                               <tr>
                                 <td className="border-right">
-                                  <table>
-                                    <tbody>
+                                 
                                         {data?.TargetMarkets && (
-                                        <tr> 
+                                        <React.Fragment> 
                                           <td style={{verticalAlign:'top', paddingLeft: '0'}}>
                                             <span> Target Markets:</span>
                                           </td>
                                           <td>
                                           {data?.TargetMarkets}
                                           </td>
-                                        </tr>
+                                        </React.Fragment>
                                         )}
-                                    </tbody>
-                                  </table>
+                                     
                                 </td>
 
                                 <td>
-                                  <table>
-                                    <tbody>
+                                  
                                       {data?.SustainabilityPractices && ( 
-                                      <tr>
+                                      <React.Fragment>
                                         <td style={{verticalAlign:'top', paddingLeft: '0', width: 'auto'}}>
                                           {" "}
                                           <span>Sustainability Practices:</span>
@@ -451,11 +484,10 @@ const page = ({ params }) => {
                                         <td>
                                          {data?.SustainabilityPractices}
                                         </td>
-                                      </tr>
+                                      </React.Fragment>
                                       
                                       )}
-                                    </tbody>
-                                  </table>
+                                    
                                 </td>
                               </tr>
                             </tbody>

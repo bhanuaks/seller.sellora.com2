@@ -22,6 +22,9 @@ export async function POST(request) {
         PatentStatus,
         RevenueRange, 
         TargetMarkets,
+        country,
+        state,
+        storeName,
         
 
     SustainabilityPractices,
@@ -38,7 +41,7 @@ export async function POST(request) {
         if(isEmpty(TypeOfEnterprise))errors.TypeOfEnterprise = "Required"
         if(isEmpty(YearFounded))errors.YearFounded = "Required"
         if(isEmpty(ProductLine))errors.ProductLine = "Required"
-        if(isEmpty(Headquarters))errors.Headquarters = "Required"
+        // if(isEmpty(Headquarters))errors.Headquarters = "Required"
         if(isEmpty(EmployeeCount))errors.EmployeeCount = "Required"
         if(isEmpty(BrandRegistration))errors.BrandRegistration = "Required"
         if(isEmpty(QualityCertifications))errors.QualityCertifications = "Required"
@@ -47,6 +50,8 @@ export async function POST(request) {
         if(isEmpty(TargetMarkets))errors.TargetMarkets = "Required"
         if(isEmpty(SustainabilityPractices))errors.SustainabilityPractices = "Required"
         if(isEmpty(PatentStatus))errors.PatentStatus = "Required"
+        if(isEmpty(country))errors.country = "Required"
+        if(isEmpty(state))errors.state = "Required"
 
         if(Object.keys(errors).length > 0){
             return responseFun(false, {errors, status_code:402}, 200)
@@ -73,7 +78,10 @@ export async function POST(request) {
                         RevenueRange, 
                        TargetMarkets,
                         SustainabilityPractices,
-                        adminApproved:0
+                        adminApproved:0,
+                        country,
+                        state,
+                        storeName
                     }
                 }
             )
@@ -94,7 +102,10 @@ export async function POST(request) {
                     RevenueRange, 
                     TargetMarkets,
                     SustainabilityPractices,
-                    adminApproved:0
+                    adminApproved:0,
+                    country,
+                    state,
+                    storeName
                 }
             )
         }

@@ -50,7 +50,8 @@ export async function POST(request) {
                 {
                     orderItemId:order._id,
                     status:2,
-                    trakingDetails:trakingInfo
+                    trakingDetails:trakingInfo,
+                    remarks:"Order has been shipped"
                 }
             );
          }

@@ -48,7 +48,7 @@ function loadData(){
              .then((res) => { 
                if (res.status) {
                 //  setSellor(res.data.data);
-                 setGlobalData((preData) => ({ sellor: res.data.data })); 
+                 setGlobalData((preData) => ({...preData, sellor: res.data.data })); 
                }
              });
 }

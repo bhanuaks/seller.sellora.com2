@@ -17,9 +17,9 @@ import '../../../public/front/assets/css/style.css'
   
   export default function SellorDashboardRootLayout({ children }) {
       const pathname =  usePathname();
-          useEffect(()=>{
-            $('.logoLoader').css('display', 'none')
-          },[pathname]) 
+          // useEffect(()=>{
+          //   $('.logoLoader').css('display', 'none')
+          // },[pathname]) 
 
     return (
       <html lang="en">
@@ -38,11 +38,11 @@ import '../../../public/front/assets/css/style.css'
       <body className="index-five">
 
       <Header/>
-      <div className="logoLoader">
+      {/* <div className="logoLoader">
           <div className="innerloader">
             <img src={`${baseUrl}front/assets/images/logo-01.png`} />
           </div>
-        </div>
+        </div> */}
         {children}
         
         {pathname =="/dashboard" ? (

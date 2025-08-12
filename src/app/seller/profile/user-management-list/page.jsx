@@ -24,8 +24,8 @@ function page() {
      const phoneInputRef = useRef(null);
      const [addressData, setAddressData] = useState({
        
-       country_s_name: "in",
-       mobile_code: "91",
+       country_s_name: "us",
+       mobile_code: "1",
        name: "",
        email: "",
        mobile: "",
@@ -422,6 +422,7 @@ function searchProduct(e){
               <tr className="winner__table">
                 <th width={210}>Name</th>
                 <th width={330}>E-mail Address</th>
+                <th width={330}>Mobile Number</th>
                 <th width={100}>Status</th>
                 <th width={150}> </th>
               </tr>
@@ -438,6 +439,7 @@ function searchProduct(e){
                     <div className="name_348937">{list.name}</div>
                   </td>
                   <td>{list.email}</td>
+                  <td>+{list.mobile_code}{list.mobile}</td>
                   <td>
                     {list.status != 'Pending' ?
                     <a href="#" onClick={(e) => statusChange(e, list._id)}>{list.status}</a>

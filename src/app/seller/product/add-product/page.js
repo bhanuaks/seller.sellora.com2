@@ -222,8 +222,21 @@ const page = ({params}) => {
                     }
                     // set dynamic field value end
                     setKeyAttributes(updateProd.keyAttributes)
+                    if(copy == "Yes"){
+                         setProductDetails({...updateProd, 
+                            main_image: null,
+                            image_1: null,
+                            image_2: null,
+                            image_3: null,
+                            image_4: null,
+                            image_5: null,
+                            image_6: null,
+                            image_7: null,
+                        })
+                    }else{
 
-                    setProductDetails(updateProd)
+                        setProductDetails(updateProd)
+                    }
                     if(updateProd.key_feature){ 
                         setKeyFeature(updateProd.key_feature.filter((item)=> item != ""))
                     }
@@ -241,6 +254,8 @@ const page = ({params}) => {
                     }
                      const imgPath = [];
                         const allImage = [];
+                        if(copy !== "Yes"){ 
+                            // if product copy then upload new product Image
                         if(updateProd?.image_1){
                           imgPath.push(`${baseUrl}${product_thumb_img_path1}${updateProd.image_1}`)
                           allImage.push(`${updateProd.image_1}`)
@@ -269,9 +284,14 @@ const page = ({params}) => {
                             imgPath.push(`${baseUrl}${product_thumb_img_path7}${updateProd.image_7}`)
                             allImage.push(`${updateProd.image_7}`)
                           }
+
+
+
+                            setImagePath(imgPath)
+                            setImage(allImage)
+                        }
                         
-                        setImagePath(imgPath)
-                        setImage(allImage)
+                       
 
                 }
               }else{

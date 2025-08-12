@@ -2,7 +2,7 @@ import { AppContext } from "@/app/contaxtData/contextData";
 import { baseUrl } from "@/Http/helper";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import React, { useContext, useEffect, useState } from "react";
 
 const Header = () => {
@@ -10,37 +10,36 @@ const Header = () => {
   const [businessData, setBusinessData] = useState(null);
   const [sellor, setSellor] = useState(null);
   const pathname = usePathname();
-  const [sellerCount, setSellerCount] = useState(0)
+  const router = useRouter();
+  const [sellerCount, setSellerCount] = useState(0);
+  const [openMobileMenu, setOpenMobileMenu] = useState("");
+  const [subSellerPermisionList, setSubSellerPermisionList] = useState([]);
+  
 
   useEffect(() => {
     // if (globalData.sellor) {
-      // $(".loaderouter").css("display", "none");
-      fetch(
-        `${baseUrl}api/seller/get-profile?with_data=businessDetails`,
-        {
-          method: "GET",
-        }
-      )
-        .then((response) => {
-          if (!response.ok) {
-            // $(".loaderouter").css("display", "none");
-            throw new Error("Network Error");
-          }
-          return response.json();
-        })
-        .then((res) => {
+    // $(".loaderouter").css("display", "none");
+    fetch(`${baseUrl}api/seller/get-profile?with_data=businessDetails`, {
+      method: "GET",
+    })
+      .then((response) => {
+        if (!response.ok) {
           // $(".loaderouter").css("display", "none");
-          if (res.status) {
-            
-            
-            setSellerCount(res.data.sellerCount)
-            setSellor(res.data.data);
-            setGlobalData((preData) => ({ sellor: res.data.data }));
-            if (res.data.referData) {
-              setBusinessData(res.data.referData);
-            }
+          throw new Error("Network Error");
+        }
+        return response.json();
+      })
+      .then((res) => {
+        // $(".loaderouter").css("display", "none");
+        if (res.status) {
+          setSellerCount(res.data.sellerCount);
+          setSellor(res.data.data);
+          setGlobalData((preData) => ({ ...preData, sellor: res.data.data }));
+          if (res.data.referData) {
+            setBusinessData(res.data.referData);
           }
-        });
+        }
+      });
     // }
   }, []);
 
@@ -61,6 +60,49 @@ const Header = () => {
         }
       });
   };
+
+  useEffect(() => {
+    fetch("/api/sub-seller-details")
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Internal issue");
+        }
+        return response.json();
+      })
+      .then((res) => {
+        if (res.status) {
+          const setting = res.data.data?.filter(
+            (allMenu) => allMenu.show == "Setting"
+          );
+
+          
+          if(res.data.userPermission && res.data.userPermission.length > 0){
+           const allPath = res.data.userPermission.map((path)=>path.slug)
+           setSubSellerPermisionList(allPath)
+          } 
+
+          setGlobalData((preData) => ({
+            ...preData,
+            sellerMenu: res.data.data,
+            userPermission: setting.length ? setting[0] : null,
+          }));
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }, []);
+
+
+    // useEffect(()=>{
+    //   if(globalData.subSeller){
+    //     if(!subSellerPermisionList.includes(pathname)){
+    //       router.push("/dashboard")
+    //     }
+    //   }
+    //   console.log({subSellerPermisionList, pathname});
+    // },[pathname, globalData.subSeller, subSellerPermisionList])
+
 
   return (
     <>
@@ -87,6 +129,75 @@ const Header = () => {
                   </div>
                   <div className="nav-area dash_board_top_menu">
                     <nav>
+                      <ul>
+                        {globalData.subSeller &&
+                          globalData.sellerMenu?.length > 0 &&
+                          globalData.sellerMenu.map((menu, index) =>
+                            (() => {
+                              if (menu.show == "Header") {
+                                return (
+                                  <li
+                                    className={`parent ${
+                                      menu.permission == "inherited"
+                                        ? "has-dropdown"
+                                        : ""
+                                    }`}
+                                    key={index}
+                                  >
+                                    <a
+                                      href={
+                                        menu.permission !== "inherited"
+                                          ? `${baseUrl}${menu.slug}`
+                                          : "#"
+                                      }
+                                    >
+                                      {menu.name}
+                                    </a>
+                                    {menu.submenus?.length > 0 && (
+                                      <ul className="submenu">
+                                        {menu.submenus.map(
+                                          (subMenuData, subIndex) => (
+                                            <li key={subIndex}>
+                                              <Link
+                                                href={
+                                                  subMenuData.submenus?.length >
+                                                  0
+                                                    ? "#"
+                                                    : `${baseUrl}${subMenuData.slug}`
+                                                }
+                                              >
+                                                {subMenuData.name}{" "}
+                                              </Link>
+                                              {subMenuData.submenus?.length >
+                                                0 && (
+                                                <ul className="child-submenu">
+                                                  {subMenuData.submenus.map(
+                                                    (childMenu, chIndex) => (
+                                                      <li key={chIndex}>
+                                                        <Link
+                                                          href={`${baseUrl}${childMenu.slug}`}
+                                                        >
+                                                          {childMenu.name}
+                                                        </Link>
+                                                      </li>
+                                                    )
+                                                  )}
+                                                </ul>
+                                              )}
+                                            </li>
+                                          )
+                                        )}
+                                      </ul>
+                                    )}
+                                  </li>
+                                );
+                              }
+                            })()
+                          )}
+                      </ul>
+                    </nav>
+
+                    <nav className={globalData.subSeller ? "d-none" : ""}>
                       <ul>
                         {/* <li className="parent"> <a href={`${baseUrl}dashboard`}>Home</a> </li> */}
                         <li className="parent has-dropdown">
@@ -372,15 +483,39 @@ const Header = () => {
                             <div className="goody-s">
                               <h3 className="animated fadeIn">
                                 {" "}
-                                {globalData?.sellor &&
+                                {/* {globalData?.sellor &&
                                 globalData?.sellor.display_name
                                   ? globalData?.sellor?.display_name
-                                  : globalData?.sellor?.name}
+                                  : globalData?.sellor?.name} */}
+                                {(() => {
+                                  if (
+                                    globalData?.sellor &&
+                                    globalData?.subSeller
+                                  ) {
+                                    return globalData?.subSeller.name;
+                                  } else if (
+                                    globalData?.sellor &&
+                                    globalData?.sellor.display_name
+                                  ) {
+                                    return globalData?.sellor?.display_name;
+                                  } else {
+                                    return globalData?.sellor?.name;
+                                  }
+                                })()}
                               </h3>
                               <p>
                                 Merchant ID:{" "}
                                 <strong>
-                                  {globalData?.sellor?.merchant_id}
+                                  {(() => {
+                                    if (
+                                      globalData?.sellor &&
+                                      globalData?.subSeller
+                                    ) {
+                                      return globalData?.subSeller.merchant_id;
+                                    } else {
+                                      return globalData?.sellor?.merchant_id;
+                                    }
+                                  })()}
                                 </strong>
                               </p>
                             </div>
@@ -401,7 +536,6 @@ const Header = () => {
                                 <div className="order-card2">
                                   <div className="order-header2">
                                     <button
-                                       
                                       className="title"
                                       onClick={(e) => sellorLogout(e)}
                                     >
@@ -412,162 +546,163 @@ const Header = () => {
                               </div>
                             )}
 
-                            {globalData?.sellor?.selfActive == "Active" && (
-                              <div className="filterbox-body">
-                                <div className="order-card2">
-                                  <div
-                                    className={`order-header2 ${
-                                      pathname ==
-                                      "/seller/profile/notification-setting"
-                                        ? "active_1"
-                                        : ""
-                                    }`}
-                                  >
-                                    <Link
-                                      href={`/seller/profile/notification-setting`}
-                                      className="title"
+                            {!globalData?.subSeller &&
+                              globalData?.sellor?.selfActive == "Active" && (
+                                <div className="filterbox-body">
+                                  <div className="order-card2">
+                                    <div
+                                      className={`order-header2 ${
+                                        pathname ==
+                                        "/seller/profile/notification-setting"
+                                          ? "active_1"
+                                          : ""
+                                      }`}
                                     >
-                                      Notification Setting
-                                    </Link>
+                                      <Link
+                                        href={`/seller/profile/notification-setting`}
+                                        className="title"
+                                      >
+                                        Notification Setting
+                                      </Link>
+                                    </div>
                                   </div>
-                                </div>
-                                <div className="order-card2">
-                                  <div
-                                    className={`order-header2 ${
-                                      pathname ==
-                                      "/seller/profile/contact-details"
-                                        ? "active_1"
-                                        : ""
-                                    }`}
-                                  >
-                                    <Link
-                                      href={`/seller/profile/contact-details`}
-                                      className="title"
+                                  <div className="order-card2">
+                                    <div
+                                      className={`order-header2 ${
+                                        pathname ==
+                                        "/seller/profile/contact-details"
+                                          ? "active_1"
+                                          : ""
+                                      }`}
                                     >
-                                      Contact Details{" "}
-                                    </Link>
+                                      <Link
+                                        href={`/seller/profile/contact-details`}
+                                        className="title"
+                                      >
+                                        Contact Details{" "}
+                                      </Link>
+                                    </div>
                                   </div>
-                                </div>
-                                <div className="order-card2">
-                                  <div
-                                    className={`order-header2 ${
-                                      pathname ==
-                                      "/seller/profile/display-information"
-                                        ? "active_1"
-                                        : ""
-                                    }`}
-                                  >
-                                    <Link
-                                      href={`/seller/profile/display-information`}
-                                      className="title"
+                                  <div className="order-card2">
+                                    <div
+                                      className={`order-header2 ${
+                                        pathname ==
+                                        "/seller/profile/display-information"
+                                          ? "active_1"
+                                          : ""
+                                      }`}
                                     >
-                                      Display Information
-                                    </Link>
+                                      <Link
+                                        href={`/seller/profile/display-information`}
+                                        className="title"
+                                      >
+                                        Display Information
+                                      </Link>
+                                    </div>
                                   </div>
-                                </div>
-                                <div className="order-card2">
-                                  <div
-                                    className={`order-header2 ${
-                                      pathname ==
-                                      "/seller/profile/pickup-address"
-                                        ? "active_1"
-                                        : ""
-                                    }`}
-                                  >
-                                    <Link
-                                      href={`/seller/profile/pickup-address`}
-                                      className="title"
+                                  <div className="order-card2">
+                                    <div
+                                      className={`order-header2 ${
+                                        pathname ==
+                                        "/seller/profile/pickup-address"
+                                          ? "active_1"
+                                          : ""
+                                      }`}
                                     >
-                                      Pick up Address
-                                    </Link>
+                                      <Link
+                                        href={`/seller/profile/pickup-address`}
+                                        className="title"
+                                      >
+                                        Pick up Address
+                                      </Link>
+                                    </div>
                                   </div>
-                                </div>
-                                <div className="order-card2">
-                                  <div
-                                    className={`order-header2 ${
-                                      pathname ==
-                                      "/seller/profile/return-setting"
-                                        ? "active_1"
-                                        : ""
-                                    }`}
-                                  >
-                                    <Link
-                                      href={`/seller/profile/return-setting`}
-                                      className="title"
+                                  <div className="order-card2">
+                                    <div
+                                      className={`order-header2 ${
+                                        pathname ==
+                                        "/seller/profile/return-setting"
+                                          ? "active_1"
+                                          : ""
+                                      }`}
                                     >
-                                      Return Setting
-                                    </Link>
+                                      <Link
+                                        href={`/seller/profile/return-setting`}
+                                        className="title"
+                                      >
+                                        Return Setting
+                                      </Link>
+                                    </div>
                                   </div>
-                                </div>
-                                <div className="order-card2">
-                                  <div
-                                    className={`order-header2 ${
-                                      pathname ==
-                                      "/seller/profile/business-details"
-                                        ? "active_1"
-                                        : ""
-                                    }`}
-                                  >
-                                    <Link
-                                      href={`/seller/profile/business-details`}
-                                      className="title"
+                                  <div className="order-card2">
+                                    <div
+                                      className={`order-header2 ${
+                                        pathname ==
+                                        "/seller/profile/business-details"
+                                          ? "active_1"
+                                          : ""
+                                      }`}
                                     >
-                                      Business Details
-                                    </Link>
+                                      <Link
+                                        href={`/seller/profile/business-details`}
+                                        className="title"
+                                      >
+                                        Business Details
+                                      </Link>
+                                    </div>
                                   </div>
-                                </div>
-                                <div className="order-card2">
-                                  <div
-                                    className={`order-header2 ${
-                                      pathname ==
-                                      "/seller/profile/tax-information"
-                                        ? "active_1"
-                                        : ""
-                                    }`}
-                                  >
-                                    <Link
-                                      href={`/seller/profile/tax-information`}
-                                      className="title"
+                                  <div className="order-card2">
+                                    <div
+                                      className={`order-header2 ${
+                                        pathname ==
+                                        "/seller/profile/tax-information"
+                                          ? "active_1"
+                                          : ""
+                                      }`}
                                     >
-                                      Tax Information
-                                    </Link>
+                                      <Link
+                                        href={`/seller/profile/tax-information`}
+                                        className="title"
+                                      >
+                                        Tax Information
+                                      </Link>
+                                    </div>
                                   </div>
-                                </div>
-                                <div className="order-card2">
-                                  <div
-                                    className={`order-header2 ${
-                                      pathname ==
-                                      "/seller/profile/shipping-setting"
-                                        ? "active_1"
-                                        : ""
-                                    }`}
-                                  >
-                                    <Link
-                                      href={`/seller/profile/shipping-setting`}
-                                      className="title"
+                                  <div className="order-card2">
+                                    <div
+                                      className={`order-header2 ${
+                                        pathname ==
+                                        "/seller/profile/shipping-setting"
+                                          ? "active_1"
+                                          : ""
+                                      }`}
                                     >
-                                      Shipping Setting
-                                    </Link>
+                                      <Link
+                                        href={`/seller/profile/shipping-setting`}
+                                        className="title"
+                                      >
+                                        Shipping Setting
+                                      </Link>
+                                    </div>
                                   </div>
-                                </div>
-                                <div className="order-card2">
-                                  <div
-                                    className={`order-header2 ${
-                                      pathname ==
-                                      "/seller/profile/bank-account-information"
-                                        ? "active_1"
-                                        : ""
-                                    }`}
-                                  >
-                                    <Link
-                                      href={`/seller/profile/bank-account-information`}
-                                      className="title"
+                                  <div className="order-card2">
+                                    <div
+                                      className={`order-header2 ${
+                                        pathname ==
+                                        "/seller/profile/bank-account-information"
+                                          ? "active_1"
+                                          : ""
+                                      }`}
                                     >
-                                      Bank Account Information
-                                    </Link>
+                                      <Link
+                                        href={`/seller/profile/bank-account-information`}
+                                        className="title"
+                                      >
+                                        Bank Account Information
+                                      </Link>
+                                    </div>
                                   </div>
-                                </div>
-                                {/* <div className="order-card2">
+                                  {/* <div className="order-card2">
                                   <div
                                     className={`order-header2 ${
                                       pathname ==
@@ -584,62 +719,108 @@ const Header = () => {
                                     </Link>
                                   </div>
                                 </div> */}
-                                <div className="order-card2">
-                                  <div
-                                    className={`order-header2 ${
-                                      pathname ==
-                                      "/seller/profile/user-management"
-                                        ? "active_1"
-                                        : ""
-                                    }`}
-                                  >
-                                    {sellerCount > 0 ?
-                                    <Link
-                                      href={`/seller/profile/user-management-list`}
-                                      className="title"
+                                  <div className="order-card2">
+                                    <div
+                                      className={`order-header2 ${
+                                        pathname ==
+                                        "/seller/profile/user-management"
+                                          ? "active_1"
+                                          : ""
+                                      }`}
                                     >
-                                      User Management
-                                    </Link>
-                                    :
-                                    <Link
-                                      href={`/seller/profile/user-management`}
-                                      className="title"
+                                      {sellerCount > 0 ? (
+                                        <Link
+                                          href={`/seller/profile/user-management-list`}
+                                          className="title"
+                                        >
+                                          User Management
+                                        </Link>
+                                      ) : (
+                                        <Link
+                                          href={`/seller/profile/user-management`}
+                                          className="title"
+                                        >
+                                          User Management
+                                        </Link>
+                                      )}
+                                    </div>
+                                  </div>
+                                  <div className="order-card2">
+                                    <div
+                                      className={`order-header2 ${
+                                        pathname ==
+                                        "/seller/profile/login-setting"
+                                          ? "active_1"
+                                          : ""
+                                      }`}
                                     >
-                                      User Management
-                                    </Link>
-                                    }
+                                      <Link
+                                        href={`/seller/profile/login-setting`}
+                                        className="title"
+                                      >
+                                        Login Setting
+                                      </Link>
+                                    </div>
+                                  </div>
+                                  <div className="order-card2">
+                                    <div className="order-header2">
+                                      <button
+                                        className="title"
+                                        onClick={(e) => sellorLogout(e)}
+                                      >
+                                        Logout
+                                      </button>
+                                    </div>
                                   </div>
                                 </div>
-                                <div className="order-card2">
-                                  <div
-                                    className={`order-header2 ${
-                                      pathname ==
-                                      "/seller/profile/login-setting"
-                                        ? "active_1"
-                                        : ""
-                                    }`}
-                                  >
-                                    <Link
-                                      href={`/seller/profile/login-setting`}
-                                      className="title"
-                                    >
-                                      Login Setting
-                                    </Link>
+                              )}
+
+                            {/* for sub seller start  */}
+
+                            {globalData?.subSeller &&
+                              globalData?.sellor?.selfActive == "Active" && (
+                                <div className="filterbox-body">
+                                  {globalData?.userPermission &&
+                                    globalData?.userPermission?.submenus
+                                      ?.length > 0 &&
+                                    globalData?.userPermission?.submenus.map(
+                                      (perm, indexNumber) => (
+                                        <div
+                                          className="order-card2"
+                                          key={indexNumber}
+                                        >
+                                          <div
+                                            className={`order-header2 ${
+                                              pathname == perm.slug
+                                                ? "active_1"
+                                                : ""
+                                            }`}
+                                          >
+                                            <Link
+                                              href={`${baseUrl}${perm.slug}`}
+                                              className="title"
+                                            >
+                                              {perm.name}
+                                            </Link>
+                                          </div>
+                                        </div>
+                                      )
+                                    )}
+
+                                  <div className="order-card2">
+                                    <div className="order-header2">
+                                      <button
+                                        className="title"
+                                        onClick={(e) => sellorLogout(e)}
+                                      >
+                                        Logout
+                                      </button>
+                                    </div>
                                   </div>
                                 </div>
-                                <div className="order-card2">
-                                  <div className="order-header2">
-                                    <button
-                                     
-                                      className="title"
-                                      onClick={(e) => sellorLogout(e)}
-                                    >
-                                      Logout
-                                    </button>
-                                  </div>
-                                </div>
-                              </div>
-                            )}
+                              )}
+
+                            {/* end sub seller */}
                           </div>
                         </div>
                       </li>
@@ -647,9 +828,18 @@ const Header = () => {
 
                     <div className="dropdown_login">
                       <li className="seller-login-profile">
-                        {globalData?.sellor && globalData?.sellor.display_name
-                          ? globalData?.sellor?.display_name
-                          : globalData?.sellor?.name}
+                        {(() => {
+                          if (globalData?.sellor && globalData?.subSeller) {
+                            return globalData?.subSeller.name;
+                          } else if (
+                            globalData?.sellor &&
+                            globalData?.sellor.display_name
+                          ) {
+                            return globalData?.sellor?.display_name;
+                          } else {
+                            return globalData?.sellor?.name;
+                          }
+                        })()}
                       </li>
                     </div>
                   </div>
@@ -682,15 +872,35 @@ const Header = () => {
                             <div className="goody-s">
                               <h3 className="animated fadeIn">
                                 {" "}
-                                {globalData?.sellor &&
-                                globalData?.sellor.display_name
-                                  ? globalData?.sellor?.display_name
-                                  : globalData?.sellor?.name}
+                                {(() => {
+                                  if (
+                                    globalData?.sellor &&
+                                    globalData?.subSeller
+                                  ) {
+                                    return globalData?.subSeller.name;
+                                  } else if (
+                                    globalData?.sellor &&
+                                    globalData?.sellor.display_name
+                                  ) {
+                                    return globalData?.sellor?.display_name;
+                                  } else {
+                                    return globalData?.sellor?.name;
+                                  }
+                                })()}
                               </h3>
                               <p>
                                 Merchant ID:{" "}
                                 <strong>
-                                  {globalData?.sellor?.merchant_id}
+                                  {(() => {
+                                    if (
+                                      globalData?.sellor &&
+                                      globalData?.subSeller
+                                    ) {
+                                      return globalData?.subSeller.merchant_id;
+                                    } else {
+                                      return globalData?.sellor?.merchant_id;
+                                    }
+                                  })()}
                                 </strong>
                               </p>
                             </div>
@@ -710,7 +920,6 @@ const Header = () => {
                                 <div className="order-card2">
                                   <div className="order-header2">
                                     <button
-                                     
                                       className="title"
                                       onClick={(e) => sellorLogout(e)}
                                     >
@@ -720,162 +929,163 @@ const Header = () => {
                                 </div>
                               </div>
                             )}
-                            {globalData?.sellor?.selfActive == "Active" && (
-                              <div className="filterbox-body">
-                                <div className="order-card2">
-                                  <div
-                                    className={`order-header2 ${
-                                      pathname ==
-                                      "/seller/profile/notification-setting"
-                                        ? "active_1"
-                                        : ""
-                                    }`}
-                                  >
-                                    <Link
-                                      href={`/seller/profile/notification-setting`}
-                                      className="title"
+                            {!globalData?.subSeller &&
+                              globalData?.sellor?.selfActive == "Active" && (
+                                <div className="filterbox-body">
+                                  <div className="order-card2">
+                                    <div
+                                      className={`order-header2 ${
+                                        pathname ==
+                                        "/seller/profile/notification-setting"
+                                          ? "active_1"
+                                          : ""
+                                      }`}
                                     >
-                                      Notification Setting
-                                    </Link>
+                                      <Link
+                                        href={`/seller/profile/notification-setting`}
+                                        className="title"
+                                      >
+                                        Notification Setting
+                                      </Link>
+                                    </div>
                                   </div>
-                                </div>
-                                <div className="order-card2">
-                                  <div
-                                    className={`order-header2 ${
-                                      pathname ==
-                                      "/seller/profile/contact-details"
-                                        ? "active_1"
-                                        : ""
-                                    }`}
-                                  >
-                                    <Link
-                                      href={`/seller/profile/contact-details`}
-                                      className="title"
+                                  <div className="order-card2">
+                                    <div
+                                      className={`order-header2 ${
+                                        pathname ==
+                                        "/seller/profile/contact-details"
+                                          ? "active_1"
+                                          : ""
+                                      }`}
                                     >
-                                      Contact Details{" "}
-                                    </Link>
+                                      <Link
+                                        href={`/seller/profile/contact-details`}
+                                        className="title"
+                                      >
+                                        Contact Details{" "}
+                                      </Link>
+                                    </div>
                                   </div>
-                                </div>
-                                <div className="order-card2">
-                                  <div
-                                    className={`order-header2 ${
-                                      pathname ==
-                                      "/seller/profile/display-information"
-                                        ? "active_1"
-                                        : ""
-                                    }`}
-                                  >
-                                    <Link
-                                      href={`/seller/profile/display-information`}
-                                      className="title"
+                                  <div className="order-card2">
+                                    <div
+                                      className={`order-header2 ${
+                                        pathname ==
+                                        "/seller/profile/display-information"
+                                          ? "active_1"
+                                          : ""
+                                      }`}
                                     >
-                                      Display Information
-                                    </Link>
+                                      <Link
+                                        href={`/seller/profile/display-information`}
+                                        className="title"
+                                      >
+                                        Display Information
+                                      </Link>
+                                    </div>
                                   </div>
-                                </div>
-                                <div className="order-card2">
-                                  <div
-                                    className={`order-header2 ${
-                                      pathname ==
-                                      "/seller/profile/pickup-address"
-                                        ? "active_1"
-                                        : ""
-                                    }`}
-                                  >
-                                    <Link
-                                      href={`/seller/profile/pickup-address`}
-                                      className="title"
+                                  <div className="order-card2">
+                                    <div
+                                      className={`order-header2 ${
+                                        pathname ==
+                                        "/seller/profile/pickup-address"
+                                          ? "active_1"
+                                          : ""
+                                      }`}
                                     >
-                                      Pick up Address
-                                    </Link>
+                                      <Link
+                                        href={`/seller/profile/pickup-address`}
+                                        className="title"
+                                      >
+                                        Pick up Address
+                                      </Link>
+                                    </div>
                                   </div>
-                                </div>
-                                <div className="order-card2">
-                                  <div
-                                    className={`order-header2 ${
-                                      pathname ==
-                                      "/seller/profile/return-setting"
-                                        ? "active_1"
-                                        : ""
-                                    }`}
-                                  >
-                                    <Link
-                                      href={`/seller/profile/return-setting`}
-                                      className="title"
+                                  <div className="order-card2">
+                                    <div
+                                      className={`order-header2 ${
+                                        pathname ==
+                                        "/seller/profile/return-setting"
+                                          ? "active_1"
+                                          : ""
+                                      }`}
                                     >
-                                      Return Setting
-                                    </Link>
+                                      <Link
+                                        href={`/seller/profile/return-setting`}
+                                        className="title"
+                                      >
+                                        Return Setting
+                                      </Link>
+                                    </div>
                                   </div>
-                                </div>
-                                <div className="order-card2">
-                                  <div
-                                    className={`order-header2 ${
-                                      pathname ==
-                                      "/seller/profile/business-details"
-                                        ? "active_1"
-                                        : ""
-                                    }`}
-                                  >
-                                    <Link
-                                      href={`/seller/profile/business-details`}
-                                      className="title"
+                                  <div className="order-card2">
+                                    <div
+                                      className={`order-header2 ${
+                                        pathname ==
+                                        "/seller/profile/business-details"
+                                          ? "active_1"
+                                          : ""
+                                      }`}
                                     >
-                                      Business Details
-                                    </Link>
+                                      <Link
+                                        href={`/seller/profile/business-details`}
+                                        className="title"
+                                      >
+                                        Business Details
+                                      </Link>
+                                    </div>
                                   </div>
-                                </div>
-                                <div className="order-card2">
-                                  <div
-                                    className={`order-header2 ${
-                                      pathname ==
-                                      "/seller/profile/tax-information"
-                                        ? "active_1"
-                                        : ""
-                                    }`}
-                                  >
-                                    <Link
-                                      href={`/seller/profile/tax-information`}
-                                      className="title"
+                                  <div className="order-card2">
+                                    <div
+                                      className={`order-header2 ${
+                                        pathname ==
+                                        "/seller/profile/tax-information"
+                                          ? "active_1"
+                                          : ""
+                                      }`}
                                     >
-                                      Tax Information
-                                    </Link>
+                                      <Link
+                                        href={`/seller/profile/tax-information`}
+                                        className="title"
+                                      >
+                                        Tax Information
+                                      </Link>
+                                    </div>
                                   </div>
-                                </div>
-                                <div className="order-card2">
-                                  <div
-                                    className={`order-header2 ${
-                                      pathname ==
-                                      "/seller/profile/shipping-setting"
-                                        ? "active_1"
-                                        : ""
-                                    }`}
-                                  >
-                                    <Link
-                                      href={`/seller/profile/shipping-setting`}
-                                      className="title"
+                                  <div className="order-card2">
+                                    <div
+                                      className={`order-header2 ${
+                                        pathname ==
+                                        "/seller/profile/shipping-setting"
+                                          ? "active_1"
+                                          : ""
+                                      }`}
                                     >
-                                      Shipping Setting
-                                    </Link>
+                                      <Link
+                                        href={`/seller/profile/shipping-setting`}
+                                        className="title"
+                                      >
+                                        Shipping Setting
+                                      </Link>
+                                    </div>
                                   </div>
-                                </div>
-                                <div className="order-card2">
-                                  <div
-                                    className={`order-header2 ${
-                                      pathname ==
-                                      "/seller/profile/bank-account-information"
-                                        ? "active_1"
-                                        : ""
-                                    }`}
-                                  >
-                                    <Link
-                                      href={`/seller/profile/bank-account-information`}
-                                      className="title"
+                                  <div className="order-card2">
+                                    <div
+                                      className={`order-header2 ${
+                                        pathname ==
+                                        "/seller/profile/bank-account-information"
+                                          ? "active_1"
+                                          : ""
+                                      }`}
                                     >
-                                      Bank Account Information
-                                    </Link>
+                                      <Link
+                                        href={`/seller/profile/bank-account-information`}
+                                        className="title"
+                                      >
+                                        Bank Account Information
+                                      </Link>
+                                    </div>
                                   </div>
-                                </div>
-                                {/* <div className="order-card2">
+                                  {/* <div className="order-card2">
                                   <div
                                     className={`order-header2 ${
                                       pathname ==
@@ -892,64 +1102,105 @@ const Header = () => {
                                     </Link>
                                   </div>
                                 </div> */}
-                                <div className="order-card2">
-                                  <div
-                                    className={`order-header2 ${
-                                      pathname ==
-                                      "/seller/profile/user-management"
-                                        ? "active_1"
-                                        : ""
-                                    }`}
-                                  >
-                                    {sellerCount > 0 ?
-                                    <Link
-                                      href={`/seller/profile/user-management-list`}
-                                      className="title"
+                                  <div className="order-card2">
+                                    <div
+                                      className={`order-header2 ${
+                                        pathname ==
+                                        "/seller/profile/user-management"
+                                          ? "active_1"
+                                          : ""
+                                      }`}
                                     >
-                                      User Management
-                                    </Link>
-                                    :
-                                    <Link
-                                      href={`/seller/profile/user-management`}
-                                      className="title"
+                                      {sellerCount > 0 ? (
+                                        <Link
+                                          href={`/seller/profile/user-management-list`}
+                                          className="title"
+                                        >
+                                          User Management
+                                        </Link>
+                                      ) : (
+                                        <Link
+                                          href={`/seller/profile/user-management`}
+                                          className="title"
+                                        >
+                                          User Management
+                                        </Link>
+                                      )}
+                                    </div>
+                                  </div>
+                                  <div className="order-card2">
+                                    <div
+                                      className={`order-header2 ${
+                                        pathname ==
+                                        "/seller/profile/login-setting"
+                                          ? "active_1"
+                                          : ""
+                                      }`}
                                     >
-                                      User Management
-                                    </Link>  
-                                    }
+                                      <Link
+                                        href={`/seller/profile/login-setting`}
+                                        className="title"
+                                      >
+                                        Login Setting
+                                      </Link>
+                                    </div>
+                                  </div>
+                                  <div className="order-card2">
+                                    <div className="order-header2">
+                                      <a
+                                        href="#"
+                                        className="title"
+                                        onClick={(e) => sellorLogout(e)}
+                                      >
+                                        Logout
+                                      </a>
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
 
+                            {globalData?.subSeller &&
+                              globalData?.sellor?.selfActive == "Active" && (
+                                <div className="filterbox-body">
+                                  {globalData?.userPermission &&
+                                    globalData?.userPermission?.submenus
+                                      ?.length > 0 &&
+                                    globalData?.userPermission?.submenus.map(
+                                      (perm, indexNumber) => (
+                                        <div
+                                          className="order-card2"
+                                          key={indexNumber}
+                                        >
+                                          <div
+                                            className={`order-header2 ${
+                                              pathname == perm.slug
+                                                ? "active_1"
+                                                : ""
+                                            }`}
+                                          >
+                                            <Link
+                                              href={`${baseUrl}${perm.slug}`}
+                                              className="title"
+                                            >
+                                              {perm.name}
+                                            </Link>
+                                          </div>
+                                        </div>
+                                      )
+                                    )}
 
+                                  <div className="order-card2">
+                                    <div className="order-header2">
+                                      <button
+                                        className="title"
+                                        onClick={(e) => sellorLogout(e)}
+                                      >
+                                        Logout
+                                      </button>
+                                    </div>
                                   </div>
                                 </div>
-                                <div className="order-card2">
-                                  <div
-                                    className={`order-header2 ${
-                                      pathname ==
-                                      "/seller/profile/login-setting"
-                                        ? "active_1"
-                                        : ""
-                                    }`}
-                                  >
-                                    <Link
-                                      href={`/seller/profile/login-setting`}
-                                      className="title"
-                                    >
-                                      Login Setting
-                                    </Link>
-                                  </div>
-                                </div>
-                                <div className="order-card2">
-                                  <div className="order-header2">
-                                    <a
-                                      href="#"
-                                      className="title"
-                                      onClick={(e) => sellorLogout(e)}
-                                    >
-                                      Logout
-                                    </a>
-                                  </div>
-                                </div>
-                              </div>
-                            )}
+                              )}
                           </div>
                         </div>
                       </li>
@@ -1000,6 +1251,7 @@ const Header = () => {
               aria-labelledby="nav-home-tab"
               tabIndex={0}
             >
+              {/* for sub seller */}
               <div className="mobile-menu-main">
                 <nav className="nav-main mainmenu-nav mt--30">
                   <ul className="mainmenu metismenu" id="mobile-menu-active">
@@ -1008,11 +1260,113 @@ const Header = () => {
                         Home
                       </Link>
                     </li>
-                    <li className="has-droupdown">
-                      <Link href="#" className="main" aria-expanded="false">
+
+                    {globalData.subSeller &&
+                      globalData.sellerMenu?.length > 0 &&
+                      globalData.sellerMenu.map((menu, index) =>
+                        (() => {
+                            if (menu.show == "Header") {
+                          return (
+                            <li key={index}
+                              className={`${
+                                menu.permission == "inherited"
+                                  ? "has-droupdown"
+                                  : ""
+                              } ${
+                                openMobileMenu == menu.slug
+                                  ? "mm-active active current"
+                                  : ""
+                              } `}
+                            >
+                              <Link
+                                href={
+                                  menu.permission !== "inherited"
+                                    ? `${baseUrl}${menu.slug}`
+                                    : "#"
+                                }
+                                onClick={(e) => {
+                                  if (openMobileMenu == menu.slug) {
+                                    setOpenMobileMenu("");
+                                  } else {
+                                    setOpenMobileMenu(menu.slug);
+                                  }
+                                }}
+                                className="main"
+                                aria-expanded={`${
+                                  openMobileMenu == menu.slug ? "true" : "false"
+                                }`}
+                              >
+                                {menu.name}
+                              </Link>
+                              {menu.submenus?.length > 0 && (
+                                <ul
+                                  className={`submenu mm-collapse ${
+                                    openMobileMenu == menu.slug ? "mm-show" : ""
+                                  }`}
+                                >
+                                  {menu.submenus.map(
+                                    (subMenuData, subIndex) => (
+                                      <li key={subIndex}>
+                                        <Link
+                                          href={
+                                            subMenuData.submenus?.length > 0
+                                              ? "#"
+                                              : `${baseUrl}${subMenuData.slug}`
+                                          }
+                                        >
+                                          {subMenuData.name}{" "}
+                                        </Link>
+                                      </li>
+                                    )
+                                  )}
+                                </ul>
+                              )}
+                            </li>
+                          );
+                        }
+                        })()
+                      )}
+                  </ul>
+                </nav>
+              </div>
+
+              {/* for sub seller end */}
+              {!globalData.subSeller && globalData.sellor && ( 
+              <div className="mobile-menu-main  ">
+                <nav className="nav-main mainmenu-nav mt--30">
+                  <ul className="mainmenu metismenu" id="mobile-menu-active">
+                    <li>
+                      <Link href={`${baseUrl}dashboard`} className="main">
+                        Home
+                      </Link>
+                    </li>
+
+                    <li
+                      className={`has-droupdown ${
+                        openMobileMenu == "Listing"
+                          ? "mm-active active current"
+                          : ""
+                      } `}
+                    >
+                      <Link
+                        href="#"
+                        className="main"
+                        aria-expanded="false"
+                        onClick={(e) => {
+                          if (openMobileMenu == "Listing") {
+                            setOpenMobileMenu("");
+                          } else {
+                            setOpenMobileMenu("Listing");
+                          }
+                        }}
+                      >
                         Listing
                       </Link>
-                      <ul className="submenu mm-collapse">
+                      <ul
+                        className={`submenu mm-collapse ${
+                          openMobileMenu == "Listing" ? "mm-show" : ""
+                        }`}
+                      >
                         <li>
                           <Link
                             href={`${baseUrl}dashboard/listing`}
@@ -1050,11 +1404,32 @@ const Header = () => {
                         </li>
                       </ul>
                     </li>
-                    <li className="has-droupdown">
-                      <Link href="#" className="main" aria-expanded="false">
+                    <li
+                      className={`has-droupdown ${
+                        openMobileMenu == "Orders"
+                          ? "mm-active active current"
+                          : ""
+                      } `}
+                    >
+                      <Link
+                        href="#"
+                        className="main"
+                        aria-expanded="false"
+                        onClick={(e) => {
+                          if (openMobileMenu == "Orders") {
+                            setOpenMobileMenu("");
+                          } else {
+                            setOpenMobileMenu("Orders");
+                          }
+                        }}
+                      >
                         Orders
                       </Link>
-                      <ul className="submenu mm-collapse">
+                      <ul
+                        className={`submenu mm-collapse ${
+                          openMobileMenu == "Orders" ? "mm-show" : ""
+                        }`}
+                      >
                         <li>
                           <Link
                             href={`${baseUrl}dashboard/active-orders`}
@@ -1071,18 +1446,22 @@ const Header = () => {
                             Returns
                           </Link>
                         </li>
-                        <li>
+                        {/* <li>
                           <Link href="#" className="mobile-menu-link">
                             Cancellations
                           </Link>
-                        </li>
+                        </li> */}
                       </ul>
                     </li>
-                    <li className="has-droupdown">
-                      <Link href="#" className="main" aria-expanded="false">
+                    <li>
+                      <Link
+                        href="/dashboard/advertising/my-ads/All"
+                        className="main"
+                        aria-expanded="false"
+                      >
                         Advertising
                       </Link>
-                      <ul className="submenu mm-collapse">
+                      {/* <ul className={`submenu mm-collapse ${openMobileMenu == "Listing" ? "mm-show" :""}`} >
                         <li>
                           <Link href="#" className="mobile-menu-link">
                             Promotion
@@ -1093,100 +1472,244 @@ const Header = () => {
                             Campaign
                           </Link>
                         </li>
-                      </ul>
+                      </ul> */}
                     </li>
                     <li>
-                      <Link href="#" className="main">
+                      <Link href="/dashboard/my-store" className="main">
                         Store
                       </Link>
                     </li>
-                    <li className="has-dropdown">
-                      <Link href="#" className="main" aria-expanded="false">
+                    <li
+                      className={`has-droupdown ${
+                        openMobileMenu == "Growth"
+                          ? "mm-active active current"
+                          : ""
+                      } `}
+                    >
+                      <Link
+                        href="#"
+                        className="main"
+                        aria-expanded="false"
+                        onClick={(e) => {
+                          if (openMobileMenu == "Growth") {
+                            setOpenMobileMenu("");
+                          } else {
+                            setOpenMobileMenu("Growth");
+                          }
+                        }}
+                      >
                         Growth
                       </Link>
-                      <ul className="submenu mm-collapse">
+                      <ul
+                        className={`submenu mm-collapse ${
+                          openMobileMenu == "Growth" ? "mm-show" : ""
+                        }`}
+                      >
                         <li>
-                          <Link href="#" className="mobile-menu-link">
+                          <Link
+                            href="/dashboard/growth/sellora-insights"
+                            className="mobile-menu-link"
+                          >
                             Sellora Insights
                           </Link>
                         </li>
                         <li>
-                          <Link href="#" className="mobile-menu-link">
+                          <Link
+                            href="/dashboard/growth/advertisment-recomendation"
+                            className="mobile-menu-link"
+                          >
                             Advertising Recommendation
                           </Link>
                         </li>
                         <li>
-                          <Link href="#" className="mobile-menu-link">
+                          <Link
+                            href="/dashboard/growth/price-recomendation"
+                            className="mobile-menu-link"
+                          >
                             Price Recommendations
                           </Link>
                         </li>
                         <li>
-                          <Link href="#" className="mobile-menu-link">
+                          <Link
+                            href="/dashboard/growth/sellora-promotions"
+                            className="mobile-menu-link"
+                          >
                             Sellora Promotions
                           </Link>
                         </li>
                       </ul>
                     </li>
-                    <li className="has-dropdown">
-                      <Link href="#" className="main" aria-expanded="false">
+                    <li
+                      className={`has-droupdown ${
+                        openMobileMenu == "Performance"
+                          ? "mm-active active current"
+                          : ""
+                      } `}
+                    >
+                      <Link
+                        href="#"
+                        className="main"
+                        aria-expanded="false"
+                        onClick={(e) => {
+                          if (openMobileMenu == "Performance") {
+                            setOpenMobileMenu("");
+                          } else {
+                            setOpenMobileMenu("Performance");
+                          }
+                        }}
+                      >
                         Performance
                       </Link>
-                      <ul className="submenu mm-collapse">
+                      <ul
+                        className={`submenu mm-collapse ${
+                          openMobileMenu == "Performance" ? "mm-show" : ""
+                        }`}
+                      >
                         <li>
-                          <Link href="#" className="mobile-menu-link">
+                          <Link
+                            href="/dashboard/performance/ratings-and-reviews/All"
+                            className="mobile-menu-link"
+                          >
                             Ratings &amp; Reviews
                           </Link>
                         </li>
                         <li>
-                          <Link href="#" className="mobile-menu-link">
+                          <Link
+                            href="/dashboard/performance/questions"
+                            className="mobile-menu-link"
+                          >
+                            Question
+                          </Link>
+                        </li>
+                        <li>
+                          <Link
+                            href="/dashboard/performance/product-quality"
+                            className="mobile-menu-link"
+                          >
                             Product Quality
                           </Link>
                         </li>
                         <li>
-                          <Link href="#" className="mobile-menu-link">
+                          <Link
+                            href="/dashboard/performance/returns"
+                            className="mobile-menu-link"
+                          >
                             Returns
                           </Link>
                         </li>
                         <li>
-                          <Link href="#" className="mobile-menu-link">
+                          <Link
+                            href="/dashboard/performance/cancellations"
+                            className="mobile-menu-link"
+                          >
                             Cancellations
                           </Link>
                         </li>
-                        <li>
+                        {/* <li>
                           <Link href="#" className="mobile-menu-link">
                             Growth Central
                           </Link>
-                        </li>
+                        </li> */}
                         <li>
-                          <Link href="#" className="mobile-menu-link">
+                          <Link
+                            href="/dashboard/performance/your-seller-tier"
+                            className="mobile-menu-link"
+                          >
                             Your Seller Tier
                           </Link>
                         </li>
                       </ul>
                     </li>
-                    <li className="has-droupdown">
-                      <Link href="#" className="main" aria-expanded="false">
+                    <li
+                      className={`has-droupdown ${
+                        openMobileMenu == "Report"
+                          ? "mm-active active current"
+                          : ""
+                      } `}
+                    >
+                      <Link
+                        href="#"
+                        className="main"
+                        aria-expanded="false"
+                        onClick={(e) => {
+                          if (openMobileMenu == "Report") {
+                            setOpenMobileMenu("");
+                          } else {
+                            setOpenMobileMenu("Report");
+                          }
+                        }}
+                      >
                         Report
                       </Link>
-                      <ul className="submenu mm-collapse">
+                      <ul
+                        className={`submenu mm-collapse ${
+                          openMobileMenu == "Report" ? "mm-show" : ""
+                        }`}
+                      >
                         <li>
-                          <Link href="#" className="mobile-menu-link">
+                          <Link
+                            href="/dashboard/report/report-centre"
+                            className="mobile-menu-link"
+                          >
                             Report centre
                           </Link>
                         </li>
                       </ul>
                     </li>
-                    <li className="has-droupdown">
-                      <Link href="#" className="main" aria-expanded="false">
+                    <li
+                      className={`has-droupdown ${
+                        openMobileMenu == "Payments"
+                          ? "mm-active active current"
+                          : ""
+                      } `}
+                    >
+                      <Link
+                        href="#"
+                        className="main"
+                        aria-expanded="false"
+                        onClick={(e) => {
+                          if (openMobileMenu == "Payments") {
+                            setOpenMobileMenu("");
+                          } else {
+                            setOpenMobileMenu("Payments");
+                          }
+                        }}
+                      >
                         Payments
                       </Link>
-                      <ul className="submenu mm-collapse">
+                      <ul
+                        className={`submenu mm-collapse ${
+                          openMobileMenu == "Payments" ? "mm-show" : ""
+                        }`}
+                      >
                         <li>
-                          <Link href="#" className="mobile-menu-link">
+                          <Link
+                            href="/dashboard/payments/payments-overview"
+                            className="mobile-menu-link"
+                          >
                             Payments Overview
                           </Link>
                         </li>
+
                         <li>
+                          <Link
+                            href="/dashboard/payments/transaction"
+                            className="mobile-menu-link"
+                          >
+                            Transaction
+                          </Link>
+                        </li>
+
+                        <li>
+                          <Link
+                            href="/dashboard/payments/disbursements"
+                            className="mobile-menu-link"
+                          >
+                            Disbursements
+                          </Link>
+                        </li>
+
+                        {/* <li>
                           <Link href="#" className="mobile-menu-link">
                             Previous Overview
                           </Link>
@@ -1205,24 +1728,50 @@ const Header = () => {
                           <Link href="#" className="mobile-menu-link">
                             Statements
                           </Link>
-                        </li>
+                        </li> */}
                       </ul>
                     </li>
-                    <li className="has-droupdown">
-                      <Link href="#" className="main" aria-expanded="false">
+                    <li
+                      className={`has-droupdown ${
+                        openMobileMenu == "Partner Services"
+                          ? "mm-active active current"
+                          : ""
+                      } `}
+                    >
+                      <Link
+                        href="#"
+                        className="main"
+                        aria-expanded="false"
+                        onClick={(e) => {
+                          if (openMobileMenu == "Partner Services") {
+                            setOpenMobileMenu("");
+                          } else {
+                            setOpenMobileMenu("Partner Services");
+                          }
+                        }}
+                      >
                         Partner Services
                       </Link>
-                      <ul className="submenu mm-collapse">
+                      <ul
+                        className={`submenu mm-collapse ${
+                          openMobileMenu == "Partner Services" ? "mm-show" : ""
+                        }`}
+                      >
                         <li>
-                          <Link href="#">All service </Link>
+                          <Link href="/dashboard/partner-services/available-services">
+                            All service{" "}
+                          </Link>
                         </li>
-                        <li>
+                        {/* <li>
                           <Link href="#" className="mobile-menu-link">
                             My service
                           </Link>
-                        </li>
+                        </li> */}
                         <li>
-                          <Link href="#" className="mobile-menu-link">
+                          <Link
+                            href="/dashboard/partner-services/help"
+                            className="mobile-menu-link"
+                          >
                             Help
                           </Link>
                         </li>
@@ -1231,6 +1780,7 @@ const Header = () => {
                   </ul>
                 </nav>
               </div>
+              )}
             </div>
           </div>
         </div>

@@ -241,7 +241,7 @@ e.preventDefault();
                 <Link href="/dashboard">Dashboard</Link>{" "}
               </li>
               <li>
-                <a href="#"> User Management</a>{" "}
+                <Link href="/seller/profile/user-management-list"> User Management</Link>{" "}
               </li>
               <li>
                 <a href="#" className="active_002">

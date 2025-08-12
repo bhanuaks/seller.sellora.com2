@@ -69,24 +69,29 @@ const deleteOldImages = async (index, existProduct, requestImage) => {
     }
 };
 // upload images
-const processImageUpload = async (image, index, existProduct, productName, requestImage) => {
+const processImageUpload = async (image, index, existProduct, productName, requestImage, copyData) => {
    
     if (image && typeof image !== "string") {
         const newImagePath = await uploadImages(image, index, productName);
-        await deleteOldImages(index, existProduct, requestImage);
+        if(copyData !== "Yes"){ 
+            await deleteOldImages(index, existProduct, requestImage);
+        }
         return newImagePath;
     } else if (image && image !== "null") {
        
         await moveImageIfExists(index, image)
         // after move delete  old uploaded image
         if (existProduct && existProduct[`image_${index}`] && existProduct[`image_${index}`] != image) {
-            await deleteOldImages(index, existProduct, requestImage);
+            if(copyData !== "Yes"){  
+                await deleteOldImages(index, existProduct, requestImage);
+            }
             const oldPath = existProduct[`image_${index}`]
         }
         return image;
     } else if((!image || image == "null") && (existProduct && existProduct[[`image_${index}`]])) {
-        
-        await deleteOldImages(index, existProduct, requestImage);
+        if(copyData !== "Yes"){ 
+            await deleteOldImages(index, existProduct, requestImage);
+        }
         return null;
     }
 };
@@ -286,9 +291,11 @@ export async function POST(request) {
 
         if (existProduct && existProduct.main_image) {
             const oldPath = existProduct.main_image
-            await deleteImageOne(`${main_large_img_path}${oldPath}`)
-            await deleteImageOne(`${main_medium_img_path}${oldPath}`)
-            await deleteImageOne(`${main_thumb_img_path}${oldPath}`)
+            if(copy != "Yes"){ 
+                await deleteImageOne(`${main_large_img_path}${oldPath}`)
+                await deleteImageOne(`${main_medium_img_path}${oldPath}`)
+                await deleteImageOne(`${main_thumb_img_path}${oldPath}`)
+            }
         }
         const extension = path.extname(main_image.name);
         const accepteExtensions = ['.jpg', '.png', 'jpeg', 'webp'];
@@ -316,13 +323,13 @@ export async function POST(request) {
     // end upload main image
     const requestImage = [image_1, image_2, image_3, image_4, image_5, image_6, image_7];
     const fileShortenedProductName = product_name.length > 6 ? product_name.slice(0, 6).toString().trim() : product_name.toString().trim();
-    image_1_path =await processImageUpload(image_1, 1, existProduct, fileShortenedProductName, requestImage)
-    image_2_path =await processImageUpload(image_2, 2, existProduct, fileShortenedProductName, requestImage)
-    image_3_path =await processImageUpload(image_3, 3, existProduct, fileShortenedProductName, requestImage)
-    image_4_path =await processImageUpload(image_4, 4, existProduct, fileShortenedProductName, requestImage)
-    image_5_path =await processImageUpload(image_5, 5, existProduct, fileShortenedProductName, requestImage)
-    image_6_path =await processImageUpload(image_6, 6, existProduct, fileShortenedProductName, requestImage)
-    image_7_path =await processImageUpload(image_7, 7, existProduct, fileShortenedProductName, requestImage)
+    image_1_path =await processImageUpload(image_1, 1, existProduct, fileShortenedProductName, requestImage, copy)
+    image_2_path =await processImageUpload(image_2, 2, existProduct, fileShortenedProductName, requestImage, copy)
+    image_3_path =await processImageUpload(image_3, 3, existProduct, fileShortenedProductName, requestImage, copy)
+    image_4_path =await processImageUpload(image_4, 4, existProduct, fileShortenedProductName, requestImage, copy)
+    image_5_path =await processImageUpload(image_5, 5, existProduct, fileShortenedProductName, requestImage, copy)
+    image_6_path =await processImageUpload(image_6, 6, existProduct, fileShortenedProductName, requestImage, copy)
+    image_7_path =await processImageUpload(image_7, 7, existProduct, fileShortenedProductName, requestImage, copy)
 
     
  
@@ -521,6 +528,15 @@ async function copyVariantAndOtherDetails(oldProductId, newProductId, seller_id)
                 newVariant.product_id = newProductId;
                 newVariant.seller_id = seller_id;
                 newVariant.isProcessing = "Processing";
+
+                newVariant.withImage = "No";
+                newVariant.image_1 = null;
+                newVariant.image_2 = null;
+                newVariant.image_3 = null;
+                newVariant.image_4 = null;
+                newVariant.image_5 = null;
+                newVariant.image_6 = null;
+                newVariant.image_7 = null;
                 
                 // Create new variant
                 const createdVariant = await productVariantModel.create(newVariant);
