@@ -1,6 +1,6 @@
 'use client'
 import React, { useEffect, useState } from 'react'
-import LeftSideBar from '../leftSideBar';
+import LeftSideBar from '../LeftSideBar';
 import LeftMobileSideBar from '../LeftMobileSideBar';
 import SearchBox from '../SearchBox';
 import { usePathname } from 'next/navigation';

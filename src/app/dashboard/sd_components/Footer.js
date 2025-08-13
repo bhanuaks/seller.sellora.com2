@@ -33,7 +33,7 @@ const Footer = () => {
     </div>
   </Link>
 
-<a href="#">
+<a href="/dashboard/help-center/featured-guides">
    <div className="item">
       <img src={`${baseUrl}front/assets/images/not_pad.png`} />
       <div className="item-content">

@@ -129,11 +129,11 @@ function page() {
                     <tr>
                       <td>Apparel &amp; Accessories</td>
                       <td>
-                        5% for items with a total sales price of $15 or less
+                         10% for items with a total sales price of $15 or less
                         <br />
-                        10% for items with a total sales price between $15 $20
+                        12.5% for items with a total sales price between $15 &gt; $20
                         <br />
-                        10% for items with a total sales price greater than $20
+                        15% for items with a total sales price greater than $20
                         <br />
                         12% for backpacks
                       </td>
@@ -142,7 +142,7 @@ function page() {
                     <tr>
                       <td>Beauty &amp; Personal care</td>
                       <td>
-                        7% for items with a total sales price of $10 or less
+                         7% for items with a total sales price of $10 or less
                         <br />
                         12% for items with a total sales price greater than $10
                       </td>
@@ -156,19 +156,18 @@ function page() {
                     <tr>
                       <td>Electronics Accessories</td>
                       <td>
-                        10% for the portion of the total sales price up to $100
+                         10% for the portion of the total sales price up to $100
                         <br />
-                        7% for the portion of the total sales price greater than
-                        $100
+                         7% for the portion of the total sales price greater than $100
                       </td>
                       <td className="text-center">$0.30</td>
                     </tr>
                     <tr>
                       <td>Furniture</td>
                       <td>
-                        12% on the first $200
+                        12% for item price &gt; $ 200
                         <br />
-                        10% on amounts over $200
+                         10% or item price &lt; $ 200
                       </td>
                       <td className="text-center">$0.30</td>
                     </tr>
@@ -192,8 +191,7 @@ function page() {
                       <td>
                         15% for the portion of the total sales price up to $250
                         <br />
-                        7% for the portion of the total sales price greater than
-                        $250
+                        10% for the portion of the total sales price greater than $250
                       </td>
                       <td className="text-center">$0.30</td>
                     </tr>
@@ -205,8 +203,8 @@ function page() {
                     <tr>
                       <td>Office Product &amp; Stationery</td>
                       <td>
-                        12% except 7% for Calculators and 10% for Printer
-                        Cartridges{" "}
+                         The standard rate is 12%, except it is 7% for Calculators and 10%
+ for Printer Cartridges
                       </td>
                       <td className="text-center">$0.30</td>
                     </tr>
