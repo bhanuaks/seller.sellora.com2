@@ -2,7 +2,7 @@ import { AppContext } from "@/app/contaxtData/contextData";
 import { baseUrl } from "@/Http/helper";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import React, { useContext, useEffect, useState } from "react";
 
 const Header = () => {
@@ -14,6 +14,9 @@ const Header = () => {
   const [sellerCount, setSellerCount] = useState(0);
   const [openMobileMenu, setOpenMobileMenu] = useState("");
   const [subSellerPermisionList, setSubSellerPermisionList] = useState([]);
+
+  const searchParams = useSearchParams();
+  
   
 
   useEffect(() => {
@@ -85,6 +88,7 @@ const Header = () => {
             ...preData,
             sellerMenu: res.data.data,
             userPermission: setting.length ? setting[0] : null,
+            childMenuPermission:res.data.childMenuPermission
           }));
         }
       })
@@ -103,6 +107,111 @@ const Header = () => {
     //   console.log({subSellerPermisionList, pathname});
     // },[pathname, globalData.subSeller, subSellerPermisionList])
 
+
+    useEffect(() => {
+      
+
+      if(globalData.sellerMenu.length > 0){
+
+    //console.log('childchild', globalData)
+    
+    const fullPath = `${pathname}${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
+  /* const userHasAccess = globalData.sellerMenu.some(
+  p => {
+    if (Array.isArray(p.submenus) && p.submenus.length > 0) {
+      p.submenus.some(sub =>
+       
+      (fullPath.endsWith(sub.slug) || pathname.endsWith(sub.slug))  && sub.permission !== 'none'  
+      
+    
+    )
+    } else {
+
+      return (fullPath.endsWith(p.slug) || pathname.endsWith(p.slug))  && p.permission !== 'none'
+    }
+    
+  }
+  );
+  */
+
+const childMenuPermission = globalData.childMenuPermission;
+
+ /* const userHasAccess = globalData.sellerMenu.some(menu =>
+
+  Array.isArray(menu.submenus) && menu.submenus.length > 0 ? menu.submenus.some(sub => (fullPath.endsWith(sub.slug) || pathname.endsWith(sub.slug))  && sub.permission !== 'none')
+    
+  : (fullPath.endsWith(menu.slug) || pathname.endsWith(menu.slug))  && menu.permission !== 'none'
+
+);
+*/
+
+const userHasAccess = globalData.sellerMenu.some(menu => {
+  
+  const hasSlugAccess = Array.isArray(menu.submenus) && menu.submenus.length > 0
+    ? menu.submenus.some(sub =>
+        (fullPath.endsWith(sub.slug) || pathname.endsWith(sub.slug)) &&
+        sub.permission !== 'none'
+      )
+    : (fullPath.endsWith(menu.slug) || pathname.endsWith(menu.slug)) &&
+      menu.permission !== 'none';
+
+  if (hasSlugAccess) return true;
+
+  
+  if (Array.isArray(menu.submenus) && menu.submenus.length > 0) {
+    return menu.submenus.some(sub =>
+      childMenuPermission.some(child => {
+        const slugMatch = fullPath.endsWith(child.slug) || pathname.endsWith(child.slug);
+        const idMatch = child.subMenuId === sub._id;
+
+        if (!slugMatch || !idMatch) return false;
+
+        if (sub.permission === 'edit') {
+          return child.permission.toLowerCase() === 'edit' || child.permission.toLowerCase() === 'view';
+        } else if (sub.permission === 'view') {
+          return child.permission.toLowerCase() === 'view';
+        }
+        return false;
+      })
+    );
+  } else {
+    return childMenuPermission.some(child => {
+      const slugMatch = fullPath.endsWith(child.slug) || pathname.endsWith(child.slug);
+      const idMatch = child.menuId === menu._id;
+
+      if (!slugMatch || !idMatch) return false;
+
+      if (menu.permission === 'edit') {
+        return child.permission.toLowerCase() === 'edit' || child.permission.toLowerCase() === 'view';
+      } else if (menu.permission === 'view') {
+        return child.permission.toLowerCase() === 'view';
+      }
+      return false;
+    });
+  }
+});
+
+
+
+  //console.log('accesssss', subSellerPermisionList)
+  
+  //console.log('urllllll', globalData.sellor.role, fullPath, pathname, userHasAccess,  globalData.sellerMenu)
+   //const item = urlPermission.find(p => p.slug === slug);
+if(globalData.subSeller?.role === 'Employee'){
+  if(userHasAccess === false){
+    if(pathname.startsWith('/dashboard/help') || pathname.startsWith('/dashboard/help-center') ){
+      // help section allow to all seller and sub sellers
+    }else if(pathname !== '/dashboard' && pathname !== '/dashboard/403'){
+      
+        router.push('/dashboard/403');
+    }
+  }
+
+}
+
+      }
+
+    }, [globalData.sellerMenu, pathname])
 
   return (
     <>
