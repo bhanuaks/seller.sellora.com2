@@ -1417,6 +1417,7 @@ const page = ({ params }) => {
                                         type="button"
                                         className=""
                                         onClick={() => clickSaveVariant("save")}
+                                        disabled={saveProccess}
                                       >
                                         {" "}
                                         {saveProccess?"Please wait..":"Save Variation"}{" "}
