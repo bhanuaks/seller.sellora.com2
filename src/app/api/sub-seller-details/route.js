@@ -4,6 +4,7 @@ import NavMenuModel from "@/Http/Models/NavMenuModel";
 import SellerUserPermissionModel from "@/Http/Models/SellerUserPermissionModel";
 import mongoose from "mongoose";
 import { connectDb } from "@/Http/dbConnect2";
+import ChildMenuModel from "@/Http/Models/ChildMenuModel";
 
 
 // export async function GET(request) {
@@ -194,8 +195,11 @@ export async function GET(request) {
       permission: item.permission
     }));
 
+
+    const childMenuPermission = await ChildMenuModel.find()
+
        
-        return responseFun(true,{data:menuTree, userPermission:formattedPermissionByUser}, 200) 
+        return responseFun(true,{data:menuTree, userPermission:formattedPermissionByUser, childMenuPermission:childMenuPermission}, 200) 
     }catch(error){
         console.log(error);
         return responseFun(false,{error}, 200)
